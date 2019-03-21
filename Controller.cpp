@@ -182,7 +182,7 @@ void Controller::syncModuleDataObjects() {
 
   if ( bms.getHighCellVolt() > OVER_V_SETPOINT ) {
     if (!faultBMSOV) {
-      LOG_ERROR("OVER_V_SETPOINT: %fV, highest cell:%fV\n", OVER_V_SETPOINT, bms.getHighCellVolt());
+      LOG_ERROR("OVER_V_SETPOINT: %.2fV, highest cell:%.2fV\n", OVER_V_SETPOINT, bms.getHighCellVolt());
     }
     faultBMSOV = true;
   } else {
@@ -192,7 +192,7 @@ void Controller::syncModuleDataObjects() {
 
   if ( bms.getLowCellVolt() < UNDER_V_SETPOINT ) {
     if (!faultBMSUV) {
-      LOG_ERROR("UNDER_V_SETPOINT: %fV, lowest cell:%fV\n", UNDER_V_SETPOINT, bms.getLowCellVolt());
+      LOG_ERROR("UNDER_V_SETPOINT: %.2fV, lowest cell:%.2fV\n", UNDER_V_SETPOINT, bms.getLowCellVolt());
     }
     faultBMSUV = true;
   } else {
@@ -202,7 +202,7 @@ void Controller::syncModuleDataObjects() {
 
   if ( bms.getHighTemperature() > OVER_T_SETPOINT ) {
     if (!faultBMSOT) {
-      LOG_ERROR("OVER_T_SETPOINT: %fV, highest module:%fV\n", UNDER_V_SETPOINT, bms.getHighTemperature());
+      LOG_ERROR("OVER_T_SETPOINT: %.2fV, highest module:%.2fV\n", UNDER_V_SETPOINT, bms.getHighTemperature());
     }
     faultBMSOT = true;
   } else {
@@ -212,7 +212,7 @@ void Controller::syncModuleDataObjects() {
 
   if ( bms.getLowTemperature() < UNDER_T_SETPOINT ) {
     if (!faultBMSUT) {
-      LOG_ERROR("UNDER_T_SETPOINT: %fV, lowest module:%fV\n", UNDER_T_SETPOINT, bms.getLowTemperature());
+      LOG_ERROR("UNDER_T_SETPOINT: %.2fV, lowest module:%.2fV\n", UNDER_T_SETPOINT, bms.getLowTemperature());
     }
     faultBMSUT = true;
   } else {
@@ -221,24 +221,11 @@ void Controller::syncModuleDataObjects() {
   }
 
   bat12vVoltage = (float)analogRead(INA_12V_BAT) / BAT12V_SCALING_DIVISOR ;
-  //I think this can trigger a hard fault due to the displaying of the float.
-  LOG_DEBUG("before print\n");
-  LOG_INFO("bat12vVoltage: %f\n", bat12vVoltage);
-  LOG_DEBUG("after print\n");
-  //Serial.print("blah blahblah blahblah blahblah blahblah blahblah blahblah blahblah blahblah blahblah blah \n");
-  //String* AAA = new String("blah");
-  //LOG_INFO("bat12vVoltage: %d\n", analogRead(INA_12V_BAT));
-
-  //trigger hardfault
-  //int a = *(int*)0xffffffff;
-  //LOG_INFO("bat12vVoltage: 0x%x\n", a);
-  
-  //int a = 0;
-  //LOG_INFO("bat12vVoltage: %d\n", 8/a);
+  //LOG_INFO("bat12vVoltage: %.2f\n", bat12vVoltage);
 
   if ( bat12vVoltage > BAT12V_OVER_V_SETPOINT ) {
     if (!fault12VBatOV) {
-      LOG_ERROR("12VBAT_OVER_V_SETPOINT: %fV, V:%fV\n", BAT12V_OVER_V_SETPOINT, bat12vVoltage);
+      LOG_ERROR("12VBAT_OVER_V_SETPOINT: %.2fV, V:%.2fV\n", BAT12V_OVER_V_SETPOINT, bat12vVoltage);
     }
     fault12VBatOV = true;
   } else {
@@ -248,7 +235,7 @@ void Controller::syncModuleDataObjects() {
 
   if ( bat12vVoltage < BAT12V_UNDER_V_SETPOINT ) {
     if (!fault12VBatUV) {
-      LOG_ERROR("12VBAT_UNDER_V_SETPOINT: %fV, V:%fV\n", BAT12V_UNDER_V_SETPOINT, bat12vVoltage);
+      LOG_ERROR("12VBAT_UNDER_V_SETPOINT: %.2fV, V:%.2fV\n", BAT12V_UNDER_V_SETPOINT, bat12vVoltage);
     }
     fault12VBatUV = true;
   } else {

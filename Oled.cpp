@@ -239,7 +239,7 @@ void Oled::printFaults() {
 }
 
 void Oled::doOled() {
-  const int stateticks = 20;
+  const int stateticks = 4;
   static int ticks = 0;
   switch (state) {
     case FMT1:

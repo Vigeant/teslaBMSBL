@@ -4,16 +4,25 @@
 */
 #include "BMSDriver.hpp"
 
-
-
-
 //instantiate the drive
 BMSDriver bmsdriver_inst;
 
+/////////////////////////////////////////////////
+/// \brief The BMSDriver provides a high level API to talk to the Tesla module boards.
+///
+/// The constructor will initialize the arduino Serial port to the appropriate speed of 612500.
+/////////////////////////////////////////////////
 BMSDriver::BMSDriver() {
   SERIALBMS.begin(612500);
 }
 
+/////////////////////////////////////////////////
+/// \brief Helper function to help interpret and log error codes returned by the driver.
+///
+/// @param ma The module address.
+/// @param err The error code returned by the driver function (read or write).
+/// @param message An extra message to display defined by the user.
+/////////////////////////////////////////////////
 void BMSDriver::logError(const uint8_t ma, const int16_t err, const char* message) {
   switch (err) {
     case ILLEGAL_READ_LEN:

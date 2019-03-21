@@ -39,8 +39,6 @@ Logger::Logger(){
    printf() style, see Logger::log()
 
 */
-
-
 void Logger::debug(const char *message, ...) {
   if (logLevel > Debug)
     return;
@@ -139,24 +137,6 @@ boolean Logger::isDebug() {
   return logLevel == Debug;
 }
 
-/*
-   Output a log message (called by debug(), info(), warn(), error(), console())
-
-   Supports printf() like syntax:
-
-   %% - outputs a '%' character
-   %s - prints the next parameter as string
-   %d - prints the next parameter as decimal
-   %f - prints the next parameter as double float
-   %x - prints the next parameter as hex value
-   %X - prints the next parameter as hex value with '0x' added before
-   %b - prints the next parameter as binary value
-   %B - prints the next parameter as binary value with '0b' added before
-   %l - prints the next parameter as long
-   %c - prints the next parameter as a character
-   %t - prints the next parameter as boolean ('T' or 'F')
-   %T - prints the next parameter as boolean ('true' or 'false')
-*/
 void Logger::log(LogLevel level, const char *format, va_list args) {
  
     if (level < Cons){
@@ -185,105 +165,8 @@ void Logger::log(LogLevel level, const char *format, va_list args) {
     logMessage(format, args);
 }
 
-/*
 void Logger::logMessage(const char *format, va_list args) {
   char buf[128]; // resulting string limited to 128 chars
   vsnprintf(buf, 128, format, args);
   SERIALCONSOLE.print(buf);
-}*/
-
-/*
-   Output a log message (called by log(), console())
-
-   Supports printf() like syntax:
-
-   %% - outputs a '%' character
-   %s - prints the next parameter as string
-   %d - prints the next parameter as decimal
-   %f - prints the next parameter as double float
-   %x - prints the next parameter as hex value
-   %X - prints the next parameter as hex value with '0x' added before
-   %b - prints the next parameter as binary value
-   %B - prints the next parameter as binary value with '0b' added before
-   %l - prints the next parameter as long
-   %c - prints the next parameter as a character
-   %t - prints the next parameter as boolean ('T' or 'F')
-   %T - prints the next parameter as boolean ('true' or 'false')
-*/
-
-void Logger::logMessage(const char *format, va_list args) {
-  for (; *format != 0; ++format) {
-    if (*format == '%') {
-      ++format;
-      if (*format == '\0')
-        break;
-      if (*format == '%') {
-        SERIALCONSOLE.print(*format);
-        continue;
-      }
-      if (*format == 's') {
-        register char *s = (char *) va_arg( args, int );
-        SERIALCONSOLE.print(s);
-        continue;
-      }
-      if (*format == 'd' || *format == 'i') {
-        SERIALCONSOLE.print(va_arg( args, int ), DEC);
-        continue;
-      }
-      if (*format == 'f') {
-        SERIALCONSOLE.print(va_arg( args, double ), 3);
-        continue;
-      }
-      if (*format == 'z') {
-        SERIALCONSOLE.print(va_arg( args, double ), 0);
-        continue;
-      }
-      if (*format == 'x') {
-        SERIALCONSOLE.print(va_arg( args, int ), HEX);
-        continue;
-      }
-      if (*format == 'X') {
-        SERIALCONSOLE.print((const char * )"0x");
-        SERIALCONSOLE.print(va_arg( args, int ), HEX);
-        continue;
-      }
-      if (*format == 'b') {
-        SERIALCONSOLE.print(va_arg( args, int ), BIN);
-        continue;
-      }
-      if (*format == 'B') {
-        SERIALCONSOLE.print((const char *)"0b");
-        SERIALCONSOLE.print(va_arg( args, int ), BIN);
-        continue;
-      }
-      if (*format == 'l') {
-        SERIALCONSOLE.print(va_arg( args, long ), DEC);
-        continue;
-      }
-
-      if (*format == 'c') {
-        SERIALCONSOLE.write(va_arg( args, int ));
-        continue;
-      }
-      if (*format == 't') {
-        if (va_arg( args, int ) == 1) {
-          SERIALCONSOLE.print((const char * )"T");
-        } else {
-          SERIALCONSOLE.print((const char * )"F");
-        }
-        continue;
-      }
-      if (*format == 'T') {
-        if (va_arg( args, int ) == 1) {
-          SERIALCONSOLE.print((const char * )"TRUE");
-        } else {
-          SERIALCONSOLE.print((const char * )"FALSE");
-        }
-        continue;
-      }
-
-    }
-    SERIALCONSOLE.print(*format);
-  }
-  //SERIALCONSOLE.println();
 }

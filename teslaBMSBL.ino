@@ -1,49 +1,86 @@
-//#include <Arduino.h>
+#include <Arduino.h>
 #include "Cons.hpp"
 #include "Logger.hpp"
 #include "Oled.hpp"
 #include "Controller.hpp"
 
+//instantiate all objects
+static Controller controller_inst;        ///< The controller is responsible for orchestrating all major functions of the BMS.
+static Cons cons_inst;                    ///< The console is a 2 way user interface available on usb serial port at baud 115200.
+static Oled oled_inst(&controller_inst);  ///< The oled is a 1 way user interface displaying the most critical information.
 
-//instantiate the console
-static Controller controller_inst;
-static Cons cons_inst;
-static Oled oled_inst(&controller_inst);
-
-// the setup function runs once when you press reset or power the board
+/////////////////////////////////////////////////
+/// \brief The setup function runs once when you press reset or power the board.
+/////////////////////////////////////////////////
+/*! \brief Brief description.
+ *         Brief description continued.
+ *
+ *  Detailed description starts here.
+ */
 void setup() {
-
   //console stuff
   pinMode(INL_SOFT_RST, INPUT_PULLUP);
   cons_inst.printMenu();
   LOG_CONSOLE(">> ");
 }
 
-
-void phase20hz(){
-    if (digitalRead(INL_SOFT_RST) == LOW) {
-      _reboot_Teensyduino_();
-    }
-    cons_inst.doConsole();
+/////////////////////////////////////////////////
+/// Holds all the code that runs every 50ms.
+/////////////////////////////////////////////////
+void phase20hz() {
+  if (digitalRead(INL_SOFT_RST) == LOW) {
+    _reboot_Teensyduino_();
+  }
+  cons_inst.doConsole();
 }
 
-void phase10hzA(){
+/////////////////////////////////////////////////
+/// Holds code that runs every 100ms.
+/////////////////////////////////////////////////
+void phase10hzA() {
   controller_inst.doController();
 }
 
-void phase10hzB(){
+/////////////////////////////////////////////////
+/// Holds code that runs every 100ms.
+/////////////////////////////////////////////////
+void phase10hzB() {
   oled_inst.doOled();
 }
 
+/////////////////////////////////////////////////
+/// Once setup is complete, loop is called for ever.
+/////////////////////////////////////////////////
 void loop()
 {
-  //console stuff
+  uint32_t starttime, stoptime, delaytime, timespent;
+  uint32_t period = 200;
+  bool phaseA = true;
+  
   for (;;) {
+    starttime = millis();
+
     phase20hz();
-    phase10hzA();
-    delay(50);
-    phase20hz();
-    phase10hzB();
-    delay(50);
+    if (phaseA)
+      phase10hzA();
+    else
+      phase10hzB();
+
+    phaseA = !phaseA;
+      
+
+    stoptime = millis();
+    if (stoptime > starttime) {
+      timespent = stoptime - starttime;
+    } else {
+      starttime = 0xffffffff - starttime;
+      timespent = starttime + stoptime;
+    }
+    if (timespent >= period) {
+      delaytime = 0;
+    } else {
+      delaytime = period - timespent;
+    }
+    delay(delaytime);
   }
 }
