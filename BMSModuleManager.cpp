@@ -2,13 +2,16 @@
 #include "BMSModuleManager.hpp"
 #include "Logger.hpp"
 
-//extern EEPROMSettings settings;
-
+/////////////////////////////////////////////////
+/// \brief constructor initialized to invalid address 0.
+/////////////////////////////////////////////////
 BMSModuleManager::BMSModuleManager()
 {
-  for (int i = 0; i < MAX_MODULE_ADDR; i++) {
+  /*
+    for (int i = 0; i < MAX_MODULE_ADDR; i++) {
     modules[i].setAddress(i + 1);
-  }
+    }
+  */
   histLowestPackVolt = 1000.0f;
   histHighestPackVolt = 0.0f;
   histLowestPackTemp = 200.0f;
@@ -16,11 +19,13 @@ BMSModuleManager::BMSModuleManager()
   histLowestCellVolt = 5.0f;
   histHighestCellVolt = 0.0f;
   histHighestCellDiffVolt = 0.0f;
-  //isFaulted = false;
   lineFault = false;
   pstring = 1;
 }
 
+/////////////////////////////////////////////////
+/// \brief resets all the modules atributes to their initial value.
+/////////////////////////////////////////////////
 void BMSModuleManager::resetModuleRecordedValues()
 {
   for (int y = 0; y < MAX_MODULE_ADDR; y++)
@@ -29,6 +34,11 @@ void BMSModuleManager::resetModuleRecordedValues()
   }
 }
 
+/////////////////////////////////////////////////
+/// \brief perform a round of balancing.
+///
+/// @param duration the number of seconds to enable balancing for.
+/////////////////////////////////////////////////
 void BMSModuleManager::balanceCells(uint8_t duration)
 {
   uint8_t balance = 0;//bit 0 - 5 are to activate cell balancing 1-6
@@ -54,20 +64,23 @@ void BMSModuleManager::balanceCells(uint8_t duration)
   }
 }
 
-/*
-   Force all modules to reset back to address 0 then set them all up in order so that the first module
-   in line from the master board is 1, the second one 2, and so on.
-*/
+/////////////////////////////////////////////////
+/// \brief reset board addresses to a sequence from closest to BMS to farthest.
+///
+/// Force all modules to reset back to address 0 then set them all up in order so that the first module
+/// in line from the master board is 1, the second one 2, and so on.
+/////////////////////////////////////////////////
 void BMSModuleManager::renumberBoardIDs()
 {
   int16_t err;
   uint8_t buff[30];
 
-  //Reset all boards
+  //Reset addresses to 0 in objects
   for (int y = 0; y < MAX_MODULE_ADDR; y++) {
     modules[y].setAddress(0);
   }
 
+  //Reset addresses to 0 in boards
   int tempNumFoundModules = 0;
   LOG_INFO("\n\nReseting all boards\n\n");
   if ((err = BMSDW(BROADCAST_ADDR, 0x3C, 0xA5)) < 0) {
@@ -76,8 +89,8 @@ void BMSModuleManager::renumberBoardIDs()
 
   //assign address to boards that respond to address 0
   for (int y = 0; y < MAX_MODULE_ADDR; y++) {
-    //for (int y = 0; y < 2; y++) {
     LOG_INFO("sending read on address 0\n");
+
     //check if a board responds to address 0
     if ((err = BMSDR(0, 0, 1, buff)) != READ_CRC_FAIL) {
       if (err == READ_RECV_LEN_MISMATCH) {
@@ -97,18 +110,19 @@ void BMSModuleManager::renumberBoardIDs()
     if ((err = BMSDW(0, REG_ADDR_CTRL, (y + 1) | 0x80)) < 0 ) {
       BMSD_LOG_ERR(y + 1, err, "write address register");
     }
-
     modules[y].setAddress(y + 1);
     LOG_INFO("Address %d assigned\n", modules[y].getAddress());
     tempNumFoundModules++;
   }
-
   numFoundModules = tempNumFoundModules;
 }
 
-/*
-  After a RESET boards have their faults written due to the hard restart or first time power up, this clears their faults
-*/
+/////////////////////////////////////////////////
+/// \brief clear board faults and alerts.
+///
+/// After a RESET boards have their faults written due to the hard restart
+/// or first time power up, this clears their faults
+/////////////////////////////////////////////////
 void BMSModuleManager::clearFaults()
 {
   int16_t err;
@@ -131,25 +145,26 @@ void BMSModuleManager::clearFaults()
   if ((err = BMSDW(BROADCAST_ADDR, REG_FAULT_STATUS, 0)) < 0) {
     BMSD_LOG_ERR(BROADCAST_ADDR, err, "clear faults status");
   }
-  //wtf!!!
-  //isFaulted = false;
 }
 
-/*
-  Puts all boards on the bus into a Sleep state, very good to use when the vehicle is at rest state.
-  Pulling the boards out of sleep only to check voltage decay and temperature when the contactors are open.
-*/
+/////////////////////////////////////////////////
+/// \brief puts boards to sleep to save power.
+///
+/// Puts all boards on the bus into a Sleep state, very good to use when the vehicle is at rest state.
+/// Pulling the boards out of sleep only to check voltage decay and temperature when the contactors are open.
+/////////////////////////////////////////////////
 void BMSModuleManager::sleepBoards() {
   int16_t err;
-  //put boards to sleep
   if ((err = BMSDW(BROADCAST_ADDR, REG_IO_CTRL, 0x04)) < 0) {
     BMSD_LOG_ERR(BROADCAST_ADDR, err, "put boards to sleep");
   }
 }
 
-/*
-  Wakes all the boards up and clears thier SLEEP state bit in the Alert Status Registery
-*/
+/////////////////////////////////////////////////
+/// \brief wake boards.
+///
+/// Wakes all the boards up and clears their SLEEP state bit in the Alert Status Registery
+/////////////////////////////////////////////////
 void BMSModuleManager::wakeBoards()
 {
   int16_t err;
@@ -169,10 +184,11 @@ void BMSModuleManager::wakeBoards()
   }
 }
 
-
-/*
-   Most important function called every tick ===========================================
-*/
+/////////////////////////////////////////////////
+/// \brief This function synchronises each module instance with its physical board.
+///
+/// Most important function called every tick
+/////////////////////////////////////////////////
 void BMSModuleManager::getAllVoltTemp() {
   int16_t err;
   float tempPackVolt = 0.0f;
@@ -186,17 +202,11 @@ void BMSModuleManager::getAllVoltTemp() {
     lineFault = false;
   }
 
-
+  //update state of each module and gather voltages and temperatures
   for (int y = 0; y < MAX_MODULE_ADDR; y++)
   {
     if (modules[y].getAddress() > 0) {
-      //LOG_DEBUG("Module %i exists. Reading voltage and temperature values\n", modules[y].getAddress());
-      
       modules[y].updateInstanceWithModuleValues();
-      
-      //LOG_DEBUG("Module voltage: %f\n", modules[y].getModuleVoltage());
-      //LOG_DEBUG("Lowest Cell V: %f     Highest Cell V: %f\n", modules[y].getLowCellV(), modules[y].getHighCellV());
-      //LOG_DEBUG("Temp1: %f       Temp2: %f\n", modules[y].getTemperature(0), modules[y].getTemperature(1));
       tempPackVolt += modules[y].getModuleVoltage();
       if (modules[y].getLowTemp() < histLowestPackTemp) histLowestPackTemp = modules[y].getLowTemp();
       if (modules[y].getHighTemp() > histHighestPackTemp) histHighestPackTemp = modules[y].getHighTemp();
@@ -205,8 +215,7 @@ void BMSModuleManager::getAllVoltTemp() {
     }
   }
 
-
-
+  //update high and low watermark values for voltages
   tempPackVolt = tempPackVolt / pstring;
   if (tempPackVolt > histHighestPackVolt) histHighestPackVolt = tempPackVolt;
   if (tempPackVolt < histLowestPackVolt) histLowestPackVolt = tempPackVolt;
@@ -225,6 +234,7 @@ void BMSModuleManager::getAllVoltTemp() {
       if (modules[y].getLowCellV() <  tempLowCellVolt)  tempLowCellVolt = modules[y].getLowCellV();
     }
   }
+
   //update cell V watermarks
   if ( tempLowCellVolt < histLowestCellVolt ) histLowestCellVolt =  tempLowCellVolt;
   if ( tempHighCellVolt > histHighestCellVolt ) histHighestCellVolt = tempHighCellVolt;
@@ -233,73 +243,93 @@ void BMSModuleManager::getAllVoltTemp() {
   if ( histHighestCellDiffVolt < tempHCDV ) histHighestCellDiffVolt = tempHCDV;
 
   //save values to objects
-
   lowCellVolt = tempLowCellVolt;
   highCellVolt = tempHighCellVolt;
   packVolt = tempPackVolt;
-
 }
 
+/////////////////////////////////////////////////
+/// \brief returns the highest temperature reached by the pack since last reset of the attributes.
+//////////////////////////////////////////////////
 float BMSModuleManager::getHistHighestPackTemp() {
   return histHighestPackTemp;
 }
 
+/////////////////////////////////////////////////
+/// \brief returns the highest voltage difference between 2 cells reached by the pack since last reset of the attributes.
+//////////////////////////////////////////////////
 float BMSModuleManager::getHistHighestCellDiffVolt() {
   return histHighestCellDiffVolt;
 }
 
-/*
-   current lowest cell voltage
-*/
-float BMSModuleManager::getLowCellVolt()
-{
+/////////////////////////////////////////////////
+/// \brief returns voltage of the lowest cell
+//////////////////////////////////////////////////
+float BMSModuleManager::getLowCellVolt() {
   return lowCellVolt;
 }
 
-/*
-   current highest cell voltage
-*/
-float BMSModuleManager::getHighCellVolt()
-{
+/////////////////////////////////////////////////
+/// \brief returns voltage of the highest cell
+//////////////////////////////////////////////////
+float BMSModuleManager::getHighCellVolt() {
   return highCellVolt;
 }
 
-/*
-   current pack voltage
-*/
-float BMSModuleManager::getPackVoltage()
-{
+/////////////////////////////////////////////////
+/// \brief returns total pack voltage
+//////////////////////////////////////////////////
+float BMSModuleManager::getPackVoltage() {
   return packVolt;
 }
 
+/////////////////////////////////////////////////
+/// \brief returns the lowest cell voltage reached within the pack since last reset of the attributes.
+//////////////////////////////////////////////////
 float BMSModuleManager::getHistLowestCellVolt() {
   return histLowestCellVolt;
 }
 
+/////////////////////////////////////////////////
+/// \brief returns the highest cell voltage reached within the pack since last reset of the atributes.
+//////////////////////////////////////////////////
 float BMSModuleManager::getHistHighestCellVolt() {
   return histHighestCellVolt;
 }
 
-float BMSModuleManager::getHistLowestPackVolt()
-{
+/////////////////////////////////////////////////
+/// \brief returns the lowest pack voltage reached since last reset of the atributes.
+//////////////////////////////////////////////////
+float BMSModuleManager::getHistLowestPackVolt() {
   return histLowestPackVolt;
 }
 
-float BMSModuleManager::getHistHighestPackVolt()
-{
+/////////////////////////////////////////////////
+/// \brief returns the highest pack voltage reached since last reset of the atributes.
+//////////////////////////////////////////////////
+float BMSModuleManager::getHistHighestPackVolt() {
   return histHighestPackVolt;
 }
 
+/////////////////////////////////////////////////
+/// \brief not used
+//////////////////////////////////////////////////
 void BMSModuleManager::setBatteryID(int id)
 {
   batteryID = id;
 }
 
+/////////////////////////////////////////////////
+/// \brief not used
+//////////////////////////////////////////////////
 void BMSModuleManager::setPstrings(int pstrings)
 {
   pstring = pstrings;
 }
 
+/////////////////////////////////////////////////
+/// \brief returns the average temperature of the pack.
+//////////////////////////////////////////////////
 float BMSModuleManager::getAvgTemperature()
 {
   float avg = 0.0f;
@@ -324,17 +354,16 @@ float BMSModuleManager::getAvgTemperature()
   }
 }
 
+/////////////////////////////////////////////////
+/// \brief returns the current highest temperature of the pack.
+//////////////////////////////////////////////////
 float BMSModuleManager::getHighTemperature()
 {
   highTemp = -100;
-  for (int x = 0; x < MAX_MODULE_ADDR; x++)
-  {
-    if (modules[x].getAddress() > 0)
-    {
-      if (modules[x].getAvgTemp() > -70)
-      {
-        if (modules[x].getAvgTemp() > highTemp)
-        {
+  for (int x = 0; x < MAX_MODULE_ADDR; x++) {
+    if (modules[x].getAddress() > 0) {
+      if (modules[x].getAvgTemp() > -70) {
+        if (modules[x].getAvgTemp() > highTemp) {
           highTemp = modules[x].getAvgTemp();
         }
       }
@@ -342,21 +371,19 @@ float BMSModuleManager::getHighTemperature()
       break;
     }
   }
-
   return highTemp;
 }
 
+/////////////////////////////////////////////////
+/// \brief returns the current lowest temperature of the pack.
+//////////////////////////////////////////////////
 float BMSModuleManager::getLowTemperature()
 {
   lowTemp = 999;
-  for (int x = 0; x < MAX_MODULE_ADDR; x++)
-  {
-    if (modules[x].getAddress() > 0)
-    {
-      if (modules[x].getAvgTemp() > -70)
-      {
-        if (modules[x].getAvgTemp() < lowTemp)
-        {
+  for (int x = 0; x < MAX_MODULE_ADDR; x++) {
+    if (modules[x].getAddress() > 0) {
+      if (modules[x].getAvgTemp() > -70) {
+        if (modules[x].getAvgTemp() < lowTemp) {
           lowTemp = modules[x].getAvgTemp();
         }
       }
@@ -367,6 +394,9 @@ float BMSModuleManager::getLowTemperature()
   return lowTemp;
 }
 
+/////////////////////////////////////////////////
+/// \brief returns the current average cell voltage for the whole pack.
+//////////////////////////////////////////////////
 float BMSModuleManager::getAvgCellVolt()
 {
   float avg = 0.0f;
@@ -379,21 +409,16 @@ float BMSModuleManager::getAvgCellVolt()
   return avg;
 }
 
-/*
-bool BMSModuleManager::getIsFaulted() {
-  return isFaulted;
-}*/
+/////////////////////////////////////////////////
+/// \brief returns true if the serial communication is broken.
+//////////////////////////////////////////////////
 bool BMSModuleManager::getLineFault() {
   return lineFault;
 }
 
-
-
-
-
-
-
-
+/////////////////////////////////////////////////
+/// \brief prints the pack summary to the console.
+//////////////////////////////////////////////////
 void BMSModuleManager::printPackSummary()
 {
   uint8_t faults;
@@ -505,6 +530,9 @@ void BMSModuleManager::printPackSummary()
   }
 }
 
+/////////////////////////////////////////////////
+/// \brief prints the pack details to the console.
+//////////////////////////////////////////////////
 void BMSModuleManager::printPackDetails(int digits)
 {
   //uint8_t faults;
@@ -542,6 +570,9 @@ void BMSModuleManager::printPackDetails(int digits)
   }
 }
 
+/////////////////////////////////////////////////
+/// \brief prints the pack details in CSV format to the console.
+//////////////////////////////////////////////////
 void BMSModuleManager::printAllCSV()
 {
   for (int y = 0; y < MAX_MODULE_ADDR; y++)

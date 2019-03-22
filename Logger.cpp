@@ -29,16 +29,18 @@
 //instantiate the logger
 Logger log_inst;
 
-Logger::Logger(){
+/////////////////////////////////////////////////
+/// \brief Constructor for the logger
+/////////////////////////////////////////////////
+Logger::Logger() {
   logLevel = Logger::Info;
   lastLogTime = 0;
 }
 
-/*
-   Output a debug message with a variable amount of parameters.
-   printf() style, see Logger::log()
-
-*/
+/////////////////////////////////////////////////
+/// \brief Output a debug message on the console
+/// with a variable amount of parameters printf() style
+/////////////////////////////////////////////////
 void Logger::debug(const char *message, ...) {
   if (logLevel > Debug)
     return;
@@ -48,10 +50,10 @@ void Logger::debug(const char *message, ...) {
   va_end(args);
 }
 
-/*
-   Output a info message with a variable amount of parameters
-   printf() style, see Logger::log()
-*/
+/////////////////////////////////////////////////
+/// \brief Output a info message on the console
+/// with a variable amount of parameters printf() style
+/////////////////////////////////////////////////
 void Logger::info(const char *message, ...) {
   if (logLevel > Info)
     return;
@@ -61,10 +63,10 @@ void Logger::info(const char *message, ...) {
   va_end(args);
 }
 
-/*
-   Output a warning message with a variable amount of parameters
-   printf() style, see Logger::log()
-*/
+/////////////////////////////////////////////////
+/// \brief Output a warning message on the console
+/// with a variable amount of parameters printf() style
+/////////////////////////////////////////////////
 void Logger::warn(const char *message, ...) {
   if (logLevel > Warn)
     return;
@@ -74,10 +76,10 @@ void Logger::warn(const char *message, ...) {
   va_end(args);
 }
 
-/*
-   Output a error message with a variable amount of parameters
-   printf() style, see Logger::log()
-*/
+/////////////////////////////////////////////////
+/// \brief Output a error message on the console
+/// with a variable amount of parameters printf() style
+/////////////////////////////////////////////////
 void Logger::error(const char *message, ...) {
   if (logLevel > Error)
     return;
@@ -87,84 +89,94 @@ void Logger::error(const char *message, ...) {
   va_end(args);
 }
 
-/*
-   Output a comnsole message with a variable amount of parameters
-   printf() style, see Logger::logMessage()
-*/
+/////////////////////////////////////////////////
+/// \brief Output a console message on the console
+/// with a variable amount of parameters printf() style
+/////////////////////////////////////////////////
 void Logger::console(const char *message, ...) {
   //return;
-  
+
   va_list args;
   va_start(args, message);
   log(Cons, message, args);
-  
+
   va_end(args);
 }
 
-
-/*
-   Set the log level. Any output below the specified log level will be omitted.
-*/
+/////////////////////////////////////////////////
+/// \brief Set the log level. Any output below the specified log level will be omitted.
+///
+/// @param level (0 = debug, 1=info, 2=warning, 3=error, 4=supress all)
+/////////////////////////////////////////////////
 void Logger::setLoglevel(LogLevel level) {
   logLevel = level;
 }
 
-/*
-   Retrieve the current log level.
-*/
+/////////////////////////////////////////////////
+/// \brief Retrieve the current log level.
+/////////////////////////////////////////////////
 Logger::LogLevel Logger::getLogLevel() {
   return logLevel;
 }
 
-/*
-   Return a timestamp when the last log entry was made.
-*/
+/////////////////////////////////////////////////
+/// \brief Return a timestamp when the last log entry was made.
+/////////////////////////////////////////////////
 uint32_t Logger::getLastLogTime() {
   return lastLogTime;
 }
 
-/*
-   Returns if debug log level is enabled. This can be used in time critical
-   situations to prevent unnecessary string concatenation (if the message won't
-   be logged in the end).
-
-   Example:
-   if (Logger::isDebug()) {
-      Logger::debug("current time: %d", millis());
-   }
-*/
-boolean Logger::isDebug() {
+/////////////////////////////////////////////////
+/// \brief Returns if debug log level is enabled.
+///
+/// This can be used in time critical
+/// situations to prevent unnecessary string concatenation (if the message won't
+/// be logged in the end).
+///
+/// Example:
+///
+/// if (Logger::isDebug()) {
+///
+///    Logger::debug("current time: %d", millis());
+///
+/// }
+/////////////////////////////////////////////////
+bool Logger::isDebug() {
   return logLevel == Debug;
 }
 
+/////////////////////////////////////////////////
+/// \brief Outputs a message to screen
+/////////////////////////////////////////////////
 void Logger::log(LogLevel level, const char *format, va_list args) {
- 
-    if (level < Cons){
-      lastLogTime = millis();
-      SERIALCONSOLE.print(lastLogTime);
-      SERIALCONSOLE.print(" - ");
-    }
-  
-    switch (level) {
-      case Debug:
-        SERIALCONSOLE.print("DEBUG  :");
-        break;
-      case Info:
-        SERIALCONSOLE.print("INFO   :");
-        break;
-      case Warn:
-        SERIALCONSOLE.print("WARNING:");
-        break;
-      case Error:
-        SERIALCONSOLE.print("ERROR  :");
-        break;
-      case Off:
-      case Cons:
-        break;
-    }
-    logMessage(format, args);
+  if (level < Cons) {
+    lastLogTime = millis();
+    SERIALCONSOLE.print(lastLogTime);
+    SERIALCONSOLE.print(" - ");
+  }
+  switch (level) {
+    case Debug:
+      SERIALCONSOLE.print("DEBUG  :");
+      break;
+    case Info:
+      SERIALCONSOLE.print("INFO   :");
+      break;
+    case Warn:
+      SERIALCONSOLE.print("WARNING:");
+      break;
+    case Error:
+      SERIALCONSOLE.print("ERROR  :");
+      break;
+    case Off:
+    case Cons:
+      break;
+  }
+  logMessage(format, args);
 }
 
+/////////////////////////////////////////////////
+/// \brief Outputs a message to screen
+/////////////////////////////////////////////////
 void Logger::logMessage(const char *format, va_list args) {
   char buf[128]; // resulting string limited to 128 chars
   vsnprintf(buf, 128, format, args);

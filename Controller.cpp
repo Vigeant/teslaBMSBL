@@ -1,10 +1,8 @@
 #include "Controller.hpp"
 
-//------------------------------------------------------------------------------
-// doController
-//
-// Orchestrates the activities within the BMS via a state machine.
-//------------------------------------------------------------------------------
+/////////////////////////////////////////////////
+/// \brief Orchestrates the activities within the BMS via a state machine.
+/////////////////////////////////////////////////
 void Controller::doController() {
   const int stateticks = 4;
   static int ticks = 0;
@@ -54,7 +52,6 @@ void Controller::doController() {
       }
       break;
 
-
     default:
       break;
   }
@@ -86,20 +83,22 @@ void Controller::doController() {
       run();
       break;
 
-
     default:
       break;
   }
   ticks++;
 }
 
-
+/////////////////////////////////////////////////
+/// \brief When instantiated, the controller is in the init state ensuring that all the signal pins are set ptoperly.
+/////////////////////////////////////////////////
 Controller::Controller() {
   state = INIT;
 }
 
-//initialization functions
-//reset all boards and assign address to each board and configure their thresholds
+/////////////////////////////////////////////////
+/// \brief reset all boards and assign address to each board and configure their thresholds
+/////////////////////////////////////////////////
 void Controller::init() {
   pinMode(OUTL_12V_BAT_CHRG, OUTPUT);
   pinMode(OUTPWM_PUMP, OUTPUT); //PWM use analogWrite(OUTPWM_PUMP, 0-255);
@@ -136,8 +135,6 @@ void Controller::init() {
   isFaulted = false;
   stickyFaulted = false;
 
-
-
   chargerInhibit = false;
   powerLimiter = false;
 
@@ -145,17 +142,9 @@ void Controller::init() {
   bms.clearFaults();
 }
 
-void Controller::assertFaultLine() {
-  //TODO assert fault line
-}
-
-void Controller::clearFaultLine() {
-  //TODO assert fault line
-}
-
-//run-time functions
-//gathers all the data from the boards and populates the BMSModel
-
+/////////////////////////////////////////////////
+/// \brief gathers all the data from the boards and check for any faulty state.
+/////////////////////////////////////////////////
 void Controller::syncModuleDataObjects() {
   float bat12vVoltage;
   bms.getAllVoltTemp();
@@ -262,19 +251,18 @@ void Controller::syncModuleDataObjects() {
   bms.clearFaults();
 }
 
-//balances the cells according to thresholds in the CONFIG.h file
+/////////////////////////////////////////////////
+/// \brief balances the cells according to thresholds in the CONFIG.h file
+/////////////////////////////////////////////////
 void Controller::balanceCells() {
   //balance for 1 second given that the controller wakes up every second.
   //TODO balancing disabled here to avoid discharging the batteries.
-  //void balanceCells(4);
+  //void balanceCells(1);
 }
 
-
-/*
-   standby state is when the boat is not charging and not driving.
-   The boat may be connected to a charger but it has reached full charge.
-   In that state, it monitors for a voltage change to switch to a new state.
-*/
+/////////////////////////////////////////////////
+/// \brief standby state is when the boat is not connected to a EVSE, not in run state and the 12V battery is above its low voltage threshold.
+/////////////////////////////////////////////////
 void Controller::standby() {
   syncModuleDataObjects();
   digitalWrite(OUTL_EVCC_ON, HIGH);
@@ -282,6 +270,9 @@ void Controller::standby() {
   digitalWrite(OUTL_12V_BAT_CHRG, HIGH);
 }
 
+/////////////////////////////////////////////////
+/// \brief standbyDC2DC state is when the boat *is not connected* to a EVSE, not in run state and the 12V battery is being charged since it dipped bellow its low voltage threshold.
+/////////////////////////////////////////////////
 void Controller::standbyDC2DC() {
   syncModuleDataObjects();
   digitalWrite(OUTL_EVCC_ON, HIGH);
@@ -289,6 +280,9 @@ void Controller::standbyDC2DC() {
   digitalWrite(OUTL_12V_BAT_CHRG, LOW);
 }
 
+/////////////////////////////////////////////////
+/// \brief charging state is when the boat *is connected* to a EVSE and is either actively charging or in between 2 charging cycles until it dips bellow its pack voltage threshold.
+/////////////////////////////////////////////////
 void Controller::charging() {
   syncModuleDataObjects();
   digitalWrite(OUTL_EVCC_ON, LOW);
@@ -296,6 +290,9 @@ void Controller::charging() {
   digitalWrite(OUTL_12V_BAT_CHRG, LOW);
 }
 
+/////////////////////////////////////////////////
+/// \brief cargerCycle state is when the boat *is connected* to a EVSE and is cycling the EVCC to trigger a new charging cycle.
+/////////////////////////////////////////////////
 void Controller::cargerCycle() {
   syncModuleDataObjects();
   digitalWrite(OUTL_EVCC_ON, HIGH);
@@ -303,18 +300,26 @@ void Controller::cargerCycle() {
   digitalWrite(OUTL_12V_BAT_CHRG, LOW);
 }
 
+/////////////////////////////////////////////////
+/// \brief run state is turned on and ready to operate.
+/////////////////////////////////////////////////
 void Controller::run() {
   syncModuleDataObjects();
   digitalWrite(OUTL_EVCC_ON, HIGH);
   digitalWrite(OUTL_NO_FAULT, powerLimiter);
   digitalWrite(OUTL_12V_BAT_CHRG, LOW);
-
 }
 
+/////////////////////////////////////////////////
+/// \brief returns the current state the controller is in.
+/////////////////////////////////////////////////
 Controller::ControllerState Controller::getState() {
   return state;
 }
 
+/////////////////////////////////////////////////
+/// \brief returns the BMS instance to allow access to its members for reporting purposes.
+/////////////////////////////////////////////////
 BMSModuleManager* Controller::getBMSPtr() {
   return &bms;
 }

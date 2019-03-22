@@ -1,3 +1,4 @@
+/**@file BMSDriver.hpp */
 #include <Arduino.h>
 #include "Logger.hpp"
 #include <string.h>
@@ -59,6 +60,30 @@ class BMSDriver {
 //export the logger
 extern BMSDriver bmsdriver_inst;
 
+/////////////////////////////////////////////////
+/// \brief Helper macro that reads values from the string of bms modules.
+///
+/// @param moduleAddress The module address to read from.
+/// @param readAddress The address to read from in the module.
+/// @param readLen The number of bytes to read from the module starting from readAddress.
+/// @param recvBuff The buffer where the data will be written to.
+/////////////////////////////////////////////////
 #define BMSDR bmsdriver_inst.read
+
+/////////////////////////////////////////////////
+/// \brief Helper macro that writes a byte to a module in the string of bms modules.
+///
+/// @param moduleAddress The module address to write to. Can use a boradcast.
+/// @param writeAddress The address to write to in the module.
+/// @param sendByte The byte to write.
+/////////////////////////////////////////////////
 #define BMSDW bmsdriver_inst.write
+
+/////////////////////////////////////////////////
+/// \brief Helper macro that will print the location of the error and function to help interpret and log error codes returned by the driver.
+///
+/// @param moduleAddress The module address.
+/// @param error The error code returned by the driver function (read or write).
+/// @param message An extra message to display defined by the user.
+/////////////////////////////////////////////////
 #define BMSD_LOG_ERR LOG_ERR("file: %s, function: %s, line: %d\n",strrchr(__FILE__,'\\'),__func__,__LINE__); bmsdriver_inst.logError

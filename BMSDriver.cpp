@@ -19,41 +19,49 @@ BMSDriver::BMSDriver() {
 /////////////////////////////////////////////////
 /// \brief Helper function to help interpret and log error codes returned by the driver.
 ///
-/// @param ma The module address.
-/// @param err The error code returned by the driver function (read or write).
+/// @param moduleAddress The module address.
+/// @param error The error code returned by the driver function (read or write).
 /// @param message An extra message to display defined by the user.
 /////////////////////////////////////////////////
-void BMSDriver::logError(const uint8_t ma, const int16_t err, const char* message) {
-  switch (err) {
+void BMSDriver::logError(const uint8_t moduleAddress, const int16_t error, const char* message) {
+  switch (error) {
     case ILLEGAL_READ_LEN:
-      LOG_ERROR("Module %d: ILLEGAL_READ_LEN | %s\n", ma, message);
+      LOG_ERROR("Module %d: ILLEGAL_READ_LEN | %s\n", moduleAddress, message);
       break;
     case READ_CRC_FAIL:
-      LOG_ERROR("Module %d: READ_CRC_FAIL | %s\n", ma, message);
+      LOG_ERROR("Module %d: READ_CRC_FAIL | %s\n", moduleAddress, message);
       break;
     case READ_RECV_MODADDR_MISMATCH:
-      LOG_ERROR("Module %d: READ_RECV_MODADDR_MISMATCH | %s\n", ma, message);
+      LOG_ERROR("Module %d: READ_RECV_MODADDR_MISMATCH | %s\n", moduleAddress, message);
       break;
     case READ_RECV_ADDR_MISMATCH:
-      LOG_ERROR("Module %d: READ_RECV_ADDR_MISMATCH | %s\n", ma, message);
+      LOG_ERROR("Module %d: READ_RECV_ADDR_MISMATCH | %s\n", moduleAddress, message);
       break;
     case READ_RECV_LEN_MISMATCH:
-      LOG_ERROR("Module %d: READ_RECV_LEN_MISMATCH | %s\n", ma, message);
+      LOG_ERROR("Module %d: READ_RECV_LEN_MISMATCH | %s\n", moduleAddress, message);
       break;
     case WRITE_RECV_LEN_MISMATCH:
-      LOG_ERROR("Module %d: WRITE_RECV_LEN_MISMATCH | %s\n", ma, message);
+      LOG_ERROR("Module %d: WRITE_RECV_LEN_MISMATCH | %s\n", moduleAddress, message);
       break;
     case WRITE_CRC_FAIL:
-      LOG_ERROR("Module %d: WRITE_CRC_FAIL | %s\n", ma, message);
+      LOG_ERROR("Module %d: WRITE_CRC_FAIL | %s\n", moduleAddress, message);
       break;
 
     default:
-      LOG_ERROR("Module %d: UNKNOWN_ERROR | %s\n", ma, message);
+      LOG_ERROR("Module %d: UNKNOWN_ERROR | %s\n", moduleAddress, message);
       break;
   }
 
 }
 
+/////////////////////////////////////////////////
+/// \brief reads values from the string of bms modules.
+///
+/// @param moduleAddress The module address to read from.
+/// @param readAddress The address to read from in the module.
+/// @param readLen The number of bytes to read from the module starting from readAddress.
+/// @param recvBuff The buffer where the data will be written to.
+/////////////////////////////////////////////////
 int16_t BMSDriver::read(const uint8_t moduleAddress, const uint8_t readAddress, const uint8_t readLen, uint8_t* recvBuff ) {
   uint8_t fixedModAddress = moduleAddress << 1;
   uint8_t byteIndex = 0;
@@ -77,8 +85,7 @@ int16_t BMSDriver::read(const uint8_t moduleAddress, const uint8_t readAddress, 
   SERIALBMS.write(readLen);
 
   //receiving answer
-  //read the data in the buffer
-  delay(2* ((readLen/8)+1));
+  delay(2 * ((readLen / 8) + 1));
   for (byteIndex = 0; SERIALBMS.available() && (byteIndex < maxLen); byteIndex++) {
     buff[byteIndex] = SERIALBMS.read();
     //chThdSleepMilliseconds(5);
@@ -91,39 +98,23 @@ int16_t BMSDriver::read(const uint8_t moduleAddress, const uint8_t readAddress, 
   }
   while (SERIALBMS.available()) SERIALBMS.read();
 
-
   //verify the CRC
   if (genCRC(buff, maxLen - 1) != buff[maxLen - 1]) {
-    //LOG_ERROR("READ_CRC_FAIL | Reading module:%3d, addr:0x%02x, len:%d\n", moduleAddress, readAddress, readLen );
-    /*
-    if (log_inst.getLogLevel() == Logger::Debug) {
-      LOG_CONSOLE("sent: %02X %02X %02X ", fixedModAddress, readAddress, readLen );
-      LOG_CONSOLE("\nrecv: ");
-      for (int i = 0; i < byteIndex; i++) {
-        LOG_CONSOLE("%02X ", buff[i]);
-      }
-      LOG_CONSOLE("\n");
-      return READ_CRC_FAIL;
-    }
-    */
+    LOG_ERROR("READ_CRC_FAIL | Reading module:%3d, addr:0x%02x, len:%d\n", moduleAddress, readAddress, readLen );
   }
 
   //success! remove 4 bytes protocol wrapper around payload
   memcpy(recvBuff, &buff[3], readLen); //[modAddr][readAddr][readLen][data][CRC] -> [data]
-  /*
-  LOG_DEBUG("Received:");
-  if (log_inst.getLogLevel() == Logger::Debug) {
-    for (int i = 0; i < readLen; i++) {
-      if (i % 16 == 0) LOG_CONSOLE("\n%x\t", i);
-      LOG_CONSOLE("%x ", recvBuff[i]);
-    }
-    LOG_CONSOLE("\n");
-  }
-  */
   return byteIndex;
 }
 
-
+/////////////////////////////////////////////////
+/// \brief writes a byte to a module in the string of bms modules.
+///
+/// @param moduleAddress The module address to write to. Can use a boradcast.
+/// @param writeAddress The address to write to in the module.
+/// @param sendByte The byte to write.
+/////////////////////////////////////////////////
 int16_t BMSDriver::write(const uint8_t moduleAddress, const uint8_t writeAddress, const uint8_t sendByte) {
   uint8_t fixedModAddress = moduleAddress << 1;
   uint8_t byteIndex = 0;
@@ -146,43 +137,22 @@ int16_t BMSDriver::write(const uint8_t moduleAddress, const uint8_t writeAddress
   SERIALBMS.write(sendBuff, sizeof(sendBuff));
 
   //receiving answer
-  //read the data in the buffer
   delay(2);
   for (byteIndex = 0; SERIALBMS.available() && (byteIndex < maxLen); byteIndex++) {
     recvBuff[byteIndex] = SERIALBMS.read();
   }
 
   //empty out the serial read buffer
-  if (maxLen < byteIndex)
-  {
-    //LOG_WARN("SERIALBMS still had crap in its buffer after reading readLen | Writing module:%3d, addr:0x%02x, byte:%x\n", moduleAddress, writeAddress, sendByte );
+  if (maxLen < byteIndex) {
     while (SERIALBMS.available()) SERIALBMS.read();
   } else if (maxLen > byteIndex) {
-    //LOG_ERROR("WRITE_RECV_LEN_MISMATCH | Writing module:%3d, addr:0x%02x, byte:%x\n", moduleAddress, writeAddress, sendByte );
     return WRITE_RECV_LEN_MISMATCH;
   }
 
   //verify the CRC
   if (sendBuff[maxLen - 1] != recvBuff[maxLen - 1]) {
-    //LOG_ERROR("WRITE_CRC_FAIL | Writing module:%3d, addr:0x%02x, byte:%x\n", moduleAddress, writeAddress, sendByte );
-    /*
-    if (log_inst.getLogLevel() == Logger::Debug) {
-      LOG_CONSOLE("sent: ");
-      for (int i = 0; i < byteIndex; i++) {
-        LOG_CONSOLE("%x ", sendBuff[i]);
-      }
-      LOG_CONSOLE("\nrecv: ");
-      for (int i = 0; i < byteIndex; i++) {
-        LOG_CONSOLE("%x ", recvBuff[i]);
-      }
-      LOG_CONSOLE("\n");
-      return WRITE_CRC_FAIL;
-    }
-    */
+    LOG_ERROR("WRITE_CRC_FAIL | Writing module:%3d, addr:0x%02x, byte:%x\n", moduleAddress, writeAddress, sendByte );
   }
-
-  //success!
-  //LOG_DEBUG("Write Successful!\n");
   return byteIndex;
 }
 
@@ -194,7 +164,6 @@ uint8_t BMSDriver::genCRC(const uint8_t * buf, const uint8_t bufLen) {
   for (int x = 0; x < bufLen; x++)
   {
     crc ^= buf[x]; /* XOR-in the next input byte */
-
     for (int i = 0; i < 8; i++)
     {
       if ((crc & 0x80) != 0)
@@ -207,6 +176,5 @@ uint8_t BMSDriver::genCRC(const uint8_t * buf, const uint8_t bufLen) {
       }
     }
   }
-
   return crc;
 }

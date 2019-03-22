@@ -1,8 +1,22 @@
+/**@file teslaBMSBL.ino */
 #include <Arduino.h>
 #include "Cons.hpp"
 #include "Logger.hpp"
 #include "Oled.hpp"
 #include "Controller.hpp"
+
+/*! \mainpage teslaBMSBL
+ *
+ * \section intro_sec Introduction
+ *
+ * A teensy based battery management system for Tesla battery modules.
+ *
+ * \section install_sec Installation
+ *
+ * \subsection step1 Step 1: Opening the box
+ *  
+ * etc...
+ */
 
 //instantiate all objects
 static Controller controller_inst;        ///< The controller is responsible for orchestrating all major functions of the BMS.
@@ -12,11 +26,6 @@ static Oled oled_inst(&controller_inst);  ///< The oled is a 1 way user interfac
 /////////////////////////////////////////////////
 /// \brief The setup function runs once when you press reset or power the board.
 /////////////////////////////////////////////////
-/*! \brief Brief description.
- *         Brief description continued.
- *
- *  Detailed description starts here.
- */
 void setup() {
   //console stuff
   pinMode(INL_SOFT_RST, INPUT_PULLUP);
@@ -65,9 +74,7 @@ void loop()
       phase10hzA();
     else
       phase10hzB();
-
-    phaseA = !phaseA;
-      
+    phaseA = !phaseA;    
 
     stoptime = millis();
     if (stoptime > starttime) {

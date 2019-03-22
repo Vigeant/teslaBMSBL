@@ -3,12 +3,17 @@
 #include <stdio.h>
 #include <stdarg.h>
 
+#define CONSOLEBUFFERSIZE 64
+
+/////////////////////////////////////////////////
+/// \brief This is the consoles main function where commands and interpreted every tick.
+/////////////////////////////////////////////////
 void Cons::doConsole() {
-  static unsigned char y[32] = {0};
+  static unsigned char y[CONSOLEBUFFERSIZE] = {0};
   static unsigned char yptr = 0;
   static unsigned char numB = 0;
   if (SERIALCONSOLE.available()) {
-    numB = SERIALCONSOLE.readBytesUntil('\n', &y[yptr], 31 - yptr);
+    numB = SERIALCONSOLE.readBytesUntil('\n', &y[yptr], CONSOLEBUFFERSIZE - 1 - yptr);
     if ((y[yptr] == '\n') || (y[yptr] == '\r')) {
       LOG_CONSOLE("\r\n");
       switch (y[0]) {
@@ -44,14 +49,14 @@ void Cons::doConsole() {
         default:
           break;
       }
-    } else if (yptr < 29) {
+    } else if (yptr < CONSOLEBUFFERSIZE - 3) {
       LOG_CONSOLE("%s", &y[yptr]);
       yptr += numB;
       return;
     }
 
     //at this point prepare for a new command
-    for (int i = 0; i < 32; i++) {
+    for (int i = 0; i < CONSOLEBUFFERSIZE; i++) {
       y[i] = 0;
     }
     yptr = 0;
@@ -59,14 +64,16 @@ void Cons::doConsole() {
   }
 }
 
+/////////////////////////////////////////////////
+/// \brief Prints banner and menu to the console.
+/////////////////////////////////////////////////
 void Cons::printMenu() {
-
   LOG_CONSOLE("\n\\||||||||/   \\||||||||/   |||||||||/   ||           \\||||||||/\n");
   LOG_CONSOLE("    ||                    ||           ||\n");
   LOG_CONSOLE("    ||       \\||||||||/   ||||||||||   ||           ||||||||||\n");
   LOG_CONSOLE("    ||                            ||   ||           ||      ||\n");
   LOG_CONSOLE("    ||       \\||||||||/   /|||||||||   |||||||||/   ||      ||\n\n");
-  LOG_CONSOLE("          Real Time Battery Management System by GuilT\n");
+  LOG_CONSOLE("              Battery Management System by GuilT\n");
   LOG_CONSOLE("\n************************* SYSTEM MENU *************************\n");
   LOG_CONSOLE("GENERAL SYSTEM CONFIGURATION\n\n");
   LOG_CONSOLE("   h or ? = help (displays this message)\n");
@@ -75,14 +82,11 @@ void Cons::printMenu() {
   LOG_CONSOLE("\n");
 }
 
+/////////////////////////////////////////////////
+/// \brief Constructor
+/////////////////////////////////////////////////
 Cons::Cons() {
   // initialize serial communication at 9600 bits per second:
   SERIALCONSOLE.begin(115200);
-
-  /*
-    while (!SERIALCONSOLE) {
-    ; // wait for serial port to connect. Needed for native USB, on LEONARDO, MICRO, YUN, and other 32u4 based boards.
-    }*/
-
   SERIALCONSOLE.setTimeout(15);
 }
