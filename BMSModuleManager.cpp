@@ -7,11 +7,6 @@
 /////////////////////////////////////////////////
 BMSModuleManager::BMSModuleManager()
 {
-  /*
-    for (int i = 0; i < MAX_MODULE_ADDR; i++) {
-    modules[i].setAddress(i + 1);
-    }
-  */
   histLowestPackVolt = 1000.0f;
   histHighestPackVolt = 0.0f;
   histLowestPackTemp = 200.0f;
@@ -192,7 +187,7 @@ void BMSModuleManager::wakeBoards()
 void BMSModuleManager::getAllVoltTemp() {
   int16_t err;
   float tempPackVolt = 0.0f;
-  if (lineFault) renumberBoardIDs();
+  if (lineFault || modules[0].getAddress() == 0) renumberBoardIDs();
 
   //stop balancing
   if ((err = BMSDW(BROADCAST_ADDR, REG_BAL_CTRL, 0x00)) < 0) {

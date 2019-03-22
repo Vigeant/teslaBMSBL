@@ -11,7 +11,7 @@ void Controller::doController() {
   switch (state) {
 
     case INIT:
-      if (ticks >= 20) {
+      if (ticks >= stateticks) {
         ticks = 0;
         state = STANDBY;
       }
