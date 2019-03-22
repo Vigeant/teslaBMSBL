@@ -268,6 +268,7 @@ void Controller::standby() {
   digitalWrite(OUTL_EVCC_ON, HIGH);
   digitalWrite(OUTL_NO_FAULT, chargerInhibit);
   digitalWrite(OUTL_12V_BAT_CHRG, HIGH);
+  analogWrite(OUTPWM_PUMP, 0);
 }
 
 /////////////////////////////////////////////////
@@ -278,6 +279,18 @@ void Controller::standbyDC2DC() {
   digitalWrite(OUTL_EVCC_ON, HIGH);
   digitalWrite(OUTL_NO_FAULT, chargerInhibit);
   digitalWrite(OUTL_12V_BAT_CHRG, LOW);
+  analogWrite(OUTPWM_PUMP, 0);
+}
+
+void Controller::coolingControl() {
+  float temp = bms.getHighTemperature();
+  if (temp < COOLING_T_SETPOINT){
+    analogWrite(OUTPWM_PUMP, 0); //0-255
+  } else if (temp > OVER_T_SETPOINT - 5){
+    analogWrite(OUTPWM_PUMP, 255); //0-255
+  } else {
+    analogWrite(OUTPWM_PUMP, 255 * (temp - COOLING_T_SETPOINT) / (OVER_T_SETPOINT - 5 - COOLING_T_SETPOINT));
+  }
 }
 
 /////////////////////////////////////////////////
@@ -288,6 +301,7 @@ void Controller::charging() {
   digitalWrite(OUTL_EVCC_ON, LOW);
   digitalWrite(OUTL_NO_FAULT, chargerInhibit);
   digitalWrite(OUTL_12V_BAT_CHRG, LOW);
+  coolingControl();
 }
 
 /////////////////////////////////////////////////
@@ -298,6 +312,7 @@ void Controller::cargerCycle() {
   digitalWrite(OUTL_EVCC_ON, HIGH);
   digitalWrite(OUTL_NO_FAULT, chargerInhibit);
   digitalWrite(OUTL_12V_BAT_CHRG, LOW);
+  coolingControl();
 }
 
 /////////////////////////////////////////////////
@@ -308,6 +323,7 @@ void Controller::run() {
   digitalWrite(OUTL_EVCC_ON, HIGH);
   digitalWrite(OUTL_NO_FAULT, powerLimiter);
   digitalWrite(OUTL_12V_BAT_CHRG, LOW);
+  coolingControl();
 }
 
 /////////////////////////////////////////////////

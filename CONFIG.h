@@ -61,6 +61,7 @@
 #define WARN_CELL_V_OFFSET 0.1f
 //start balancing when high and low cell reach this delta
 #define CELLS_V_DELTA 0.2f
+#define COOLING_T_SETPOINT 30.0f
 #define OVER_T_SETPOINT 65.0f
 #define UNDER_T_SETPOINT -10.0f
 //issue a warning on OLED and serial console if T is that close to a OT or UT fault.

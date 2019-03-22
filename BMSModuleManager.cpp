@@ -572,7 +572,7 @@ void BMSModuleManager::printAllCSV()
       LOG_CONSOLE(",");
       for (int i = 0; i < 6; i++)
       {
-        LOG_CONSOLE("%d,", modules[y].getCellVoltage(i));
+        LOG_CONSOLE("%.2f,", modules[y].getCellVoltage(i));
       }
       LOG_CONSOLE("%.2f,", modules[y].getTemperature(0));
       LOG_CONSOLE("%.2f\n", modules[y].getTemperature(1));

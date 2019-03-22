@@ -53,7 +53,7 @@ class Controller {
 
     void assertFaultLine();
     void clearFaultLine();
-
+    void coolingControl();
 
     ControllerState state;
     void init(); //reset all boards and assign address to each board
