@@ -242,7 +242,7 @@ void Oled::printFaults() {
 /// The Oled cycles through formats after a predefined number of ticks. At each tick, it updates what is currently displayed in the current format.
 /////////////////////////////////////////////////
 void Oled::doOled() {
-  const int stateticks = 4;
+  const int stateticks = 6;
   static int ticks = 0;
   switch (state) {
     case FMT1:

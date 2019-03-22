@@ -20,7 +20,7 @@
 
 //instantiate all objects
 static Controller controller_inst;        ///< The controller is responsible for orchestrating all major functions of the BMS.
-static Cons cons_inst;                    ///< The console is a 2 way user interface available on usb serial port at baud 115200.
+static Cons cons_inst(&controller_inst);  ///< The console is a 2 way user interface available on usb serial port at baud 115200.
 static Oled oled_inst(&controller_inst);  ///< The oled is a 1 way user interface displaying the most critical information.
 
 /////////////////////////////////////////////////

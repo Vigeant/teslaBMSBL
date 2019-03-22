@@ -18,12 +18,15 @@ void Cons::doConsole() {
       LOG_CONSOLE("\r\n");
       switch (y[0]) {
         case '1':
-          LOG_CONSOLE("Enable debug mode to see stack usage for all tasks\n");
+          controller_inst_ptr->getBMSPtr()->printPackSummary();
           break;
 
         case '2':
-          LOG_CONSOLE("Option %s\n", y);
-          LOG_INFO("log_inst@: , loglevel: %d\n", &log_inst, log_inst.getLogLevel());
+          controller_inst_ptr->getBMSPtr()->printPackDetails();
+          break;
+
+        case '3':
+          controller_inst_ptr->getBMSPtr()->printAllCSV();
           break;
 
         case 'v':
@@ -77,7 +80,9 @@ void Cons::printMenu() {
   LOG_CONSOLE("\n************************* SYSTEM MENU *************************\n");
   LOG_CONSOLE("GENERAL SYSTEM CONFIGURATION\n\n");
   LOG_CONSOLE("   h or ? = help (displays this message)\n");
-  LOG_CONSOLE("   1 = display stack high watermark for this task\n");
+  LOG_CONSOLE("   1 = display BMS status summary\n");
+  LOG_CONSOLE("   2 = display BMS detailed summary\n");
+  LOG_CONSOLE("   3 = output BMS details in CSV format\n");
   LOG_CONSOLE("   vX verbose (X=0:debug, X=1:info, X=2:warn, X=3:error, X=4:Cons)\n");
   LOG_CONSOLE("\n");
 }
@@ -85,8 +90,9 @@ void Cons::printMenu() {
 /////////////////////////////////////////////////
 /// \brief Constructor
 /////////////////////////////////////////////////
-Cons::Cons() {
+Cons::Cons(Controller* cont_inst_ptr) {
   // initialize serial communication at 9600 bits per second:
   SERIALCONSOLE.begin(115200);
   SERIALCONSOLE.setTimeout(15);
+  controller_inst_ptr = cont_inst_ptr;
 }

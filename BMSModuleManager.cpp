@@ -426,12 +426,8 @@ void BMSModuleManager::printPackSummary()
   uint8_t COV;
   uint8_t CUV;
 
-  LOG_CONSOLE("");
-  LOG_CONSOLE("");
-  LOG_CONSOLE("");
-  LOG_CONSOLE("Modules: %i    Voltage: %fV   Avg Cell Voltage: %fV     Avg Temp: %fC ", numFoundModules,
+  LOG_CONSOLE("\nModules: %i    Voltage: %.2fV   Avg Cell Voltage: %.2fV     Avg Temp: %.2fC\n", numFoundModules,
               getPackVoltage(), getAvgCellVolt(), getAvgTemperature());
-  LOG_CONSOLE("");
   for (int y = 0; y < MAX_MODULE_ADDR; y++)
   {
     if (modules[y].getAddress() > 0)
@@ -441,9 +437,9 @@ void BMSModuleManager::printPackSummary()
       COV = modules[y].getCOVCells();
       CUV = modules[y].getCUVCells();
 
-      LOG_CONSOLE("                               Module #%i\n", y);
+      LOG_CONSOLE("\n                               Module #%i\n", y);
 
-      LOG_CONSOLE("  Voltage: %fV   (%fV-%fV)     Temperatures: (%fC-%fC)\n", modules[y].getModuleVoltage(),
+      LOG_CONSOLE("  Voltage: %.2fV   (%.2fV-%.2fV)     Temperatures: (%.2fC-%.2fC)\n", modules[y].getModuleVoltage(),
                   modules[y].getLowCellV(), modules[y].getHighCellV(), modules[y].getLowTemp(), modules[y].getHighTemp());
       if (faults > 0)
       {
@@ -533,7 +529,7 @@ void BMSModuleManager::printPackSummary()
 /////////////////////////////////////////////////
 /// \brief prints the pack details to the console.
 //////////////////////////////////////////////////
-void BMSModuleManager::printPackDetails(int digits)
+void BMSModuleManager::printPackDetails()
 {
   //uint8_t faults;
   //uint8_t alerts;
@@ -541,11 +537,9 @@ void BMSModuleManager::printPackDetails(int digits)
   //uint8_t CUV;
   int cellNum = 0;
 
-  LOG_CONSOLE("\n");
-  LOG_CONSOLE("\n");
-  LOG_CONSOLE("\n");
-  LOG_CONSOLE("Modules: %i Cells: %i Strings: %i  Voltage: %fV   Avg Cell Voltage: %fV  Low Cell Voltage: %fV   High Cell Voltage: %fV Delta Voltage: %zmV   Avg Temp: %fC \n", numFoundModules, seriescells(),
-              pstring, getPackVoltage(), getAvgCellVolt(), lowCellVolt, highCellVolt, (highCellVolt - lowCellVolt) * 1000, getAvgTemperature());
+  LOG_CONSOLE("\nModules: %i  Strings: %i  Voltage: %.2fV   Avg Cell Voltage: %.2fV  Low Cell Voltage: %.2fV   High Cell Voltage: %.2fV\n", numFoundModules, 
+              pstring, getPackVoltage(), getAvgCellVolt(), lowCellVolt, highCellVolt ); 
+  LOG_CONSOLE("Delta Voltage: %.3fV   Avg Temp: %.2fC \n", (highCellVolt - lowCellVolt), getAvgTemperature());        
   LOG_CONSOLE("\n");
   for (int y = 0; y < MAX_MODULE_ADDR; y++)
   {
@@ -558,14 +552,14 @@ void BMSModuleManager::printPackDetails(int digits)
 
       LOG_CONSOLE("Module #%d\n", modules[y].getAddress());
       if (y < 10) LOG_CONSOLE(" ");
-      LOG_CONSOLE("  %fV\n", modules[y].getModuleVoltage());
+      LOG_CONSOLE("  %.2fV\n", modules[y].getModuleVoltage());
       for (int i = 0; i < 6; i++)
       {
         if (cellNum < 10) LOG_CONSOLE(" ");
-        LOG_CONSOLE("  Cell%d: %fV\n", cellNum++, modules[y].getCellVoltage(i));
+        LOG_CONSOLE("  Cell%d: %.2fV\n", cellNum++, modules[y].getCellVoltage(i));
       }
-      LOG_CONSOLE("  Neg Term Temp: %fC\t", modules[y].getTemperature(0));
-      LOG_CONSOLE("Pos Term Temp: %fC\n", modules[y].getTemperature(1));
+      LOG_CONSOLE("  Neg Term Temp: %.2fC\t", modules[y].getTemperature(0));
+      LOG_CONSOLE("Pos Term Temp: %.2fC\n", modules[y].getTemperature(1));
     }
   }
 }
@@ -585,8 +579,8 @@ void BMSModuleManager::printAllCSV()
       {
         LOG_CONSOLE("%d,", modules[y].getCellVoltage(i));
       }
-      LOG_CONSOLE("%f,", modules[y].getTemperature(0));
-      LOG_CONSOLE("%f\n", modules[y].getTemperature(1));
+      LOG_CONSOLE("%.2f,", modules[y].getTemperature(0));
+      LOG_CONSOLE("%.2f\n", modules[y].getTemperature(1));
     }
   }
 }
