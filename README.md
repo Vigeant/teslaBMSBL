@@ -24,6 +24,7 @@
 - [X] assign all signals to pins
 - [ ] Implement state machine
 	- [X] noFault is driven differently from run to charging (run noFault is used to limit output while in charging it is used to prevent charging)
-- [X] modify formats to display:
-	- [X] sticky faults format
+- [ ] add dc2dc states in charging mode to support shutting down dc2dc
+- [ ] sync diagram state machine with controller code to make faults match
+- [ ] update formula for pwd of cooling pump to floor at 25% duty cycle.
 	

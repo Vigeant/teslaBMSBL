@@ -285,7 +285,7 @@ void Controller::standbyDC2DC() {
 void Controller::coolingControl() {
   float temp = bms.getHighTemperature();
   if (temp < COOLING_T_SETPOINT){
-    analogWrite(OUTPWM_PUMP, 0); //0-255
+    analogWrite(OUTPWM_PUMP, 63); // 25% duty cycle (0-255)
   } else if (temp > OVER_T_SETPOINT - 5){
     analogWrite(OUTPWM_PUMP, 255); //0-255
   } else {
