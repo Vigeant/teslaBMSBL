@@ -62,8 +62,6 @@
 #define CHARGER_CYCLE_V_SETPOINT 3.9f
 //issue a warning on OLED and serial console if a cell is that close to a OV or UV fault.
 #define WARN_CELL_V_OFFSET 0.1f
-//start balancing when high and low cell reach this delta
-//#define CELLS_V_DELTA 0.2f
 
 /*
  * cooling system setings
