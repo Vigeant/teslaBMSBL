@@ -24,7 +24,9 @@
 - [X] assign all signals to pins
 - [ ] Implement state machine
 	- [X] noFault is driven differently from run to charging (run noFault is used to limit output while in charging it is used to prevent charging)
-- [ ] add dc2dc states in charging mode to support shutting down dc2dc
-- [ ] sync diagram state machine with controller code to make faults match
-- [ ] update formula for pwd of cooling pump to floor at 25% duty cycle.
+	- [X] add dc2dc states in charging mode to support shutting down dc2dc in diagram
+	- [ ] implement state machine ni code to match diagram.
+	- [ ] update all states in the Oled class to match actual state machine.
+- [X] update formula for pwm of cooling pump to floor at 25% duty cycle.
+
 	

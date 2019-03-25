@@ -2,6 +2,9 @@
 
 #include <Arduino.h>
 
+//enable testing function that cycles through all states instead of real state machine
+//#define STATECYCLING 1
+
 ///////////////////////////////////
 // Teensy pin configuration      //
 ///////////////////////////////////
@@ -29,7 +32,7 @@
 #define INL_BAT_MON_FAULT     17    //Battery Monitor Fault.
 #define INL_EVSE_DISC         18    //Electric Vehicle Supply Equipment Disconnected (from EVCC).
 #define INH_RUN               19    //RUN signal from power relay with voltage divider from 12V to 5V.
-#define INH_MISC              20    //misc discrete with voltage divider from 12V to 5V.
+#define INH_CHARGING          20    //CHARGING signal from EVCC with voltage divider from 12V to 5V.
 #define INA_12V_BAT           A7    //PIN21 12v battery monitor. Analog input with 12V to 5V voltage divider.
 #define OUTL_EVCC_ON          22    //drive low to power on EVCC. Cycling this signal will force a new charge cycle.
 #define OUTL_NO_FAULT         23    //drive low to signal no fault to EVCC. Required for EVCC to charge.
@@ -55,14 +58,21 @@
 #define UNDER_V_SETPOINT 3.0f
 //stop charging (if possible)
 #define MAX_CHARGE_V_SETPOINT 4.1f
-//cycle charger to force a chargin cycle
+//cycle charger to force a charging cycle
 #define CHARGER_CYCLE_V_SETPOINT 3.9f
 //issue a warning on OLED and serial console if a cell is that close to a OV or UV fault.
 #define WARN_CELL_V_OFFSET 0.1f
 //start balancing when high and low cell reach this delta
-#define CELLS_V_DELTA 0.2f
-#define COOLING_T_SETPOINT 25.0f
-#define OVER_T_SETPOINT 40.0f
+//#define CELLS_V_DELTA 0.2f
+
+/*
+ * cooling system setings
+ */
+#define FLOOR_DUTY_COOLANT_PUMP 0.25f // 0.0 - 1.0
+#define COOLING_LOWT_SETPOINT 25.0f  //threashold at wich coolant pump gradually increases duty up to max.
+#define COOLING_HIGHT_SETPOINT 35.0f //threshold at wich coolant pump is at maximum duty
+
+#define OVER_T_SETPOINT 40.0f       //Tesla seam to allow reaching 45C while supercharging
 #define UNDER_T_SETPOINT -10.0f
 //issue a warning on OLED and serial console if T is that close to a OT or UT fault.
 #define WARN_T_OFFSET 5.0f
@@ -71,9 +81,9 @@
 //balance all cells above the lowest cell by this offset (taken from tom debree)
 #define BALANCE_CELL_V_OFFSET 0.04f
 //DC 2 DC 12V battery charging cycle trigger
-#define DC2DC_CYCLE_V_SETPOINT 12f
+#define DC2DC_CYCLE_V_SETPOINT 12.0f
 //DC 2 DC 12V battery charging cycle time in seconds
-#define DC2DC_CYCLE_TIME_S 3600f
+#define DC2DC_CYCLE_TIME_S 3600
 //12V battery OV setpoint
 #define BAT12V_OVER_V_SETPOINT 14.5f
 //12V battery UV setpoint

@@ -140,6 +140,12 @@ void Oled::printFormat5() {
     case Controller::RUN:
       Oled::printCentre("RUN", 1);
       break;
+    case Controller::EVSE_CONNECTED_DC2DC:
+      Oled::printCentre("EVSE_CONNECTED_DC2DC", 1);
+      break;
+    case Controller::EVSE_CONNECTED:
+      Oled::printCentre("EVSE_CONNECTED", 1);
+      break;
     default:
       Oled::printCentre("default", 1);
       break;

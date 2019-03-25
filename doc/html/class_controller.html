@@ -74,13 +74,17 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
 Public Types</h2></td></tr>
 <tr class="memitem:ae347a3207d8741eb1f0d45a9c63b9ad8"><td class="memItemLeft" align="right" valign="top"><a id="ae347a3207d8741eb1f0d45a9c63b9ad8"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><b>ControllerState</b> { <br />
-&#160;&#160;<b>INIT</b> = 0, 
-<b>STANDBY</b> = 1, 
-<b>STANDBY_DC2DC</b> = 2, 
-<b>CHARGING</b> = 3, 
+&#160;&#160;<b>INIT</b>, 
+<b>STANDBY</b>, 
+<b>STANDBY_DC2DC</b>, 
+<b>CHARGER_CYCLE</b>, 
 <br />
-&#160;&#160;<b>CHARGER_CYCLE</b> = 4, 
-<b>RUN</b> = 5
+&#160;&#160;<b>PRE_CHARGE</b>, 
+<b>CHARGING</b>, 
+<b>RUN</b>, 
+<b>EVSE_CONNECTED</b>, 
+<br />
+&#160;&#160;<b>EVSE_CONNECTED_DC2DC</b>
 <br />
  }</td></tr>
 <tr class="separator:ae347a3207d8741eb1f0d45a9c63b9ad8"><td class="memSeparator" colspan="2">&#160;</td></tr>

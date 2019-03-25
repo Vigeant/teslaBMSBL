@@ -8,7 +8,7 @@
 class Controller {
   public:
     enum ControllerState {
-      INIT = 0, STANDBY = 1, STANDBY_DC2DC = 2, CHARGING = 3, CHARGER_CYCLE = 4, RUN = 5
+      INIT, STANDBY, STANDBY_DC2DC, CHARGER_CYCLE, PRE_CHARGE, CHARGING, RUN, EVSE_CONNECTED, EVSE_CONNECTED_DC2DC
     };
     void doController();
     Controller();
@@ -53,14 +53,17 @@ class Controller {
 
     void assertFaultLine();
     void clearFaultLine();
-    void coolingControl();
+    float getCoolingPumpDuty(float);
 
     ControllerState state;
     void init(); //reset all boards and assign address to each board
     void standby();
     void standbyDC2DC();
-    void charging();
+    void evseConnected();
+    void evseConnectedDC2DC();
     void cargerCycle();
+    void preCharge();
+    void charging();
     void run();
 
 };
