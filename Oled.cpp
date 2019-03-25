@@ -131,17 +131,20 @@ void Oled::printFormat5() {
     case Controller::STANDBY_DC2DC:
       Oled::printCentre("STANDBY_DC2", 1);
       break;
-    case Controller::CHARGING:
-      Oled::printCentre("CHARGING", 1);
-      break;
     case Controller::CHARGER_CYCLE:
       Oled::printCentre("CHARGER_CYC", 1);
+      break;
+    case Controller::PRE_CHARGE:
+      Oled::printCentre("PRE_CHARGE", 1);
+      break;
+    case Controller::CHARGING:
+      Oled::printCentre("CHARGING", 1);
       break;
     case Controller::RUN:
       Oled::printCentre("RUN", 1);
       break;
     case Controller::EVSE_CONNECTED_DC2DC:
-      Oled::printCentre("EVSE_CONNECTED_DC2DC", 1);
+      Oled::printCentre("EVSE_CON_DC2DC", 1);
       break;
     case Controller::EVSE_CONNECTED:
       Oled::printCentre("EVSE_CONNECTED", 1);

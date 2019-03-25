@@ -36,7 +36,7 @@ void Controller::doController() {
         state = EVSE_CONNECTED;
       } else if (bat12vVoltage < DC2DC_CYCLE_V_SETPOINT) {
         ticks = 0;
-        bat12Vcyclestart = (millis()/1000);
+        bat12Vcyclestart = (millis() / 1000);
         state = STANDBY_DC2DC;
       }
 #endif
@@ -55,14 +55,14 @@ void Controller::doController() {
       } else if (digitalRead(INL_EVSE_DISC) == HIGH) {
         ticks = 0;
         state = EVSE_CONNECTED_DC2DC;
-      } else if (bat12Vcyclestart < (millis()/1000)) {
-        if ((bat12Vcyclestart + DC2DC_CYCLE_TIME_S) > (millis()/1000)) {
+      } else if (bat12Vcyclestart < (millis() / 1000)) {
+        if ((bat12Vcyclestart + DC2DC_CYCLE_TIME_S) > (millis() / 1000)) {
           ticks = 0;
           state = STANDBY;
         }
         //if seconds counter wrapped around
-      } else if (bat12Vcyclestart > (millis()/1000)) {
-        if ((0xffffffff - bat12Vcyclestart + (millis()/1000)) > DC2DC_CYCLE_TIME_S) {
+      } else if (bat12Vcyclestart > (millis() / 1000)) {
+        if ((0xffffffff - bat12Vcyclestart + (millis() / 1000)) > DC2DC_CYCLE_TIME_S) {
           ticks = 0;
           state = STANDBY;
         }
@@ -85,7 +85,7 @@ void Controller::doController() {
         state = CHARGER_CYCLE;
       } else if (bat12vVoltage < DC2DC_CYCLE_V_SETPOINT) {
         ticks = 0;
-        bat12Vcyclestart = (millis()/1000);
+        bat12Vcyclestart = (millis() / 1000);
         state = STANDBY_DC2DC;
       }
 #endif
@@ -104,14 +104,14 @@ void Controller::doController() {
       } else if (bms.getLowCellVolt() < CHARGER_CYCLE_V_SETPOINT) {
         ticks = 0;
         state = CHARGER_CYCLE;
-      } else if (bat12Vcyclestart < (millis()/1000)) {
-        if ((bat12Vcyclestart + DC2DC_CYCLE_TIME_S) > (millis()/1000)) {
+      } else if (bat12Vcyclestart < (millis() / 1000)) {
+        if ((bat12Vcyclestart + DC2DC_CYCLE_TIME_S) > (millis() / 1000)) {
           ticks = 0;
           state = EVSE_CONNECTED;
         }
         //if seconds counter wrapped around
-      } else if (bat12Vcyclestart > (millis()/1000)) {
-        if ((0xffffffff - bat12Vcyclestart + (millis()/1000)) > DC2DC_CYCLE_TIME_S) {
+      } else if (bat12Vcyclestart > (millis() / 1000)) {
+        if ((0xffffffff - bat12Vcyclestart + (millis() / 1000)) > DC2DC_CYCLE_TIME_S) {
           ticks = 0;
           state = EVSE_CONNECTED;
         }
@@ -127,28 +127,58 @@ void Controller::doController() {
       break;
 
     case PRE_CHARGE:
+#ifdef STATECYCLING
       if (ticks >= stateticks) {
         ticks = 0;
         state = CHARGING;
       }
+#else
+      if (digitalRead(INL_EVSE_DISC) == LOW) {
+        ticks = 0;
+        state = STANDBY;
+      } else if (digitalRead(INH_CHARGING) == HIGH) {
+        ticks = 0;
+        state = CHARGING;
+      }
+#endif
+
       break;
     case CHARGING:
+#ifdef STATECYCLING
       if (ticks >= stateticks) {
         ticks = 0;
         state = RUN;
       }
+#else
+      if (digitalRead(INL_EVSE_DISC) == LOW) {
+        ticks = 0;
+        state = STANDBY;
+      } else if (digitalRead(INH_CHARGING) == LOW) {
+        ticks = 0;
+        state = EVSE_CONNECTED;
+      }
+#endif
       break;
 
     case RUN:
+#ifdef STATECYCLING
       if (ticks >= stateticks) {
         ticks = 0;
         state = STANDBY;
       }
+#else
+      if (digitalRead(INH_RUN ) == LOW) {
+        ticks = 0;
+        state = STANDBY;
+      }
+#endif
       break;
 
     default:
       break;
   }
+
+  
 
   //execute state
   switch (state) {
@@ -449,7 +479,7 @@ void Controller::cargerCycle() {
   analogWrite(OUTPWM_PUMP, 0);
 }
 
-void Controller::preCharge(){
+void Controller::preCharge() {
   syncModuleDataObjects();
   digitalWrite(OUTL_EVCC_ON, LOW);
   digitalWrite(OUTL_NO_FAULT, chargerInhibit);
