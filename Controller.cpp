@@ -60,7 +60,7 @@ void Controller::doController() {
           ticks = 0;
           state = STANDBY;
         }
-        //if seconds counter wrapped around
+        //if millis counter wrapped around
       } else if (bat12Vcyclestart > (millis() / 1000)) {
         if ((0xffffffff - bat12Vcyclestart + (millis() / 1000)) > DC2DC_CYCLE_TIME_S) {
           ticks = 0;
@@ -109,7 +109,7 @@ void Controller::doController() {
           ticks = 0;
           state = EVSE_CONNECTED;
         }
-        //if seconds counter wrapped around
+        //if millis counter wrapped around
       } else if (bat12Vcyclestart > (millis() / 1000)) {
         if ((0xffffffff - bat12Vcyclestart + (millis() / 1000)) > DC2DC_CYCLE_TIME_S) {
           ticks = 0;
@@ -356,16 +356,16 @@ void Controller::balanceCells() {
 ///
 /// @param the temparature in C
 /////////////////////////////////////////////////
+//pwd = a*temp + b
+#define COOLING_A (1.0 - FLOOR_DUTY_COOLANT_PUMP) / (COOLING_HIGHT_SETPOINT - COOLING_LOWT_SETPOINT)
+#define COOLING_B FLOOR_DUTY_COOLANT_PUMP - COOLING_A * COOLING_LOWT_SETPOINT
 float Controller::getCoolingPumpDuty(float temp) {
-  //pwd = a*temp +b
-  float a = (1.0 - FLOOR_DUTY_COOLANT_PUMP) / (COOLING_HIGHT_SETPOINT - COOLING_LOWT_SETPOINT);
-  float b = FLOOR_DUTY_COOLANT_PUMP - a * COOLING_LOWT_SETPOINT;
   if (temp < COOLING_LOWT_SETPOINT) {
     return FLOOR_DUTY_COOLANT_PUMP;
   } else if (temp > COOLING_HIGHT_SETPOINT) {
     return 1.0;
   } else {
-    return a * temp + b;
+    return COOLING_A * temp + COOLING_B;
   }
 }
 
@@ -433,7 +433,6 @@ void Controller::standby() {
 /// charged since it dipped bellow its low voltage threshold.
 /////////////////////////////////////////////////
 void Controller::standbyDC2DC() {
-  syncModuleDataObjects();
   digitalWrite(OUTL_EVCC_ON, LOW);
   digitalWrite(OUTL_NO_FAULT, chargerInhibit);
   digitalWrite(OUTL_12V_BAT_CHRG, LOW);
@@ -446,7 +445,6 @@ void Controller::standbyDC2DC() {
 /// cycles until it dips bellow its pack voltage threshold.
 /////////////////////////////////////////////////
 void Controller::evseConnected() {
-  syncModuleDataObjects();
   digitalWrite(OUTL_EVCC_ON, LOW);
   digitalWrite(OUTL_NO_FAULT, chargerInhibit);
   digitalWrite(OUTL_12V_BAT_CHRG, HIGH);
@@ -460,7 +458,6 @@ void Controller::evseConnected() {
 /// cycles until it dips bellow its pack voltage threshold. 12V attery charging
 /////////////////////////////////////////////////
 void Controller::evseConnectedDC2DC() {
-  syncModuleDataObjects();
   digitalWrite(OUTL_EVCC_ON, LOW);
   digitalWrite(OUTL_NO_FAULT, chargerInhibit);
   digitalWrite(OUTL_12V_BAT_CHRG, LOW);
@@ -472,7 +469,6 @@ void Controller::evseConnectedDC2DC() {
 /// to a EVSE and is cycling the EVCC to trigger a new charging cycle.
 /////////////////////////////////////////////////
 void Controller::cargerCycle() {
-  syncModuleDataObjects();
   digitalWrite(OUTL_EVCC_ON, HIGH);
   digitalWrite(OUTL_NO_FAULT, chargerInhibit);
   digitalWrite(OUTL_12V_BAT_CHRG, HIGH);
@@ -480,7 +476,6 @@ void Controller::cargerCycle() {
 }
 
 void Controller::preCharge() {
-  syncModuleDataObjects();
   digitalWrite(OUTL_EVCC_ON, LOW);
   digitalWrite(OUTL_NO_FAULT, chargerInhibit);
   digitalWrite(OUTL_12V_BAT_CHRG, HIGH);
@@ -492,7 +487,6 @@ void Controller::preCharge() {
 /// to a EVSE and is actively charging until EVCC shuts itself down.
 /////////////////////////////////////////////////
 void Controller::charging() {
-  syncModuleDataObjects();
   balanceCells();
   digitalWrite(OUTL_EVCC_ON, LOW);
   digitalWrite(OUTL_NO_FAULT, chargerInhibit);
@@ -504,7 +498,6 @@ void Controller::charging() {
 /// \brief run state is turned on and ready to operate.
 /////////////////////////////////////////////////
 void Controller::run() {
-  syncModuleDataObjects();
   digitalWrite(OUTL_EVCC_ON, HIGH);
   digitalWrite(OUTL_NO_FAULT, powerLimiter);
   digitalWrite(OUTL_12V_BAT_CHRG, LOW);

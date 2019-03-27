@@ -2,7 +2,7 @@
 
 #include <Arduino.h>
 
-//enable testing function that cycles through all states instead of real state machine
+//enable testing mode that simply cycles through all states instead of triggers
 //#define STATECYCLING 1
 
 ///////////////////////////////////
