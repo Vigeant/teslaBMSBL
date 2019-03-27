@@ -66,15 +66,7 @@ class BMSModuleManager
     BMSModule modules[MAX_MODULE_ADDR + 1]; // store data for as many modules as we've configured for.
     int batteryID;
     int numFoundModules;                    // The number of modules that seem to exist
-    //bool isFaulted;
     bool lineFault;     //true if we lose comms with modules.
-    //int spack;
-    /*
-      void sendBatterySummary();
-      void sendModuleSummary(int module);
-      void sendCellDetails(int module, int cell);
-    */
-
 };
 
 #endif //ifndef BMSMODULEMANAGER_HPP_

@@ -370,7 +370,7 @@ float Controller::getCoolingPumpDuty(float temp) {
 }
 
 /////////////////////////////////////////////////
-/// \brief reset all boards and assign address to each board and configure their thresholds
+/// \brief reset all boards, assign address to each board and configure their thresholds
 /////////////////////////////////////////////////
 void Controller::init() {
   pinMode(OUTL_12V_BAT_CHRG, OUTPUT);
@@ -475,6 +475,10 @@ void Controller::cargerCycle() {
   analogWrite(OUTPWM_PUMP, 0);
 }
 
+/////////////////////////////////////////////////
+/// \brief preCharge state is simply waiting for the charge signal to be asserted by the charger
+/// following a cycling of its power.
+/////////////////////////////////////////////////
 void Controller::preCharge() {
   digitalWrite(OUTL_EVCC_ON, LOW);
   digitalWrite(OUTL_NO_FAULT, chargerInhibit);
