@@ -7,7 +7,7 @@ void Controller::doController() {
   static int ticks = 0;
   static unsigned int bat12Vcyclestart = 0;
   const int stateticks = 4;
-  float bat12vVoltage = (float)analogRead(INA_12V_BAT) / BAT12V_SCALING_DIVISOR ;
+  bat12vVoltage = (float)analogRead(INA_12V_BAT) / BAT12V_SCALING_DIVISOR ;
 
   if (state != INIT) syncModuleDataObjects();
 

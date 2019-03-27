@@ -39,6 +39,7 @@ class Controller {
 
     bool isFaulted;
     bool stickyFaulted;
+    float bat12vVoltage;
 
   private:
 

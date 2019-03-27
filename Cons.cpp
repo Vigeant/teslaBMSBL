@@ -19,13 +19,10 @@ void Cons::doConsole() {
       switch (y[0]) {
         case '1':
           controller_inst_ptr->getBMSPtr()->printPackSummary();
+          LOG_CONSOLE("12V Battery: %.2fV \n", controller_inst_ptr->bat12vVoltage);
           break;
 
         case '2':
-          controller_inst_ptr->getBMSPtr()->printPackDetails();
-          break;
-
-        case '3':
           controller_inst_ptr->getBMSPtr()->printAllCSV();
           break;
 
@@ -81,8 +78,7 @@ void Cons::printMenu() {
   LOG_CONSOLE("GENERAL SYSTEM CONFIGURATION\n\n");
   LOG_CONSOLE("   h or ? = help (displays this message)\n");
   LOG_CONSOLE("   1 = display BMS status summary\n");
-  LOG_CONSOLE("   2 = display BMS detailed summary\n");
-  LOG_CONSOLE("   3 = output BMS details in CSV format\n");
+  LOG_CONSOLE("   2 = output BMS details in CSV format\n");
   LOG_CONSOLE("   vX verbose (X=0:debug, X=1:info, X=2:warn, X=3:error, X=4:Cons)\n");
   LOG_CONSOLE("\n");
 }
