@@ -432,88 +432,77 @@ void BMSModuleManager::printPackSummary()
       alerts = modules[y].getAlerts();
       COV = modules[y].getCOVCells();
       CUV = modules[y].getCUVCells();
+      LOG_CONSOLE("\n=================================================================\n");
+      LOG_CONSOLE("=                              Module #%2i                      =\n", y);
+      LOG_CONSOLE("=================================================================\n");
+      LOG_CONSOLE("\t============================== Cell details =====================\n");
 
-      LOG_CONSOLE("\n                               Module #%i\n", y);
-
-      LOG_CONSOLE("  Voltage: %.2fV   (%.2fV-%.2fV)     Temperatures: (%.2fC-%.2fC)\n", modules[y].getModuleVoltage(),
+      LOG_CONSOLE("\tVoltage: %3.2fV (%3.2fV-%.2fV)\tTemperatures: (%3.2fC-%3.2fC)\n", modules[y].getModuleVoltage(),
                   modules[y].getLowCellV(), modules[y].getHighCellV(), modules[y].getLowTemp(), modules[y].getHighTemp());
-      if (faults > 0)
-      {
+      LOG_CONSOLE("\tHistoric Voltages: (%3.2fV-%.2fV)\tTemperatures: (%3.2fC-%3.2fC)\n", modules[y].getLowestModuleVolt(),
+                  modules[y].getHighestModuleVolt(), modules[y].getLowestTemp(), modules[y].getHighestTemp());
+                  
+      for (int i = 0; i < 6; i++) {
+        LOG_CONSOLE("\tCell%2d: %3.2fV | historic lowest: %3.2fV | historic highest: %3.2fV\n", i + 1, modules[y].getCellVoltage(i), modules[y].getLowestCellVolt(i), modules[y].getHighestCellVolt(i));
+      }
+
+      if (faults > 0) {
         LOG_CONSOLE("  MODULE IS FAULTED:\n");
-        if (faults & 1)
-        {
+        if (faults & 1) {
           LOG_CONSOLE("    Overvoltage Cell Numbers (1-6): ");
-          for (int i = 0; i < 6; i++)
-          {
-            if (COV & (1 << i))
-            {
+          for (int i = 0; i < 6; i++) {
+            if (COV & (1 << i)) {
               LOG_CONSOLE("%d ", i + 1);
             }
           }
           LOG_CONSOLE("\n");
         }
-        if (faults & 2)
-        {
+        if (faults & 2) {
           LOG_CONSOLE("    Undervoltage Cell Numbers (1-6): ");
-          for (int i = 0; i < 6; i++)
-          {
-            if (CUV & (1 << i))
-            {
+          for (int i = 0; i < 6; i++) {
+            if (CUV & (1 << i)) {
               LOG_CONSOLE("%d ", i + 1);
             }
           }
           LOG_CONSOLE("\n");
         }
-        if (faults & 4)
-        {
+        if (faults & 4) {
           LOG_CONSOLE("    CRC error in received packet\n");
         }
-        if (faults & 8)
-        {
+        if (faults & 8) {
           LOG_CONSOLE("    Power on reset has occurred\n");
         }
-        if (faults & 0x10)
-        {
+        if (faults & 0x10) {
           LOG_CONSOLE("    Test fault active\n");
         }
-        if (faults & 0x20)
-        {
+        if (faults & 0x20) {
           LOG_CONSOLE("    Internal registers inconsistent\n");
         }
       }
-      if (alerts > 0)
-      {
+      if (alerts > 0) {
         LOG_CONSOLE("  MODULE HAS ALERTS:\n");
-        if (alerts & 1)
-        {
+        if (alerts & 1) {
           LOG_CONSOLE("    Over temperature on TS1\n");
         }
-        if (alerts & 2)
-        {
+        if (alerts & 2) {
           LOG_CONSOLE("    Over temperature on TS2\n");
         }
-        if (alerts & 4)
-        {
+        if (alerts & 4) {
           LOG_CONSOLE("    Sleep mode active\n");
         }
-        if (alerts & 8)
-        {
+        if (alerts & 8) {
           LOG_CONSOLE("    Thermal shutdown active\n");
         }
-        if (alerts & 0x10)
-        {
+        if (alerts & 0x10) {
           LOG_CONSOLE("    Test Alert\n");
         }
-        if (alerts & 0x20)
-        {
+        if (alerts & 0x20) {
           LOG_CONSOLE("    OTP EPROM Uncorrectable Error\n");
         }
-        if (alerts & 0x40)
-        {
+        if (alerts & 0x40) {
           LOG_CONSOLE("    GROUP3 Regs Invalid\n");
         }
-        if (alerts & 0x80)
-        {
+        if (alerts & 0x80) {
           LOG_CONSOLE("    Address not registered\n");
         }
       }
@@ -533,9 +522,9 @@ void BMSModuleManager::printPackDetails()
   //uint8_t CUV;
   int cellNum = 0;
 
-  LOG_CONSOLE("\nModules: %i  Strings: %i  Voltage: %.2fV   Avg Cell Voltage: %.2fV  Low Cell Voltage: %.2fV   High Cell Voltage: %.2fV\n", numFoundModules, 
-              pstring, getPackVoltage(), getAvgCellVolt(), lowCellVolt, highCellVolt ); 
-  LOG_CONSOLE("Delta Voltage: %.3fV   Avg Temp: %.2fC \n", (highCellVolt - lowCellVolt), getAvgTemperature());        
+  LOG_CONSOLE("\nModules: %i  Strings: %i  Voltage: %.2fV   Avg Cell Voltage: %.2fV  Low Cell Voltage: %.2fV   High Cell Voltage: %.2fV\n", numFoundModules,
+              pstring, getPackVoltage(), getAvgCellVolt(), lowCellVolt, highCellVolt );
+  LOG_CONSOLE("Delta Voltage: %.3fV   Avg Temp: %.2fC \n", (highCellVolt - lowCellVolt), getAvgTemperature());
   LOG_CONSOLE("\n");
   for (int y = 0; y < MAX_MODULE_ADDR; y++)
   {

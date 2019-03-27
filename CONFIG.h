@@ -8,7 +8,6 @@
 ///////////////////////////////////
 // Teensy pin configuration      //
 ///////////////////////////////////
-
 //side 1
 //#define SERIAL1_RX          0
 //#define SERIAL1_TX          1
