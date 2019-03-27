@@ -55,8 +55,8 @@ void Controller::doController() {
       } else if (digitalRead(INL_EVSE_DISC) == HIGH) {
         ticks = 0;
         state = EVSE_CONNECTED_DC2DC;
-      } else if (bat12Vcyclestart < (millis() / 1000)) {
-        if ((bat12Vcyclestart + DC2DC_CYCLE_TIME_S) > (millis() / 1000)) {
+      } else if (bat12Vcyclestart <= (millis() / 1000)) {
+        if ((bat12Vcyclestart + DC2DC_CYCLE_TIME_S) < (millis() / 1000)) {
           ticks = 0;
           state = STANDBY;
         }
@@ -178,7 +178,7 @@ void Controller::doController() {
       break;
   }
 
-  
+
 
   //execute state
   switch (state) {
@@ -379,6 +379,7 @@ void Controller::init() {
   pinMode(INL_BAT_MON_FAULT, INPUT_PULLUP);
   pinMode(INL_EVSE_DISC, INPUT_PULLUP);
   pinMode(INH_RUN, INPUT_PULLDOWN);
+  pinMode(INH_CHARGING, INPUT_PULLDOWN);
   pinMode(INA_12V_BAT, INPUT);  // [0-1023] = analogRead(INA_12V_BAT)
   pinMode(OUTL_EVCC_ON, OUTPUT);
   pinMode(OUTL_NO_FAULT, OUTPUT);
