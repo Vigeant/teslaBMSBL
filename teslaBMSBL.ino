@@ -5,6 +5,10 @@
 #include "Oled.hpp"
 #include "Controller.hpp"
 
+#define CPU_RESTART_ADDR (uint32_t *)0xE000ED0C
+#define CPU_RESTART_VAL 0x5FA0004
+#define CPU_RESTART (*CPU_RESTART_ADDR = CPU_RESTART_VAL);
+
 /*! \mainpage teslaBMSBL
  *
  * \section intro_sec Introduction
@@ -38,7 +42,8 @@ void setup() {
 /////////////////////////////////////////////////
 void phase20hz() {
   if (digitalRead(INL_SOFT_RST) == LOW) {
-    _reboot_Teensyduino_();
+    //_reboot_Teensyduino_();
+    CPU_RESTART;
   }
   cons_inst.doConsole();
 }

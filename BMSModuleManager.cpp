@@ -432,19 +432,22 @@ void BMSModuleManager::printPackSummary()
       alerts = modules[y].getAlerts();
       COV = modules[y].getCOVCells();
       CUV = modules[y].getCUVCells();
-      LOG_CONSOLE("\n=================================================================\n");
-      LOG_CONSOLE("=                              Module #%2i                      =\n", y);
-      LOG_CONSOLE("=================================================================\n");
-      LOG_CONSOLE("\t============================== Cell details =====================\n");
+      LOG_CONSOLE("\n=====================================================================\n");
+      LOG_CONSOLE("=                                Module #%2i                         =\n", y+1);
+      LOG_CONSOLE("=====================================================================\n");
+      //LOG_CONSOLE("\t============================== Cell details =====================\n");
 
-      LOG_CONSOLE("\tVoltage: %3.2fV (%3.2fV-%.2fV)\tTemperatures: (%3.2fC-%3.2fC)\n", modules[y].getModuleVoltage(),
+      LOG_CONSOLE("Voltage: %3.2fV (%3.2fV-%.2fV)\t\tTemperatures: (%3.2fC-%3.2fC)\n", modules[y].getModuleVoltage(),
                   modules[y].getLowCellV(), modules[y].getHighCellV(), modules[y].getLowTemp(), modules[y].getHighTemp());
-      LOG_CONSOLE("\tHistoric Voltages: (%3.2fV-%.2fV)\tTemperatures: (%3.2fC-%3.2fC)\n", modules[y].getLowestModuleVolt(),
+      LOG_CONSOLE("Historic Voltages: (%3.2fV-%.2fV)\tTemperatures: (%3.2fC-%3.2fC)\n", modules[y].getLowestModuleVolt(),
                   modules[y].getHighestModuleVolt(), modules[y].getLowestTemp(), modules[y].getHighestTemp());
-                  
+      LOG_CONSOLE("+------+--------+--------+---------+\n");
+      LOG_CONSOLE("|Cell #| Cell V |lowest V|highest V|\n");
+      LOG_CONSOLE("+------+--------+--------+---------+\n");
       for (int i = 0; i < 6; i++) {
-        LOG_CONSOLE("\tCell%2d: %3.2fV | historic lowest: %3.2fV | historic highest: %3.2fV\n", i + 1, modules[y].getCellVoltage(i), modules[y].getLowestCellVolt(i), modules[y].getHighestCellVolt(i));
+        LOG_CONSOLE("|  %2d  |  %.2f  |  %.2f  |  %.2f   |\n", i + 1, modules[y].getCellVoltage(i), modules[y].getLowestCellVolt(i), modules[y].getHighestCellVolt(i));
       }
+      LOG_CONSOLE("+------+--------+--------+---------+\n");
 
       if (faults > 0) {
         LOG_CONSOLE("  MODULE IS FAULTED:\n");
