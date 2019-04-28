@@ -62,7 +62,7 @@ bool BMSModule::balanceCells(uint8_t cellMask, uint8_t balanceTime) {
 }
 
 /////////////////////////////////////////////////
-/// \brief This function fetches all the data form the physical tesla module and populates its atributes.
+/// \brief This function fetches all the data from the physical tesla module and populates its atributes.
 ///
 /// This function is meant to be called periodically so that the controller can make decision based on the state of the module.
 /// The data collected are the faults, the reading of the two temperature sensors and the voltage reading from all 6 cells.

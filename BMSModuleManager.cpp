@@ -34,7 +34,7 @@ void BMSModuleManager::resetModuleRecordedValues()
 ///
 /// @param duration the number of seconds to enable balancing for.
 /////////////////////////////////////////////////
-void BMSModuleManager::balanceCells(uint8_t duration)
+void BMSModuleManager::balanceCells(uint8_t duration, float cell_v_offset)
 {
   uint8_t balance = 0;//bit 0 - 5 are to activate cell balancing 1-6
 
@@ -45,7 +45,7 @@ void BMSModuleManager::balanceCells(uint8_t duration)
       balance = 0;
       for (int i = 0; i < 6; i++)
       {
-        if (modules[y].getCellVoltage(i) > getLowCellVolt() + BALANCE_CELL_V_OFFSET)
+        if (modules[y].getCellVoltage(i) > getLowCellVolt() + cell_v_offset)
         {
           balance = balance | (1 << i);
 
@@ -192,6 +192,7 @@ void BMSModuleManager::getAllVoltTemp() {
 
   //stop balancing
   if ((err = BMSDW(BROADCAST_ADDR, REG_BAL_CTRL, 0x00)) < 0) {
+  //if ((err = BMSDW(BROADCAST_ADDR, REG_BAL_CTRL, 0x3f)) < 0) {
     BMSD_LOG_ERR(BROADCAST_ADDR, err, "getAllVoltTemp, stop balancing");
     lineFault = true;
   } else {

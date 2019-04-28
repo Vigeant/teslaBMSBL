@@ -5,6 +5,8 @@
 //enable testing mode that simply cycles through all states instead of triggers
 //#define STATECYCLING 1
 
+#define FAULT_DEBOUNCE_COUNT 3
+
 ///////////////////////////////////
 // Teensy pin configuration      //
 ///////////////////////////////////
@@ -65,10 +67,14 @@
 #define UNDER_T_SETPOINT -10.0f
 //issue a warning on OLED and serial console if T is that close to a OT or UT fault.
 #define WARN_T_OFFSET 5.0f
-//start balancing when highest cell reaches this setpoint (taken from tom debree)
-#define BALANCE_V_SETPOINT 3.9f
-//balance all cells above the lowest cell by this offset (taken from tom debree)
-#define BALANCE_CELL_V_OFFSET 0.04f
+//start precision balancing when highest cell reaches this setpoint (taken from tom debree)
+#define PRECISION_BALANCE_V_SETPOINT 3.9f
+//precision balance all cells above the lowest cell by this offset (taken from tom debree)
+#define PRECISION_BALANCE_CELL_V_OFFSET 0.04f
+//start rough balancing when highest cell reaches this setpoint (taken from tom debree)
+#define ROUGH_BALANCE_V_SETPOINT 3.6f
+//rough balance all cells above the lowest cell by this offset (taken from tom debree)
+#define ROUGH_BALANCE_CELL_V_OFFSET 0.10f
 //DC 2 DC 12V battery charging cycle trigger
 #define DC2DC_CYCLE_V_SETPOINT 12.0f
 //DC 2 DC 12V battery charging cycle time in seconds

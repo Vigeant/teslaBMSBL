@@ -11,7 +11,7 @@ class BMSModuleManager
     int seriescells();
     void resetModuleRecordedValues();
     void StopBalancing();
-    void balanceCells(uint8_t duration);
+    void balanceCells(uint8_t duration, float cell_v_offset);
     void renumberBoardIDs();
     void clearFaults();
     void sleepBoards();

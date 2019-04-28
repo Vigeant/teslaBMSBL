@@ -37,6 +37,17 @@ class Controller {
     bool sFault12VBatOV;
     bool sFault12VBatUV;
 
+    //faults debounce counters
+    uint8_t faultModuleLoopDB;
+    uint8_t faultBatMonDB;
+    uint8_t faultBMSSerialCommsDB;
+    uint8_t faultBMSOVDB;
+    uint8_t faultBMSUVDB;
+    uint8_t faultBMSOTDB;
+    uint8_t faultBMSUTDB;
+    uint8_t fault12VBatOVDB;
+    uint8_t fault12VBatUVDB;
+
     bool isFaulted;
     bool stickyFaulted;
     float bat12vVoltage;

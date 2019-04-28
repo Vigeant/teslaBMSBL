@@ -178,8 +178,6 @@ void Controller::doController() {
       break;
   }
 
-
-
   //execute state
   switch (state) {
 
@@ -233,92 +231,128 @@ Controller::Controller() {
 }
 
 /////////////////////////////////////////////////
-/// \brief gathers all the data from the boards and check for any faulty state.
+/// \brief gathers all the data from the boards and check for any faults.
 /////////////////////////////////////////////////
 void Controller::syncModuleDataObjects() {
   float bat12vVoltage;
   bms.getAllVoltTemp();
 
   if (bms.getLineFault()) {
-    if (!faultBMSSerialComms) {
-      LOG_ERROR("Serial communication with battery modules lost!\n");
+    faultBMSSerialCommsDB += 1;
+    if (faultBMSSerialCommsDB >= FAULT_DEBOUNCE_COUNT) {
+      if (!faultBMSSerialComms) {LOG_ERROR("Serial communication with battery modules lost!\n");}
+      faultBMSSerialComms = true;
+      faultBMSSerialCommsDB = FAULT_DEBOUNCE_COUNT;
     }
-    faultBMSSerialComms = true;
   } else {
     if (faultBMSSerialComms) LOG_INFO("Serial communication with battery modules re-established!\n");
+    faultBMSSerialCommsDB = 0;
     faultBMSSerialComms = false;
   }
 
   if (digitalRead(INL_BAT_PACK_FAULT) == LOW) {
-    if (!faultModuleLoop) {
-      LOG_ERROR("One or more BMS modules have asserted the fault loop!\n");
+    faultModuleLoopDB += 1;
+    if (faultModuleLoopDB >= FAULT_DEBOUNCE_COUNT) {
+      if (!faultModuleLoop) {LOG_ERROR("One or more BMS modules have asserted the fault loop!\n");}
+      faultModuleLoop = true;
+      faultModuleLoopDB = FAULT_DEBOUNCE_COUNT;
     }
-    faultModuleLoop = true;
   } else {
     if (faultModuleLoop) LOG_INFO("All modules have deasserted the fault loop\n");
+    faultModuleLoopDB = 0;
     faultModuleLoop = false;
   }
 
-  if ( bms.getHighCellVolt() > OVER_V_SETPOINT ) {
-    if (!faultBMSOV) {
-      LOG_ERROR("OVER_V_SETPOINT: %.2fV, highest cell:%.2fV\n", OVER_V_SETPOINT, bms.getHighCellVolt());
+  if (digitalRead(INL_BAT_MON_FAULT) == LOW) {
+    faultBatMonDB += 1;
+    if (faultBatMonDB >= FAULT_DEBOUNCE_COUNT) {
+      if(!faultBatMon) {LOG_ERROR("The battery monitor asserted the fault loop!\n");}
+      faultBatMon = true;
+      faultBatMonDB = FAULT_DEBOUNCE_COUNT;
     }
-    faultBMSOV = true;
+  } else {
+    if (faultBatMon) LOG_INFO("The battery monitor deasserted the fault loop\n");
+    faultBatMonDB = 0;
+    faultBatMon = false;
+  }
+
+  if ( bms.getHighCellVolt() > OVER_V_SETPOINT) {
+    faultBMSOVDB += 1;
+    if (faultBMSOVDB >= FAULT_DEBOUNCE_COUNT) {
+      if (!faultBMSOV) {LOG_ERROR("OVER_V_SETPOINT: %.2fV, highest cell:%.2fV\n", OVER_V_SETPOINT, bms.getHighCellVolt());}
+      faultBMSOV = true;
+      faultBMSOVDB = FAULT_DEBOUNCE_COUNT;
+    }
   } else {
     if (faultBMSOV) LOG_INFO("All cells are back under OV threshold\n");
+    faultBMSOVDB = 0;
     faultBMSOV = false;
   }
 
-  if ( bms.getLowCellVolt() < UNDER_V_SETPOINT ) {
-    if (!faultBMSUV) {
-      LOG_ERROR("UNDER_V_SETPOINT: %.2fV, lowest cell:%.2fV\n", UNDER_V_SETPOINT, bms.getLowCellVolt());
+  if ( bms.getLowCellVolt() < UNDER_V_SETPOINT) {
+    faultBMSUVDB += 1;
+    if (faultBMSUVDB >= FAULT_DEBOUNCE_COUNT) {
+      if(!faultBMSUV) {LOG_ERROR("UNDER_V_SETPOINT: %.2fV, lowest cell:%.2fV\n", UNDER_V_SETPOINT, bms.getLowCellVolt());}
+      faultBMSUV = true;
+      faultBMSUVDB = FAULT_DEBOUNCE_COUNT;
     }
-    faultBMSUV = true;
   } else {
     if (faultBMSUV) LOG_INFO("All cells are back over UV threshold\n");
+    faultBMSUVDB = 0;
     faultBMSUV = false;
   }
 
-  if ( bms.getHighTemperature() > OVER_T_SETPOINT ) {
-    if (!faultBMSOT) {
-      LOG_ERROR("OVER_T_SETPOINT: %.2fV, highest module:%.2fV\n", UNDER_V_SETPOINT, bms.getHighTemperature());
+  if ( bms.getHighTemperature() > OVER_T_SETPOINT) {
+    faultBMSOTDB += 1;
+    if (faultBMSOTDB >= FAULT_DEBOUNCE_COUNT) {
+      if (!faultBMSOT) {LOG_ERROR("OVER_T_SETPOINT: %.2fV, highest module:%.2fV\n", UNDER_V_SETPOINT, bms.getHighTemperature());}
+      faultBMSOT = true;
+      faultBMSOTDB = FAULT_DEBOUNCE_COUNT;
     }
-    faultBMSOT = true;
   } else {
     if (faultBMSOT) LOG_INFO("All modules are back under the OT threshold\n");
+    faultBMSOTDB = 0;
     faultBMSOT = false;
   }
 
-  if ( bms.getLowTemperature() < UNDER_T_SETPOINT ) {
-    if (!faultBMSUT) {
-      LOG_ERROR("UNDER_T_SETPOINT: %.2fV, lowest module:%.2fV\n", UNDER_T_SETPOINT, bms.getLowTemperature());
+  if ( bms.getLowTemperature() < UNDER_T_SETPOINT) {
+    faultBMSUTDB += 1;
+    if (faultBMSUTDB >= FAULT_DEBOUNCE_COUNT) {
+      if (!faultBMSUT) {LOG_ERROR("UNDER_T_SETPOINT: %.2fV, lowest module:%.2fV\n", UNDER_T_SETPOINT, bms.getLowTemperature());}
+      faultBMSUT = true;
+      faultBMSUTDB = FAULT_DEBOUNCE_COUNT;
     }
-    faultBMSUT = true;
   } else {
     if (faultBMSUT) LOG_INFO("All modules are back over the UT threshold\n");
+    faultBMSUTDB = 0;
     faultBMSUT = false;
   }
 
   bat12vVoltage = (float)analogRead(INA_12V_BAT) / BAT12V_SCALING_DIVISOR ;
   //LOG_INFO("bat12vVoltage: %.2f\n", bat12vVoltage);
-
-  if ( bat12vVoltage > BAT12V_OVER_V_SETPOINT ) {
-    if (!fault12VBatOV) {
-      LOG_ERROR("12VBAT_OVER_V_SETPOINT: %.2fV, V:%.2fV\n", BAT12V_OVER_V_SETPOINT, bat12vVoltage);
+  if ( bat12vVoltage > BAT12V_OVER_V_SETPOINT) {
+    fault12VBatOVDB += 1;
+    if (fault12VBatOVDB >= FAULT_DEBOUNCE_COUNT) {
+      if (!fault12VBatOV) {LOG_ERROR("12VBAT_OVER_V_SETPOINT: %.2fV, V:%.2fV\n", BAT12V_OVER_V_SETPOINT, bat12vVoltage);}
+      fault12VBatOV = true;
+      fault12VBatOVDB = FAULT_DEBOUNCE_COUNT;
     }
-    fault12VBatOV = true;
   } else {
     if (fault12VBatOV) LOG_INFO("12V battery back under the OV threshold\n");
+    fault12VBatOVDB = 0;
     fault12VBatOV = false;
   }
 
-  if ( bat12vVoltage < BAT12V_UNDER_V_SETPOINT ) {
-    if (!fault12VBatUV) {
-      LOG_ERROR("12VBAT_UNDER_V_SETPOINT: %.2fV, V:%.2fV\n", BAT12V_UNDER_V_SETPOINT, bat12vVoltage);
+  if ( bat12vVoltage < BAT12V_UNDER_V_SETPOINT) {
+    fault12VBatUVDB += 1;
+    if (fault12VBatUVDB >= FAULT_DEBOUNCE_COUNT) {
+      if (!fault12VBatUV) {LOG_ERROR("12VBAT_UNDER_V_SETPOINT: %.2fV, V:%.2fV\n", BAT12V_UNDER_V_SETPOINT, bat12vVoltage);}
+      fault12VBatUV = true;
+      fault12VBatUVDB = FAULT_DEBOUNCE_COUNT;
     }
-    fault12VBatUV = true;
   } else {
     if (fault12VBatUV) LOG_INFO("12V battery back over the UV threshold\n");
+    fault12VBatUVDB = 0;
     fault12VBatUV = false;
   }
 
@@ -346,7 +380,11 @@ void Controller::syncModuleDataObjects() {
 /////////////////////////////////////////////////
 void Controller::balanceCells() {
   //balance for 1 second given that the controller wakes up every second.
-  bms.balanceCells(1);
+  if (bms.getHighCellVolt() > PRECISION_BALANCE_V_SETPOINT){
+    bms.balanceCells(1, PRECISION_BALANCE_CELL_V_OFFSET);
+  } else if (bms.getHighCellVolt() > ROUGH_BALANCE_V_SETPOINT){
+    bms.balanceCells(1, ROUGH_BALANCE_CELL_V_OFFSET);
+  }
 }
 
 /////////////////////////////////////////////////
@@ -406,6 +444,17 @@ void Controller::init() {
   sFault12VBatOV = false;
   sFault12VBatUV = false;
 
+  //faults debounce counters
+  faultModuleLoopDB = 0;
+  faultBatMonDB = 0;
+  faultBMSSerialCommsDB = 0;
+  faultBMSOVDB = 0;
+  faultBMSUVDB = 0;
+  faultBMSOTDB = 0;
+  faultBMSUTDB = 0;
+  fault12VBatOVDB = 0;
+  fault12VBatUVDB = 0;
+
   isFaulted = false;
   stickyFaulted = false;
 
@@ -434,6 +483,7 @@ void Controller::standby() {
 /// charged since it dipped bellow its low voltage threshold.
 /////////////////////////////////////////////////
 void Controller::standbyDC2DC() {
+  //balanceCells(); /////////////////////////////////////////////////////////////disable in prod!!!!!!!!!!!!!!
   digitalWrite(OUTL_EVCC_ON, LOW);
   digitalWrite(OUTL_NO_FAULT, chargerInhibit);
   digitalWrite(OUTL_12V_BAT_CHRG, LOW);
@@ -496,7 +546,7 @@ void Controller::charging() {
   digitalWrite(OUTL_EVCC_ON, LOW);
   digitalWrite(OUTL_NO_FAULT, chargerInhibit);
   digitalWrite(OUTL_12V_BAT_CHRG, LOW);
-  analogWrite(OUTPWM_PUMP, getCoolingPumpDuty(bms.getHighTemperature()));
+  analogWrite(OUTPWM_PUMP, (uint8_t) (getCoolingPumpDuty(bms.getHighTemperature()) * 255 ));
 }
 
 /////////////////////////////////////////////////
@@ -506,7 +556,7 @@ void Controller::run() {
   digitalWrite(OUTL_EVCC_ON, HIGH);
   digitalWrite(OUTL_NO_FAULT, powerLimiter);
   digitalWrite(OUTL_12V_BAT_CHRG, LOW);
-  analogWrite(OUTPWM_PUMP, getCoolingPumpDuty(bms.getHighTemperature()));
+  analogWrite(OUTPWM_PUMP, (uint8_t) (getCoolingPumpDuty(bms.getHighTemperature()) * 255 ));
 }
 
 /////////////////////////////////////////////////
