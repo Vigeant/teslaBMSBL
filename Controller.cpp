@@ -522,7 +522,7 @@ void Controller::evseConnectedDC2DC() {
 void Controller::cargerCycle() {
   digitalWrite(OUTL_EVCC_ON, HIGH);
   digitalWrite(OUTL_NO_FAULT, chargerInhibit);
-  digitalWrite(OUTL_12V_BAT_CHRG, HIGH);
+  digitalWrite(OUTL_12V_BAT_CHRG, LOW);
   analogWrite(OUTPWM_PUMP, 0);
 }
 
@@ -533,7 +533,7 @@ void Controller::cargerCycle() {
 void Controller::preCharge() {
   digitalWrite(OUTL_EVCC_ON, LOW);
   digitalWrite(OUTL_NO_FAULT, chargerInhibit);
-  digitalWrite(OUTL_12V_BAT_CHRG, HIGH);
+  digitalWrite(OUTL_12V_BAT_CHRG, LOW);
   analogWrite(OUTPWM_PUMP, 0);
 }
 
