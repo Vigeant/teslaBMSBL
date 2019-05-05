@@ -9,58 +9,71 @@
 /// \brief This is the consoles main function where commands and interpreted every tick.
 /////////////////////////////////////////////////
 void Cons::doConsole() {
-  static unsigned char y[CONSOLEBUFFERSIZE] = {0};
+  static char y[CONSOLEBUFFERSIZE] = {0};
+  static unsigned char lastyptr = 0;
   static unsigned char yptr = 0;
   static unsigned char numB = 0;
   if (SERIALCONSOLE.available()) {
-    numB = SERIALCONSOLE.readBytesUntil('\n', &y[yptr], CONSOLEBUFFERSIZE - 1 - yptr);
-    if ((y[yptr] == '\n') || (y[yptr] == '\r')) {
-      LOG_CONSOLE("\r\n");
-      switch (y[0]) {
-        case '1':
-          controller_inst_ptr->getBMSPtr()->printPackSummary();
-          LOG_CONSOLE("12V Battery: %.2fV \n", controller_inst_ptr->bat12vVoltage);
-          break;
+    numB = SERIALCONSOLE.readBytesUntil('\n', &y[lastyptr], CONSOLEBUFFERSIZE - 1 - lastyptr);
 
-        case '2':
-          controller_inst_ptr->getBMSPtr()->printAllCSV();
-          break;
+    //LOG_CONSOLE("lastyptr: 0x%x, yptr: 0x%x, numB: 0x%x\r\n", lastyptr, yptr, numB);
 
-        case 'v':
-          if (y[1] >= 0x30 && y[1] <= 0x35) {
-            log_inst.setLoglevel((Logger::LogLevel)(y[1] - 0x30));
-            LOG_DEBUG("logLevel set to :%d\n", log_inst.getLogLevel());
-            LOG_INFO("logLevel set to :%d\n", log_inst.getLogLevel());
-            LOG_WARN("logLevel set to :%d\n", log_inst.getLogLevel());
-            LOG_ERROR("logLevel set to :%d\n", log_inst.getLogLevel());
-            LOG_CONSOLE("logLevel set to :%d\n", log_inst.getLogLevel());
-          } else {
-            LOG_CONSOLE("logLevel out of bounds (0-5)\n");
-          }
-          break;
 
-        case 'h':
-        case '?':
-          printMenu();
-          break;
+    while (yptr < lastyptr + numB) {
+      if ((y[yptr] == '\n') || (y[yptr] == '\r')) {
+        LOG_CONSOLE("\r\n");
+        //LOG_CONSOLE("LL%c", y[0]);
+        switch (y[0]) {
+          case '1':
+            controller_inst_ptr->getBMSPtr()->printPackSummary();
+            LOG_CONSOLE("12V Battery: %.2fV \n", controller_inst_ptr->bat12vVoltage);
+            break;
 
-        case '\n':
-        case '\r':
-        default:
-          break;
+          case '2':
+            controller_inst_ptr->getBMSPtr()->printPackGraph();
+            break;
+
+          case '3':
+            controller_inst_ptr->getBMSPtr()->printAllCSV();
+            break;
+
+          case 'v':
+            if (y[1] >= 0x30 && y[1] <= 0x35) {
+              log_inst.setLoglevel((Logger::LogLevel)(y[1] - 0x30));
+              LOG_DEBUG("logLevel set to :%d\n", log_inst.getLogLevel());
+              LOG_INFO("logLevel set to :%d\n", log_inst.getLogLevel());
+              LOG_WARN("logLevel set to :%d\n", log_inst.getLogLevel());
+              LOG_ERROR("logLevel set to :%d\n", log_inst.getLogLevel());
+              LOG_CONSOLE("logLevel set to :%d\n", log_inst.getLogLevel());
+            } else {
+              LOG_CONSOLE("logLevel out of bounds (0-5)\n");
+            }
+            break;
+
+          case 'h':
+          case '?':
+            printMenu();
+            break;
+
+          case '\n':
+          case '\r':
+          default:
+            break;
+        }
+        memset(y,0,CONSOLEBUFFERSIZE);
+        yptr = 0;
+        lastyptr = 0;
+        LOG_CONSOLE(">> ");
+        break; //not perfect but...
+      } else {
+        //LOG_CONSOLE("y[%d]:%c y[0]:0x%x", yptr, y[yptr], y[0]);
+        LOG_CONSOLE("%c", y[yptr]);
+        yptr++;
       }
-    } else if (yptr < CONSOLEBUFFERSIZE - 3) {
-      LOG_CONSOLE("%s", &y[yptr]);
-      yptr += numB;
-      return;
     }
 
-    //at this point prepare for a new command
-    for (int i = 0; i < CONSOLEBUFFERSIZE; i++) {
-      y[i] = 0;
-    }
-    yptr = 0;
-    LOG_CONSOLE(">> ");
+    //wait for next tick
+    lastyptr = yptr;
   }
 }
 
@@ -78,7 +91,8 @@ void Cons::printMenu() {
   LOG_CONSOLE("GENERAL SYSTEM CONFIGURATION\n\n");
   LOG_CONSOLE("   h or ? = help (displays this message)\n");
   LOG_CONSOLE("   1 = display BMS status summary\n");
-  LOG_CONSOLE("   2 = output BMS details in CSV format\n");
+  LOG_CONSOLE("   2 = print cell voltage graph\n");
+  LOG_CONSOLE("   3 = output BMS details in CSV format\n");
   LOG_CONSOLE("   vX verbose (X=0:debug, X=1:info, X=2:warn, X=3:error, X=4:Cons)\n");
   LOG_CONSOLE("\n");
 }

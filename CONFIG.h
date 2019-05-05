@@ -71,9 +71,9 @@
 #define PRECISION_BALANCE_V_SETPOINT 3.9f
 //precision balance all cells above the lowest cell by this offset (taken from tom debree)
 #define PRECISION_BALANCE_CELL_V_OFFSET 0.04f
-//start rough balancing when highest cell reaches this setpoint (taken from tom debree)
+//start rough balancing when highest cell reaches this setpoint
 #define ROUGH_BALANCE_V_SETPOINT 3.6f
-//rough balance all cells above the lowest cell by this offset (taken from tom debree)
+//rough balance all cells above the lowest cell by this offset
 #define ROUGH_BALANCE_CELL_V_OFFSET 0.10f
 //DC 2 DC 12V battery charging cycle trigger
 #define DC2DC_CYCLE_V_SETPOINT 12.0f

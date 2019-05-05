@@ -442,13 +442,13 @@ void BMSModuleManager::printPackSummary()
                   modules[y].getLowCellV(), modules[y].getHighCellV(), modules[y].getLowTemp(), modules[y].getHighTemp());
       LOG_CONSOLE("Historic Voltages: (%3.2fV-%.2fV)\tTemperatures: (%3.2fC-%3.2fC)\n", modules[y].getLowestModuleVolt(),
                   modules[y].getHighestModuleVolt(), modules[y].getLowestTemp(), modules[y].getHighestTemp());
-      LOG_CONSOLE("+------+--------+--------+---------+\n");
-      LOG_CONSOLE("|Cell #| Cell V |lowest V|highest V|\n");
-      LOG_CONSOLE("+------+--------+--------+---------+\n");
+      LOG_CONSOLE("+------+---------+---------+----------+\n");
+      LOG_CONSOLE("|Cell #| Cell V  |lowest V |highest V |\n");
+      LOG_CONSOLE("+------+---------+---------+----------+\n");
       for (int i = 0; i < 6; i++) {
-        LOG_CONSOLE("|  %2d  |  %.2f  |  %.2f  |  %.2f   |\n", i + 1, modules[y].getCellVoltage(i), modules[y].getLowestCellVolt(i), modules[y].getHighestCellVolt(i));
+        LOG_CONSOLE("|  %2d  |  %.3f  |  %.3f  |  %.3f   |\n", i + 1, modules[y].getCellVoltage(i), modules[y].getLowestCellVolt(i), modules[y].getHighestCellVolt(i));
       }
-      LOG_CONSOLE("+------+--------+--------+---------+\n");
+      LOG_CONSOLE("+------+---------+---------+----------+\n");
 
       if (faults > 0) {
         LOG_CONSOLE("  MODULE IS FAULTED:\n");
@@ -518,39 +518,71 @@ void BMSModuleManager::printPackSummary()
 /////////////////////////////////////////////////
 /// \brief prints the pack details to the console.
 //////////////////////////////////////////////////
-void BMSModuleManager::printPackDetails()
+void BMSModuleManager::printPackGraph()
 {
-  //uint8_t faults;
-  //uint8_t alerts;
-  //uint8_t COV;
-  //uint8_t CUV;
-  int cellNum = 0;
+  char graphLine[86];
+  int cellX;
+  float deltaV =  highCellVolt - lowCellVolt;
+  float rowV;
+  unsigned int seconds = millis()/1000;   
+  
+  memset(graphLine, 0, 86);
+  LOG_CONSOLE("\n====================================================================================\n");
+  
+  LOG_CONSOLE("=  %3d days, %02d:%02d:%02d            cell voltage Graph (V)                            =\n",seconds/86400, (seconds % 86400)/3600, (seconds % 3600)/60, (seconds % 60));
+  LOG_CONSOLE("====================================================================================\n");
 
-  LOG_CONSOLE("\nModules: %i  Strings: %i  Voltage: %.2fV   Avg Cell Voltage: %.2fV  Low Cell Voltage: %.2fV   High Cell Voltage: %.2fV\n", numFoundModules,
-              pstring, getPackVoltage(), getAvgCellVolt(), lowCellVolt, highCellVolt );
-  LOG_CONSOLE("Delta Voltage: %.3fV   Avg Temp: %.2fC \n", (highCellVolt - lowCellVolt), getAvgTemperature());
-  LOG_CONSOLE("\n");
-  for (int y = 0; y < MAX_MODULE_ADDR; y++)
-  {
-    if (modules[y].getAddress() > 0)
-    {
-      //faults = modules[y].getFaults();
-      //alerts = modules[y].getAlerts();
-      //COV = modules[y].getCOVCells();
-      //CUV = modules[y].getCUVCells();
 
-      LOG_CONSOLE("Module #%d\n", modules[y].getAddress());
-      if (y < 10) LOG_CONSOLE(" ");
-      LOG_CONSOLE("  %.2fV\n", modules[y].getModuleVoltage());
-      for (int i = 0; i < 6; i++)
-      {
-        if (cellNum < 10) LOG_CONSOLE(" ");
-        LOG_CONSOLE("  Cell%d: %.2fV\n", cellNum++, modules[y].getCellVoltage(i));
-      }
-      LOG_CONSOLE("  Neg Term Temp: %.2fC\t", modules[y].getTemperature(0));
-      LOG_CONSOLE("Pos Term Temp: %.2fC\n", modules[y].getTemperature(1));
-    }
+  //print graph header
+  LOG_CONSOLE("          ");
+  for (int mod = 0; mod < numFoundModules; mod ++){
+    LOG_CONSOLE("| M%-2d|" , mod + 1);
   }
+  LOG_CONSOLE("\n");
+
+  LOG_CONSOLE("          ");
+  for (cellX = 0; cellX < numFoundModules * 6; cellX++){
+    LOG_CONSOLE("%d", cellX%6 + 1);
+  }
+  LOG_CONSOLE("\n");
+  
+  LOG_CONSOLE("          ");
+  for (cellX = 0; cellX < numFoundModules * 6; cellX++){
+    graphLine[cellX] = '=';
+  }
+  graphLine[cellX] = '\n';
+  LOG_CONSOLE(graphLine);
+  
+  for (int row = 40; row >= 0 ; row--){
+    memset(graphLine, 0, 86);
+    rowV = deltaV*row/40 + lowCellVolt;
+    LOG_CONSOLE("%.3fV || " , rowV);
+    for (cellX = 0; cellX < numFoundModules * 6; cellX++){
+      if (modules[cellX/6].getCellVoltage(cellX%6) < rowV){
+        graphLine[cellX] = ' ';
+      } else {
+        graphLine[cellX] = 'X';
+      }
+    }
+    graphLine[cellX] = '\n';
+    LOG_CONSOLE(graphLine);
+  }
+
+  LOG_CONSOLE("          ");
+  for (cellX = 0; cellX < numFoundModules * 6; cellX++){
+    graphLine[cellX] = '=';
+  }
+  graphLine[cellX] = '\n';
+  LOG_CONSOLE(graphLine);
+  LOG_CONSOLE("          ");
+  for (cellX = 0; cellX < numFoundModules * 6; cellX++){
+    LOG_CONSOLE("%d", cellX%6 + 1);
+  }
+  LOG_CONSOLE("\n          ");
+  for (int mod = 0; mod < numFoundModules; mod ++){
+    LOG_CONSOLE("| M%-2d|" , mod + 1);
+  }
+  LOG_CONSOLE("\n");
 }
 
 /////////////////////////////////////////////////

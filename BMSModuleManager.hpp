@@ -46,7 +46,7 @@ class BMSModuleManager
     */
     void printAllCSV();
     void printPackSummary();
-    void printPackDetails();
+    void printPackGraph();
 
 
   private:
