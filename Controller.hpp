@@ -14,6 +14,7 @@ class Controller {
     Controller();
     ControllerState getState();
     BMSModuleManager* getBMSPtr();
+    void printControllerState();
 
     //faults
     bool faultModuleLoop;
@@ -37,7 +38,7 @@ class Controller {
     bool sFault12VBatOV;
     bool sFault12VBatUV;
 
-    //faults debounce counters
+    //faults debounce counters (DB)
     uint8_t faultModuleLoopDB;
     uint8_t faultBatMonDB;
     uint8_t faultBMSSerialCommsDB;
@@ -47,6 +48,17 @@ class Controller {
     uint8_t faultBMSUTDB;
     uint8_t fault12VBatOVDB;
     uint8_t fault12VBatUVDB;
+
+    //faults time stamps (TS)
+    uint32_t faultModuleLoopTS;
+    uint32_t faultBatMonTS;
+    uint32_t faultBMSSerialCommsTS;
+    uint32_t faultBMSOVTS;
+    uint32_t faultBMSUVTS;
+    uint32_t faultBMSOTTS;
+    uint32_t faultBMSUTTS;
+    uint32_t fault12VBatOVTS;
+    uint32_t fault12VBatUVTS;
 
     bool isFaulted;
     bool stickyFaulted;
@@ -73,7 +85,7 @@ class Controller {
     void standbyDC2DC();
     void evseConnected();
     void evseConnectedDC2DC();
-    void cargerCycle();
+    void chargerCycle();
     void preCharge();
     void charging();
     void run();

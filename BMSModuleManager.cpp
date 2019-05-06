@@ -529,7 +529,8 @@ void BMSModuleManager::printPackGraph()
   memset(graphLine, 0, 86);
   LOG_CONSOLE("\n====================================================================================\n");
   
-  LOG_CONSOLE("=  %3d days, %02d:%02d:%02d            cell voltage Graph (V)                            =\n",seconds/86400, (seconds % 86400)/3600, (seconds % 3600)/60, (seconds % 60));
+  LOG_CONSOLE("=  %3d days, %02d:%02d:%02d            cell voltage Graph (V)                            =\n",
+  seconds/86400, (seconds % 86400)/3600, (seconds % 3600)/60, (seconds % 60));
   LOG_CONSOLE("====================================================================================\n");
 
 
@@ -556,7 +557,24 @@ void BMSModuleManager::printPackGraph()
   for (int row = 40; row >= 0 ; row--){
     memset(graphLine, 0, 86);
     rowV = deltaV*row/40 + lowCellVolt;
-    LOG_CONSOLE("%.3fV || " , rowV);
+    LOG_CONSOLE("%.3fV |" , rowV);
+
+    if (getHighCellVolt() > PRECISION_BALANCE_V_SETPOINT){
+      if(rowV > getLowCellVolt() + PRECISION_BALANCE_CELL_V_OFFSET){
+        LOG_CONSOLE("B ");
+      } else{
+        LOG_CONSOLE("| ");
+      }
+    } else if (getHighCellVolt() > ROUGH_BALANCE_V_SETPOINT){
+      if(rowV > getLowCellVolt() + ROUGH_BALANCE_CELL_V_OFFSET){
+        LOG_CONSOLE("B ");
+      } else{
+        LOG_CONSOLE("| ");
+      }
+    } else {
+      LOG_CONSOLE("| ");
+    }
+    
     for (cellX = 0; cellX < numFoundModules * 6; cellX++){
       if (modules[cellX/6].getCellVoltage(cellX%6) < rowV){
         graphLine[cellX] = ' ';
@@ -590,15 +608,18 @@ void BMSModuleManager::printPackGraph()
 //////////////////////////////////////////////////
 void BMSModuleManager::printAllCSV()
 {
+  LOG_CONSOLE("Module#,time (ms),cell1,cell2,cell3,cell4,cell5,cell6,temp1,temp2\n");
   for (int y = 0; y < MAX_MODULE_ADDR; y++)
   {
     if (modules[y].getAddress() > 0)
     {
       LOG_CONSOLE("%d", modules[y].getAddress());
       LOG_CONSOLE(",");
+      LOG_CONSOLE("%d", millis());
+      LOG_CONSOLE(",");
       for (int i = 0; i < 6; i++)
       {
-        LOG_CONSOLE("%.2f,", modules[y].getCellVoltage(i));
+        LOG_CONSOLE("%.3f,", modules[y].getCellVoltage(i));
       }
       LOG_CONSOLE("%.2f,", modules[y].getTemperature(0));
       LOG_CONSOLE("%.2f\n", modules[y].getTemperature(1));

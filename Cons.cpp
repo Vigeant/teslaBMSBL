@@ -25,8 +25,9 @@ void Cons::doConsole() {
         //LOG_CONSOLE("LL%c", y[0]);
         switch (y[0]) {
           case '1':
-            controller_inst_ptr->getBMSPtr()->printPackSummary();
             LOG_CONSOLE("12V Battery: %.2fV \n", controller_inst_ptr->bat12vVoltage);
+            controller_inst_ptr->getBMSPtr()->printPackSummary();
+            controller_inst_ptr->printControllerState();
             break;
 
           case '2':

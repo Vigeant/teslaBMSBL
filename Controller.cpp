@@ -202,7 +202,7 @@ void Controller::doController() {
       break;
 
     case CHARGER_CYCLE:
-      cargerCycle();
+      chargerCycle();
       break;
 
     case PRE_CHARGE:
@@ -240,7 +240,9 @@ void Controller::syncModuleDataObjects() {
   if (bms.getLineFault()) {
     faultBMSSerialCommsDB += 1;
     if (faultBMSSerialCommsDB >= FAULT_DEBOUNCE_COUNT) {
-      if (!faultBMSSerialComms) {LOG_ERROR("Serial communication with battery modules lost!\n");}
+      if (!faultBMSSerialComms) {
+        LOG_ERROR("Serial communication with battery modules lost!\n");
+      }
       faultBMSSerialComms = true;
       faultBMSSerialCommsDB = FAULT_DEBOUNCE_COUNT;
     }
@@ -253,7 +255,9 @@ void Controller::syncModuleDataObjects() {
   if (digitalRead(INL_BAT_PACK_FAULT) == LOW) {
     faultModuleLoopDB += 1;
     if (faultModuleLoopDB >= FAULT_DEBOUNCE_COUNT) {
-      if (!faultModuleLoop) {LOG_ERROR("One or more BMS modules have asserted the fault loop!\n");}
+      if (!faultModuleLoop) {
+        LOG_ERROR("One or more BMS modules have asserted the fault loop!\n");
+      }
       faultModuleLoop = true;
       faultModuleLoopDB = FAULT_DEBOUNCE_COUNT;
     }
@@ -266,7 +270,9 @@ void Controller::syncModuleDataObjects() {
   if (digitalRead(INL_BAT_MON_FAULT) == LOW) {
     faultBatMonDB += 1;
     if (faultBatMonDB >= FAULT_DEBOUNCE_COUNT) {
-      if(!faultBatMon) {LOG_ERROR("The battery monitor asserted the fault loop!\n");}
+      if (!faultBatMon) {
+        LOG_ERROR("The battery monitor asserted the fault loop!\n");
+      }
       faultBatMon = true;
       faultBatMonDB = FAULT_DEBOUNCE_COUNT;
     }
@@ -279,7 +285,9 @@ void Controller::syncModuleDataObjects() {
   if ( bms.getHighCellVolt() > OVER_V_SETPOINT) {
     faultBMSOVDB += 1;
     if (faultBMSOVDB >= FAULT_DEBOUNCE_COUNT) {
-      if (!faultBMSOV) {LOG_ERROR("OVER_V_SETPOINT: %.2fV, highest cell:%.2fV\n", OVER_V_SETPOINT, bms.getHighCellVolt());}
+      if (!faultBMSOV) {
+        LOG_ERROR("OVER_V_SETPOINT: %.2fV, highest cell:%.2fV\n", OVER_V_SETPOINT, bms.getHighCellVolt());
+      }
       faultBMSOV = true;
       faultBMSOVDB = FAULT_DEBOUNCE_COUNT;
     }
@@ -292,7 +300,9 @@ void Controller::syncModuleDataObjects() {
   if ( bms.getLowCellVolt() < UNDER_V_SETPOINT) {
     faultBMSUVDB += 1;
     if (faultBMSUVDB >= FAULT_DEBOUNCE_COUNT) {
-      if(!faultBMSUV) {LOG_ERROR("UNDER_V_SETPOINT: %.2fV, lowest cell:%.2fV\n", UNDER_V_SETPOINT, bms.getLowCellVolt());}
+      if (!faultBMSUV) {
+        LOG_ERROR("UNDER_V_SETPOINT: %.2fV, lowest cell:%.2fV\n", UNDER_V_SETPOINT, bms.getLowCellVolt());
+      }
       faultBMSUV = true;
       faultBMSUVDB = FAULT_DEBOUNCE_COUNT;
     }
@@ -305,7 +315,9 @@ void Controller::syncModuleDataObjects() {
   if ( bms.getHighTemperature() > OVER_T_SETPOINT) {
     faultBMSOTDB += 1;
     if (faultBMSOTDB >= FAULT_DEBOUNCE_COUNT) {
-      if (!faultBMSOT) {LOG_ERROR("OVER_T_SETPOINT: %.2fV, highest module:%.2fV\n", UNDER_V_SETPOINT, bms.getHighTemperature());}
+      if (!faultBMSOT) {
+        LOG_ERROR("OVER_T_SETPOINT: %.2fV, highest module:%.2fV\n", UNDER_V_SETPOINT, bms.getHighTemperature());
+      }
       faultBMSOT = true;
       faultBMSOTDB = FAULT_DEBOUNCE_COUNT;
     }
@@ -318,7 +330,9 @@ void Controller::syncModuleDataObjects() {
   if ( bms.getLowTemperature() < UNDER_T_SETPOINT) {
     faultBMSUTDB += 1;
     if (faultBMSUTDB >= FAULT_DEBOUNCE_COUNT) {
-      if (!faultBMSUT) {LOG_ERROR("UNDER_T_SETPOINT: %.2fV, lowest module:%.2fV\n", UNDER_T_SETPOINT, bms.getLowTemperature());}
+      if (!faultBMSUT) {
+        LOG_ERROR("UNDER_T_SETPOINT: %.2fV, lowest module:%.2fV\n", UNDER_T_SETPOINT, bms.getLowTemperature());
+      }
       faultBMSUT = true;
       faultBMSUTDB = FAULT_DEBOUNCE_COUNT;
     }
@@ -333,7 +347,9 @@ void Controller::syncModuleDataObjects() {
   if ( bat12vVoltage > BAT12V_OVER_V_SETPOINT) {
     fault12VBatOVDB += 1;
     if (fault12VBatOVDB >= FAULT_DEBOUNCE_COUNT) {
-      if (!fault12VBatOV) {LOG_ERROR("12VBAT_OVER_V_SETPOINT: %.2fV, V:%.2fV\n", BAT12V_OVER_V_SETPOINT, bat12vVoltage);}
+      if (!fault12VBatOV) {
+        LOG_ERROR("12VBAT_OVER_V_SETPOINT: %.2fV, V:%.2fV\n", BAT12V_OVER_V_SETPOINT, bat12vVoltage);
+      }
       fault12VBatOV = true;
       fault12VBatOVDB = FAULT_DEBOUNCE_COUNT;
     }
@@ -346,7 +362,9 @@ void Controller::syncModuleDataObjects() {
   if ( bat12vVoltage < BAT12V_UNDER_V_SETPOINT) {
     fault12VBatUVDB += 1;
     if (fault12VBatUVDB >= FAULT_DEBOUNCE_COUNT) {
-      if (!fault12VBatUV) {LOG_ERROR("12VBAT_UNDER_V_SETPOINT: %.2fV, V:%.2fV\n", BAT12V_UNDER_V_SETPOINT, bat12vVoltage);}
+      if (!fault12VBatUV) {
+        LOG_ERROR("12VBAT_UNDER_V_SETPOINT: %.2fV, V:%.2fV\n", BAT12V_UNDER_V_SETPOINT, bat12vVoltage);
+      }
       fault12VBatUV = true;
       fault12VBatUVDB = FAULT_DEBOUNCE_COUNT;
     }
@@ -371,6 +389,17 @@ void Controller::syncModuleDataObjects() {
   sFault12VBatOV |= fault12VBatOV;
   sFault12VBatUV |= fault12VBatUV;
 
+  //update time stamps
+  if (faultModuleLoop) faultModuleLoopTS = millis() / 1000;
+  if (faultBatMon) faultBatMonTS = millis() / 1000;
+  if (faultBMSSerialComms) faultBMSSerialCommsTS = millis() / 1000;
+  if (faultBMSOV) faultBMSOVTS = millis() / 1000;
+  if (faultBMSUV) faultBMSUVTS = millis() / 1000;
+  if (faultBMSOT) faultBMSOTTS = millis() / 1000;
+  if (faultBMSUT) faultBMSUTTS = millis() / 1000;
+  if (fault12VBatOV) fault12VBatOVTS = millis() / 1000;
+  if (fault12VBatUV) fault12VBatUVTS = millis() / 1000;
+
   stickyFaulted |= isFaulted;
   bms.clearFaults();
 }
@@ -380,9 +409,9 @@ void Controller::syncModuleDataObjects() {
 /////////////////////////////////////////////////
 void Controller::balanceCells() {
   //balance for 1 second given that the controller wakes up every second.
-  if (bms.getHighCellVolt() > PRECISION_BALANCE_V_SETPOINT){
+  if (bms.getHighCellVolt() > PRECISION_BALANCE_V_SETPOINT) {
     bms.balanceCells(1, PRECISION_BALANCE_CELL_V_OFFSET);
-  } else if (bms.getHighCellVolt() > ROUGH_BALANCE_V_SETPOINT){
+  } else if (bms.getHighCellVolt() > ROUGH_BALANCE_V_SETPOINT) {
     bms.balanceCells(1, ROUGH_BALANCE_CELL_V_OFFSET);
   }
 }
@@ -455,6 +484,17 @@ void Controller::init() {
   fault12VBatOVDB = 0;
   fault12VBatUVDB = 0;
 
+  //faults time stamps (TS)
+  faultModuleLoopTS = 0;
+  faultBatMonTS = 0;
+  faultBMSSerialCommsTS = 0;
+  faultBMSOVTS = 0;
+  faultBMSUVTS = 0;
+  faultBMSOTTS = 0;
+  faultBMSUTTS = 0;
+  fault12VBatOVTS = 0;
+  fault12VBatUVTS = 0;
+
   isFaulted = false;
   stickyFaulted = false;
 
@@ -471,6 +511,7 @@ void Controller::init() {
 /// its low voltage threshold.
 /////////////////////////////////////////////////
 void Controller::standby() {
+  balanceCells();
   digitalWrite(OUTL_EVCC_ON, LOW);
   digitalWrite(OUTL_NO_FAULT, chargerInhibit);
   digitalWrite(OUTL_12V_BAT_CHRG, HIGH);
@@ -483,7 +524,7 @@ void Controller::standby() {
 /// charged since it dipped bellow its low voltage threshold.
 /////////////////////////////////////////////////
 void Controller::standbyDC2DC() {
-  //balanceCells(); /////////////////////////////////////////////////////////////disable in prod!!!!!!!!!!!!!!
+  balanceCells();
   digitalWrite(OUTL_EVCC_ON, LOW);
   digitalWrite(OUTL_NO_FAULT, chargerInhibit);
   digitalWrite(OUTL_12V_BAT_CHRG, LOW);
@@ -496,6 +537,7 @@ void Controller::standbyDC2DC() {
 /// cycles until it dips bellow its pack voltage threshold.
 /////////////////////////////////////////////////
 void Controller::evseConnected() {
+  balanceCells();
   digitalWrite(OUTL_EVCC_ON, LOW);
   digitalWrite(OUTL_NO_FAULT, chargerInhibit);
   digitalWrite(OUTL_12V_BAT_CHRG, HIGH);
@@ -509,6 +551,7 @@ void Controller::evseConnected() {
 /// cycles until it dips bellow its pack voltage threshold. 12V attery charging
 /////////////////////////////////////////////////
 void Controller::evseConnectedDC2DC() {
+  balanceCells();
   digitalWrite(OUTL_EVCC_ON, LOW);
   digitalWrite(OUTL_NO_FAULT, chargerInhibit);
   digitalWrite(OUTL_12V_BAT_CHRG, LOW);
@@ -519,7 +562,8 @@ void Controller::evseConnectedDC2DC() {
 /// \brief cargerCycle state is when the boat *is connected*
 /// to a EVSE and is cycling the EVCC to trigger a new charging cycle.
 /////////////////////////////////////////////////
-void Controller::cargerCycle() {
+void Controller::chargerCycle() {
+  balanceCells();
   digitalWrite(OUTL_EVCC_ON, HIGH);
   digitalWrite(OUTL_NO_FAULT, chargerInhibit);
   digitalWrite(OUTL_12V_BAT_CHRG, LOW);
@@ -531,6 +575,7 @@ void Controller::cargerCycle() {
 /// following a cycling of its power.
 /////////////////////////////////////////////////
 void Controller::preCharge() {
+  balanceCells();
   digitalWrite(OUTL_EVCC_ON, LOW);
   digitalWrite(OUTL_NO_FAULT, chargerInhibit);
   digitalWrite(OUTL_12V_BAT_CHRG, LOW);
@@ -571,4 +616,62 @@ Controller::ControllerState Controller::getState() {
 /////////////////////////////////////////////////
 BMSModuleManager* Controller::getBMSPtr() {
   return &bms;
+}
+
+void Controller::printControllerState() {
+  uint32_t seconds = millis()/1000;
+  LOG_CONSOLE("====================================================================================\n");
+  LOG_CONSOLE("=                     BMS Controller registered faults                             =\n");
+  switch (state) {
+    case INIT:
+      LOG_CONSOLE("=  state: INIT                                                                     =\n");
+      break;
+    case STANDBY:
+      LOG_CONSOLE("=  state: STANDBY                                                                  =\n");
+      break;
+    case STANDBY_DC2DC:
+      LOG_CONSOLE("=  state: STANDBY_DC2DC                                                            =\n");
+      break;
+    case CHARGER_CYCLE:
+      LOG_CONSOLE("=  state: CHARGER_CYCLE                                                            =\n");
+      break;
+    case PRE_CHARGE:
+      LOG_CONSOLE("=  state: PRE_CHARGE                                                               =\n");
+      break;
+    case CHARGING:
+      LOG_CONSOLE("=  state: CHARGING                                                                 =\n");
+      break;
+    case RUN:
+      LOG_CONSOLE("=  state: RUN                                                                      =\n");
+      break;
+    case EVSE_CONNECTED:
+      LOG_CONSOLE("=  state: EVSE_CONNECTED                                                           =\n");
+      break;
+    case EVSE_CONNECTED_DC2DC:
+      LOG_CONSOLE("=  state: EVSE_CONNECTED_DC2DC                                                     =\n");
+      break;
+  }
+  LOG_CONSOLE("=  Time since last reset:%-3d days, %02d:%02d:%02d                                        =\n",
+  seconds/86400, (seconds % 86400)/3600, (seconds % 3600)/60, (seconds % 60));
+  LOG_CONSOLE("====================================================================================\n");
+  LOG_CONSOLE("%-22s   last fault time\n", "Fault Name");
+  LOG_CONSOLE("----------------------   -----------------------------------------------------------\n");
+  if (sFaultModuleLoop) LOG_CONSOLE("%-22s @ %-3d days, %02d:%02d:%02d\n",
+                                      "faultModuleLoop", faultModuleLoopTS / 86400, (faultModuleLoopTS % 86400) / 3600, (faultModuleLoopTS % 3600) / 60, (faultModuleLoopTS % 60));
+  if (sFaultBatMon) LOG_CONSOLE("%-22s @ %-3d days, %02d:%02d:%02d\n",
+                                  "faultBatMon", faultBatMonTS / 86400, (faultBatMonTS % 86400) / 3600, (faultBatMonTS % 3600) / 60, (faultBatMonTS % 60));
+  if (sFaultBMSSerialComms) LOG_CONSOLE("%-22s @ %-3d days, %02d:%02d:%02d\n",
+                                          "faultBMSSerialComms", faultBMSSerialCommsTS / 86400, (faultBMSSerialCommsTS % 86400) / 3600, (faultBMSSerialCommsTS % 3600) / 60, (faultBMSSerialCommsTS % 60));
+  if (sFaultBMSOV) LOG_CONSOLE("%-22s @ %-3d days, %02d:%02d:%02d\n",
+                                 "faultBMSOV", faultBMSOVTS / 86400, (faultBMSOVTS % 86400) / 3600, (faultBMSOVTS % 3600) / 60, (faultBMSOVTS % 60));
+  if (sFaultBMSUV) LOG_CONSOLE("%-22s @ %-3d days, %02d:%02d:%02d\n",
+                                 "faultBMSUV", faultBMSUVTS / 86400, (faultBMSUVTS % 86400) / 3600, (faultBMSUVTS % 3600) / 60, (faultBMSUVTS % 60));
+  if (sFaultBMSOT) LOG_CONSOLE("%-22s @ %-3d days, %02d:%02d:%02d\n",
+                                 "faultBMSOT", faultBMSOTTS / 86400, (faultBMSOTTS % 86400) / 3600, (faultBMSOTTS % 3600) / 60, (faultBMSOTTS % 60));
+  if (sFaultBMSUT) LOG_CONSOLE("%-22s @ %-3d days, %02d:%02d:%02d\n",
+                                 "faultBMSUT", faultBMSUTTS / 86400, (faultBMSUTTS % 86400) / 3600, (faultBMSUTTS % 3600) / 60, (faultBMSUTTS % 60));
+  if (sFault12VBatOV) LOG_CONSOLE("%-22s @ %-3d days, %02d:%02d:%02d\n",
+                                    "fault12VBatOV", fault12VBatOVTS / 86400, (fault12VBatOVTS % 86400) / 3600, (fault12VBatOVTS % 3600) / 60, (fault12VBatOVTS % 60));
+  if (sFault12VBatUV) LOG_CONSOLE("%-22s @ %-3d days, %02d:%02d:%02d\n",
+                                    "fault12VBatUV", fault12VBatUVTS / 86400, (fault12VBatUVTS % 86400) / 3600, (fault12VBatUVTS % 3600) / 60, (fault12VBatUVTS % 60));
 }
