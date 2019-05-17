@@ -107,13 +107,16 @@ void Oled::printFormat4() {
   oled.clear(PAGE);            // Clear the display
   oled.setCursor(col0, 0);        // Set cursor to top-left
   oled.setFontType(1);         // Smallest font
-  oled.print("VCdmax");
+  //oled.print("VCdmax");
+  oled.print("VCdiff");
   oled.setCursor(col1, 0);
   oled.print("Tmax");
 
   oled.setFontType(2);         // 7-segment font
   oled.setCursor(col0, oled.getLCDHeight() / 2);
-  oled.print(controller_inst_ptr->getBMSPtr()->getHistHighestCellDiffVolt());
+  //oled.print(controller_inst_ptr->getBMSPtr()->getHistHighestCellDiffVolt());
+  oled.print(controller_inst_ptr->getBMSPtr()->getHighCellVolt() - controller_inst_ptr->getBMSPtr()->getLowCellVolt());
+ 
   oled.setCursor(col1, oled.getLCDHeight() / 2);
   //oled.setFontType(1);
   oled.print(controller_inst_ptr->getBMSPtr()->getHistHighestPackTemp());
