@@ -224,14 +224,14 @@ void Controller::doController() {
 }
 
 /////////////////////////////////////////////////
-/// \brief When instantiated, the controller is in the init state ensuring that all the signal pins are set ptoperly.
+/// \brief When instantiated, the controller is in the init state ensuring that all the signal pins are set properly.
 /////////////////////////////////////////////////
 Controller::Controller() {
   state = INIT;
 }
 
 /////////////////////////////////////////////////
-/// \brief gathers all the data from the boards and check for any faults.
+/// \brief gather all the data from the boards and check for any faults.
 /////////////////////////////////////////////////
 void Controller::syncModuleDataObjects() {
   float bat12vVoltage;
@@ -280,6 +280,36 @@ void Controller::syncModuleDataObjects() {
     if (faultBatMon) LOG_INFO("The battery monitor deasserted the fault loop\n");
     faultBatMonDB = 0;
     faultBatMon = false;
+  }
+
+  if (digitalRead(INL_WATER_SENS1) == LOW) {
+    faultWatSen1DB += 1;
+    if (faultWatSen1DB >= FAULT_DEBOUNCE_COUNT) {
+      if (!faultWatSen1) {
+        LOG_ERROR("The battery water sensor 1 is reporting water!\n");
+      }
+      faultWatSen1 = true;
+      faultWatSen1DB = FAULT_DEBOUNCE_COUNT;
+    }
+  } else {
+    if (faultWatSen1) LOG_INFO("The battery water sensor 1 is reporting dry.\n");
+    faultWatSen1DB = 0;
+    faultWatSen1 = false;
+  }
+
+  if (digitalRead(INL_WATER_SENS2) == LOW) {
+    faultWatSen2DB += 1;
+    if (faultWatSen2DB >= FAULT_DEBOUNCE_COUNT) {
+      if (!faultWatSen2) {
+        LOG_ERROR("The battery water sensor 2 is reporting water!\n");
+      }
+      faultWatSen2 = true;
+      faultWatSen2DB = FAULT_DEBOUNCE_COUNT;
+    }
+  } else {
+    if (faultWatSen2) LOG_INFO("The battery water sensor 2 is reporting dry.\n");
+    faultWatSen2DB = 0;
+    faultWatSen2 = false;
   }
 
   if ( bms.getHighCellVolt() > OVER_V_SETPOINT) {
@@ -374,7 +404,7 @@ void Controller::syncModuleDataObjects() {
     fault12VBatUV = false;
   }
 
-  chargerInhibit = faultModuleLoop || faultBatMon || faultBMSSerialComms || faultBMSOV || faultBMSOT;
+  chargerInhibit = faultModuleLoop || faultBatMon || faultBMSSerialComms || faultBMSOV || faultBMSOT || faultWatSen1 || faultWatSen2;
   powerLimiter = faultModuleLoop || faultBatMon || faultBMSSerialComms || faultBMSUV || faultBMSOT;
   isFaulted =  chargerInhibit || faultBMSUV || faultBMSUT || fault12VBatOV || fault12VBatUV;
 
@@ -388,6 +418,8 @@ void Controller::syncModuleDataObjects() {
   sFaultBMSUT |= faultBMSUT;
   sFault12VBatOV |= fault12VBatOV;
   sFault12VBatUV |= fault12VBatUV;
+  sFaultWatSen1 |= faultWatSen1;
+  sFaultWatSen2 |= faultWatSen2;
 
   //update time stamps
   if (faultModuleLoop) faultModuleLoopTS = millis() / 1000;
@@ -399,6 +431,8 @@ void Controller::syncModuleDataObjects() {
   if (faultBMSUT) faultBMSUTTS = millis() / 1000;
   if (fault12VBatOV) fault12VBatOVTS = millis() / 1000;
   if (fault12VBatUV) fault12VBatUVTS = millis() / 1000;
+  if (faultWatSen1) faultWatSen1TS = millis() / 1000;
+  if (faultWatSen2) faultWatSen2TS = millis() / 1000;
 
   stickyFaulted |= isFaulted;
   bms.clearFaults();
@@ -450,6 +484,8 @@ void Controller::init() {
   pinMode(INA_12V_BAT, INPUT);  // [0-1023] = analogRead(INA_12V_BAT)
   pinMode(OUTL_EVCC_ON, OUTPUT);
   pinMode(OUTL_NO_FAULT, OUTPUT);
+  pinMode(faultWatSen1, INPUT_PULLUP);
+  pinMode(faultWatSen2, INPUT_PULLUP);
 
   //faults
   faultModuleLoop = false;
@@ -461,6 +497,8 @@ void Controller::init() {
   faultBMSUT = false;
   fault12VBatOV = false;
   fault12VBatUV = false;
+  faultWatSen1 = false;
+  faultWatSen2 = false;
 
   //sticky faults
   sFaultModuleLoop = false;
@@ -472,6 +510,8 @@ void Controller::init() {
   sFaultBMSUT = false;
   sFault12VBatOV = false;
   sFault12VBatUV = false;
+  sFaultWatSen1 = false;
+  sFaultWatSen2 = false;
 
   //faults debounce counters
   faultModuleLoopDB = 0;
@@ -483,6 +523,8 @@ void Controller::init() {
   faultBMSUTDB = 0;
   fault12VBatOVDB = 0;
   fault12VBatUVDB = 0;
+  faultWatSen1DB = 0;
+  faultWatSen2DB = 0;
 
   //faults time stamps (TS)
   faultModuleLoopTS = 0;
@@ -494,6 +536,8 @@ void Controller::init() {
   faultBMSUTTS = 0;
   fault12VBatOVTS = 0;
   fault12VBatUVTS = 0;
+  faultWatSen1TS = 0;
+  faultWatSen2TS = 0;
 
   isFaulted = false;
   stickyFaulted = false;
@@ -619,7 +663,7 @@ BMSModuleManager* Controller::getBMSPtr() {
 }
 
 void Controller::printControllerState() {
-  uint32_t seconds = millis()/1000;
+  uint32_t seconds = millis() / 1000;
   LOG_CONSOLE("====================================================================================\n");
   LOG_CONSOLE("=                     BMS Controller registered faults                             =\n");
   switch (state) {
@@ -652,7 +696,7 @@ void Controller::printControllerState() {
       break;
   }
   LOG_CONSOLE("=  Time since last reset:%-3d days, %02d:%02d:%02d                                        =\n",
-  seconds/86400, (seconds % 86400)/3600, (seconds % 3600)/60, (seconds % 60));
+              seconds / 86400, (seconds % 86400) / 3600, (seconds % 3600) / 60, (seconds % 60));
   LOG_CONSOLE("====================================================================================\n");
   LOG_CONSOLE("%-22s   last fault time\n", "Fault Name");
   LOG_CONSOLE("----------------------   -----------------------------------------------------------\n");
@@ -674,4 +718,8 @@ void Controller::printControllerState() {
                                     "fault12VBatOV", fault12VBatOVTS / 86400, (fault12VBatOVTS % 86400) / 3600, (fault12VBatOVTS % 3600) / 60, (fault12VBatOVTS % 60));
   if (sFault12VBatUV) LOG_CONSOLE("%-22s @ %-3d days, %02d:%02d:%02d\n",
                                     "fault12VBatUV", fault12VBatUVTS / 86400, (fault12VBatUVTS % 86400) / 3600, (fault12VBatUVTS % 3600) / 60, (fault12VBatUVTS % 60));
+  if (sFaultWatSen1) LOG_CONSOLE("%-22s @ %-3d days, %02d:%02d:%02d\n",
+                                   "faultWatSen1", faultWatSen1TS / 86400, (faultWatSen1TS % 86400) / 3600, (faultWatSen1TS % 3600) / 60, (faultWatSen1TS % 60));
+  if (sFaultWatSen2) LOG_CONSOLE("%-22s @ %-3d days, %02d:%02d:%02d\n",
+                                   "faultWatSen2", faultWatSen2TS / 86400, (faultWatSen2TS % 86400) / 3600, (faultWatSen2TS % 3600) / 60, (faultWatSen2TS % 60));
 }

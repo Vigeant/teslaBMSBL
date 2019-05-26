@@ -19,14 +19,15 @@
 | G | BMS Under Temperature Fault |
 | H | BMS 12V Battery Over Voltage Fault |
 | I | BMS 12V Battery Under Voltage Fault |
+| J | BMS Water Sensor 1 Fault |
+| K | BMS Water Sensor 2 Fault |
+
+## Connection to USB serial console
+
+Serial Line: COMX (X typically = 7)
+Speed: 115200
 	
 ## todo
-- [X] assign all signals to pins
-- [X] Implement state machine
-	- [X] noFault is driven differently from run to charging (run noFault is used to limit output while in charging it is used to prevent charging)
-	- [X] add dc2dc states in charging mode to support shutting down dc2dc in diagram
-	- [X] implement state machine in code to match diagram.
-	- [X] update all states in the Oled class to match actual state machine.
-- [X] update formula for pwm of cooling pump to floor at 25% duty cycle.
+- [ ] Full state machine testing.
 
 	

@@ -26,6 +26,8 @@ class Controller {
     bool faultBMSUT;
     bool fault12VBatOV;
     bool fault12VBatUV;
+    bool faultWatSen1;
+    bool faultWatSen2;
 
     //sticky faults
     bool sFaultModuleLoop;
@@ -37,6 +39,8 @@ class Controller {
     bool sFaultBMSUT;
     bool sFault12VBatOV;
     bool sFault12VBatUV;
+    bool sFaultWatSen1;
+    bool sFaultWatSen2;
 
     //faults debounce counters (DB)
     uint8_t faultModuleLoopDB;
@@ -48,6 +52,8 @@ class Controller {
     uint8_t faultBMSUTDB;
     uint8_t fault12VBatOVDB;
     uint8_t fault12VBatUVDB;
+    uint8_t faultWatSen1DB;
+    uint8_t faultWatSen2DB;
 
     //faults time stamps (TS)
     uint32_t faultModuleLoopTS;
@@ -59,6 +65,8 @@ class Controller {
     uint32_t faultBMSUTTS;
     uint32_t fault12VBatOVTS;
     uint32_t fault12VBatUVTS;
+    uint32_t faultWatSen1TS;
+    uint32_t faultWatSen2TS;
 
     bool isFaulted;
     bool stickyFaulted;

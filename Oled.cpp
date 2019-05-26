@@ -116,7 +116,7 @@ void Oled::printFormat4() {
   oled.setCursor(col0, oled.getLCDHeight() / 2);
   //oled.print(controller_inst_ptr->getBMSPtr()->getHistHighestCellDiffVolt());
   oled.print(controller_inst_ptr->getBMSPtr()->getHighCellVolt() - controller_inst_ptr->getBMSPtr()->getLowCellVolt());
- 
+
   oled.setCursor(col1, oled.getLCDHeight() / 2);
   //oled.setFontType(1);
   oled.print(controller_inst_ptr->getBMSPtr()->getHistHighestPackTemp());
@@ -204,6 +204,12 @@ void Oled::printStickyFaults() {
   if (controller_inst_ptr->sFault12VBatUV) {
     oled.print("I");
   }
+  if (controller_inst_ptr->sFaultWatSen1) {
+    oled.print("J");
+  }
+  if (controller_inst_ptr->sFaultWatSen2) {
+    oled.print("K");
+  }
 
   oled.display();
 }
@@ -243,6 +249,12 @@ void Oled::printFaults() {
   }
   if (controller_inst_ptr->fault12VBatUV) {
     oled.print("I");
+  }
+  if (controller_inst_ptr->faultWatSen1) {
+    oled.print("J");
+  }
+  if (controller_inst_ptr->faultWatSen2) {
+    oled.print("K");
   }
 
   oled.display();

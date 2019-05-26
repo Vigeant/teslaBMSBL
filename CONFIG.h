@@ -23,11 +23,11 @@
 #define OUTPWM_PUMP           9     // PWM to coolant pump
 #define OLED_PIN_CS           10
 #define OLED_PIN_MOSI         11
-//                            12
+#define INL_WATER_SENS1       12    // battery enclosure water sensor 1 
 
 //side 2
 #define OLED_PIN_SCK          13    //LED
-//                            14
+#define INL_WATER_SENS2       14    // battery enclosure water sensor 2 
 #define OLED_PIN_RESET        15
 #define INL_BAT_PACK_FAULT    16    //Tesla Battery pack fault.
 #define INL_BAT_MON_FAULT     17    //Battery Monitor Fault.
