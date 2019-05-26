@@ -484,8 +484,8 @@ void Controller::init() {
   pinMode(INA_12V_BAT, INPUT);  // [0-1023] = analogRead(INA_12V_BAT)
   pinMode(OUTL_EVCC_ON, OUTPUT);
   pinMode(OUTL_NO_FAULT, OUTPUT);
-  pinMode(faultWatSen1, INPUT_PULLUP);
-  pinMode(faultWatSen2, INPUT_PULLUP);
+  pinMode(INL_WATER_SENS1, INPUT_PULLUP);
+  pinMode(INL_WATER_SENS2, INPUT_PULLUP);
 
   //faults
   faultModuleLoop = false;
