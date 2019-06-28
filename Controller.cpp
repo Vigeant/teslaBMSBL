@@ -86,7 +86,7 @@ void Controller::doController() {
       } else if (bat12vVoltage < DC2DC_CYCLE_V_SETPOINT) {
         ticks = 0;
         bat12Vcyclestart = (millis() / 1000);
-        state = STANDBY_DC2DC;
+        state = EVSE_CONNECTED_DC2DC;
       }
 #endif
       break;
@@ -105,7 +105,7 @@ void Controller::doController() {
         ticks = 0;
         state = CHARGER_CYCLE;
       } else if (bat12Vcyclestart < (millis() / 1000)) {
-        if ((bat12Vcyclestart + DC2DC_CYCLE_TIME_S) > (millis() / 1000)) {
+        if ((bat12Vcyclestart + DC2DC_CYCLE_TIME_S) < (millis() / 1000)) {
           ticks = 0;
           state = EVSE_CONNECTED;
         }
