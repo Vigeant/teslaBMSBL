@@ -83,5 +83,6 @@
 #define BAT12V_OVER_V_SETPOINT 14.5f
 //12V battery UV setpoint
 #define BAT12V_UNDER_V_SETPOINT 10.0f
-//12V battery ADC deviSor 0-1023 -> 0-15V
-#define BAT12V_SCALING_DIVISOR 68.0f
+//12V battery ADC devisor 0-1023 -> 0-15V
+//#define BAT12V_SCALING_DIVISOR 68.0f
+#define BAT12V_SCALING_DIVISOR 33.6478

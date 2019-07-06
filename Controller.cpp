@@ -23,7 +23,7 @@ void Controller::doController() {
 
     case STANDBY:
 #ifdef STATECYCLING
-      if (ticks >= stateticks) {
+      if (ticks >= stateticks + 4) {
         ticks = 0;
         state = STANDBY_DC2DC;
       }
@@ -44,7 +44,7 @@ void Controller::doController() {
 
     case STANDBY_DC2DC:
 #ifdef STATECYCLING
-      if (ticks >= stateticks) {
+      if (ticks >= stateticks + 4) {
         ticks = 0;
         state = EVSE_CONNECTED;
       }
@@ -72,7 +72,7 @@ void Controller::doController() {
 
     case EVSE_CONNECTED:
 #ifdef STATECYCLING
-      if (ticks >= stateticks) {
+      if (ticks >= stateticks + 4) {
         ticks = 0;
         state = EVSE_CONNECTED_DC2DC;
       }
@@ -93,7 +93,7 @@ void Controller::doController() {
 
     case EVSE_CONNECTED_DC2DC:
 #ifdef STATECYCLING
-      if (ticks >= stateticks) {
+      if (ticks >= stateticks + 4) {
         ticks = 0;
         state = CHARGER_CYCLE;
       }
@@ -128,7 +128,7 @@ void Controller::doController() {
 
     case PRE_CHARGE:
 #ifdef STATECYCLING
-      if (ticks >= stateticks) {
+      if (ticks >= stateticks + 4) {
         ticks = 0;
         state = CHARGING;
       }
@@ -145,7 +145,7 @@ void Controller::doController() {
       break;
     case CHARGING:
 #ifdef STATECYCLING
-      if (ticks >= stateticks) {
+      if (ticks >= stateticks + 4) {
         ticks = 0;
         state = RUN;
       }
@@ -162,7 +162,7 @@ void Controller::doController() {
 
     case RUN:
 #ifdef STATECYCLING
-      if (ticks >= stateticks) {
+      if (ticks >= stateticks + 4) {
         ticks = 0;
         state = STANDBY;
       }
@@ -587,7 +587,6 @@ void Controller::evseConnected() {
   digitalWrite(OUTL_12V_BAT_CHRG, HIGH);
   analogWrite(OUTPWM_PUMP, 0);
 }
-
 
 /////////////////////////////////////////////////
 /// \brief evseConnected state is when the boat *is connected*

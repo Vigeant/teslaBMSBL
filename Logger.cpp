@@ -33,7 +33,8 @@ Logger log_inst;
 /// \brief Constructor for the logger
 /////////////////////////////////////////////////
 Logger::Logger() {
-  logLevel = Logger::Info;
+  //logLevel = Logger::Info;
+  logLevel = 4;
   lastLogTime = 0;
 }
 
