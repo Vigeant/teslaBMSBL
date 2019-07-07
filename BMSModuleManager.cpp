@@ -425,6 +425,12 @@ void BMSModuleManager::printPackSummary()
 
   LOG_CONSOLE("\nModules: %i    Voltage: %.2fV   Avg Cell Voltage: %.2fV     Avg Temp: %.2fC\n", numFoundModules,
               getPackVoltage(), getAvgCellVolt(), getAvgTemperature());
+  LOG_CONSOLE("INL_EVSE_DISC: %d\n", digitalRead(INL_EVSE_DISC));
+  LOG_CONSOLE("INH_RUN: %d\n", digitalRead(INH_RUN));
+  LOG_CONSOLE("INL_CHARGING: %d\n", digitalRead(INL_CHARGING));
+  
+  //testing scafolding
+  LOG_CONSOLE("getLowCellVolt() < CHARGER_CYCLE_V_SETPOINT    : %f < %f?\n" , getLowCellVolt(),CHARGER_CYCLE_V_SETPOINT);
   for (int y = 0; y < MAX_MODULE_ADDR; y++)
   {
     if (modules[y].getAddress() > 0)

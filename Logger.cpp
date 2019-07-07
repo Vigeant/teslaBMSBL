@@ -34,7 +34,7 @@ Logger log_inst;
 /////////////////////////////////////////////////
 Logger::Logger() {
   //logLevel = Logger::Info;
-  logLevel = 4;
+  logLevel = Logger::Cons;
   lastLogTime = 0;
 }
 

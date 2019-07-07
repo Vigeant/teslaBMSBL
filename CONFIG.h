@@ -33,7 +33,7 @@
 #define INL_BAT_MON_FAULT     17    //Battery Monitor Fault.
 #define INL_EVSE_DISC         18    //Electric Vehicle Supply Equipment Disconnected (from EVCC).
 #define INH_RUN               19    //RUN signal from power relay with voltage divider from 12V to 5V.
-#define INH_CHARGING          20    //CHARGING signal from EVCC with voltage divider from 12V to 5V.
+#define INL_CHARGING          20    //CHARGING signal from EVCC with voltage divider from 12V to 5V.
 #define INA_12V_BAT           A7    //PIN21 12v battery monitor. Analog input with 12V to 5V voltage divider.
 #define OUTL_EVCC_ON          22    //drive low to power on EVCC. Cycling this signal will force a new charge cycle.
 #define OUTL_NO_FAULT         23    //drive low to signal no fault to EVCC. Required for EVCC to charge.
@@ -85,4 +85,4 @@
 #define BAT12V_UNDER_V_SETPOINT 10.0f
 //12V battery ADC devisor 0-1023 -> 0-15V
 //#define BAT12V_SCALING_DIVISOR 68.0f
-#define BAT12V_SCALING_DIVISOR 33.6478
+#define BAT12V_SCALING_DIVISOR 62.89f
