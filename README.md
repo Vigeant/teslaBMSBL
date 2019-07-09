@@ -26,7 +26,9 @@
 
 Serial Line: COMX (X typically = 7)
 Speed: 115200
-	
+
+## state machine:
+	[State machine](https://online.visual-paradigm.com/w/pmcoivfe/diagrams.jsp#diagram:proj=0&id=3)
 ## todo
 - [x] Change state machine to match actual charger controller behavior. 
 - [ ] sleep modes for the teensy
