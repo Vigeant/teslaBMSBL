@@ -28,6 +28,9 @@ Serial Line: COMX (X typically = 7)
 Speed: 115200
 	
 ## todo
-- [ ] Full state machine testing.
+- [x] Change state machine to match actual charger controller behavior. 
+- [ ] sleep modes for the teensy
+	- [ ] full speed run in charging and run modes, 5s sleep otherwise.
+	- [ ] allow an option in the console to disable sleep for 1h to allow debugging.
 
 	

@@ -13,158 +13,78 @@ void Controller::doController() {
 
   //figure out state transition
   switch (state) {
-
+    /**************** ****************/
     case INIT:
       if (ticks >= stateticks) {
         ticks = 0;
         state = STANDBY;
       }
       break;
-
+    /**************** ****************/
     case STANDBY:
 #ifdef STATECYCLING
-      if (ticks >= stateticks + 4) {
-        ticks = 0;
-        state = STANDBY_DC2DC;
-      }
-#else
-      if (digitalRead(INH_RUN) == HIGH) {
-        ticks = 0;
-        state = RUN;
-      } else if (digitalRead(INL_EVSE_DISC) == HIGH) {
-        ticks = 0;
-        state = EVSE_CONNECTED;
-      } else if (bat12vVoltage < DC2DC_CYCLE_V_SETPOINT) {
-        ticks = 0;
-        bat12Vcyclestart = (millis() / 1000);
-        state = STANDBY_DC2DC;
-      }
-#endif
-      break;
-
-    case STANDBY_DC2DC:
-#ifdef STATECYCLING
-      if (ticks >= stateticks + 4) {
-        ticks = 0;
-        state = EVSE_CONNECTED;
-      }
-#else
-      if (digitalRead(INH_RUN) == HIGH) {
-        ticks = 0;
-        state = RUN;
-      } else if (digitalRead(INL_EVSE_DISC) == HIGH) {
-        ticks = 0;
-        state = EVSE_CONNECTED_DC2DC;
-      } else if (bat12Vcyclestart <= (millis() / 1000)) {
-        if ((bat12Vcyclestart + DC2DC_CYCLE_TIME_S) < (millis() / 1000)) {
-          ticks = 0;
-          state = STANDBY;
-        }
-        //if millis counter wrapped around
-      } else if (bat12Vcyclestart > (millis() / 1000)) {
-        if ((0xffffffff - bat12Vcyclestart + (millis() / 1000)) > DC2DC_CYCLE_TIME_S) {
-          ticks = 0;
-          state = STANDBY;
-        }
-      }
-#endif
-      break;
-
-    case EVSE_CONNECTED:
-#ifdef STATECYCLING
-      if (ticks >= stateticks + 4) {
-        ticks = 0;
-        state = EVSE_CONNECTED_DC2DC;
-      }
-#else
-      if (digitalRead(INL_EVSE_DISC) == LOW) {
-        ticks = 0;
-        state = STANDBY;
-      } else if (bms.getLowCellVolt() < CHARGER_CYCLE_V_SETPOINT) {
-        ticks = 0;
-        state = CHARGER_CYCLE;
-      } else if (bat12vVoltage < DC2DC_CYCLE_V_SETPOINT) {
-        ticks = 0;
-        bat12Vcyclestart = (millis() / 1000);
-        state = EVSE_CONNECTED_DC2DC;
-      }
-#endif
-      break;
-
-    case EVSE_CONNECTED_DC2DC:
-#ifdef STATECYCLING
-      if (ticks >= stateticks + 4) {
-        ticks = 0;
-        state = CHARGER_CYCLE;
-      }
-#else
-      if (digitalRead(INL_EVSE_DISC) == LOW) {
-        ticks = 0;
-        state = STANDBY_DC2DC;
-      } else if (bms.getLowCellVolt() < CHARGER_CYCLE_V_SETPOINT) {
-        ticks = 0;
-        state = CHARGER_CYCLE;
-      } else if (bat12Vcyclestart < (millis() / 1000)) {
-        if ((bat12Vcyclestart + DC2DC_CYCLE_TIME_S) < (millis() / 1000)) {
-          ticks = 0;
-          state = EVSE_CONNECTED;
-        }
-        //if millis counter wrapped around
-      } else if (bat12Vcyclestart > (millis() / 1000)) {
-        if ((0xffffffff - bat12Vcyclestart + (millis() / 1000)) > DC2DC_CYCLE_TIME_S) {
-          ticks = 0;
-          state = EVSE_CONNECTED;
-        }
-      }
-#endif
-      break;
-
-    case CHARGER_CYCLE:
       if (ticks >= stateticks) {
         ticks = 0;
         state = PRE_CHARGE;
       }
-      break;
+#else
+      if (dc2dcON == 0 && bat12vVoltage < DC2DC_CYCLE_V_SETPOINT) {
+        bat12Vcyclestart = (millis() / 1000);
+        dc2dcON = 1;
+      } else if ( dc2dcON == 1 && (bat12Vcyclestart + DC2DC_CYCLE_TIME_S) < (millis() / 1000)) {
+        // I am ignoring the time counter loop around as it will simply result in a short charge cycle
+        // followed with a proper charging cycle.
+        dc2dcON = 0;
+      }
 
+      if (digitalRead(INH_RUN) == HIGH) {
+        ticks = 0;
+        state = RUN;
+      } else if (bms.getLowCellVolt() < CHARGER_CYCLE_V_SETPOINT && bms.getHighCellVolt() < MAX_CHARGE_V_SETPOINT && ticks >= 25) {
+        ticks = 0;
+        state = PRE_CHARGE;
+      }
+#endif
+      break;
+    /**************** ****************/
     case PRE_CHARGE:
 #ifdef STATECYCLING
-      if (ticks >= stateticks + 4) {
+      if (ticks >= stateticks) {
         ticks = 0;
         state = CHARGING;
       }
 #else
-      if (digitalRead(INL_EVSE_DISC) == LOW) {
-        ticks = 0;
-        state = STANDBY;
-      } else if (digitalRead(INL_CHARGING) == LOW) {
-        ticks = 0;
-        state = CHARGING;
+      if (ticks >= 4) { //adjust to give time to the EVCC to properly boot
+        if (digitalRead(INL_EVSE_DISC) == LOW) {
+          ticks = 0;
+          state = STANDBY;
+        } else if (digitalRead(INL_CHARGING) == LOW) {
+          ticks = 0;
+          state = CHARGING;
+        }
       }
 #endif
-
       break;
+    /**************** ****************/
     case CHARGING:
 #ifdef STATECYCLING
-      if (ticks >= stateticks + 4) {
+      if (ticks >= stateticks) {
         ticks = 0;
         state = RUN;
       }
 #else
-      if (digitalRead(INL_EVSE_DISC) == LOW) {
+      if (digitalRead(INL_EVSE_DISC) == LOW || digitalRead(INL_CHARGING) == HIGH) {
         ticks = 0;
         state = STANDBY;
-      } else if (digitalRead(INL_CHARGING) == HIGH) {
-        ticks = 0;
-        state = EVSE_CONNECTED;
       }
 #endif
       break;
-
+    /**************** ****************/
     case RUN:
 #ifdef STATECYCLING
-      if (ticks >= stateticks + 4) {
+      if (ticks >= stateticks) {
         ticks = 0;
-        state = STANDBY;
+        state = INIT;
       }
 #else
       if (digitalRead(INH_RUN ) == LOW) {
@@ -173,7 +93,7 @@ void Controller::doController() {
       }
 #endif
       break;
-
+    /**************** ****************/
     default:
       break;
   }
@@ -189,24 +109,8 @@ void Controller::doController() {
       standby();
       break;
 
-    case STANDBY_DC2DC:
-      standbyDC2DC();
-      break;
-
-    case EVSE_CONNECTED:
-      evseConnected();
-      break;
-
-    case EVSE_CONNECTED_DC2DC:
-      evseConnectedDC2DC();
-      break;
-
-    case CHARGER_CYCLE:
-      chargerCycle();
-      break;
-
     case PRE_CHARGE:
-      preCharge();
+      pre_charge();
       break;
 
     case CHARGING:
@@ -235,6 +139,7 @@ Controller::Controller() {
 /////////////////////////////////////////////////
 void Controller::syncModuleDataObjects() {
   float bat12vVoltage;
+  bms.wakeBoards();
   bms.getAllVoltTemp();
 
   if (bms.getLineFault()) {
@@ -435,7 +340,8 @@ void Controller::syncModuleDataObjects() {
   if (faultWatSen2) faultWatSen2TS = millis() / 1000;
 
   stickyFaulted |= isFaulted;
-  bms.clearFaults();
+  //bms.clearFaults();
+  bms.sleepBoards();
 }
 
 /////////////////////////////////////////////////
@@ -544,6 +450,7 @@ void Controller::init() {
 
   chargerInhibit = false;
   powerLimiter = false;
+  dc2dcON = false;
 
   bms.renumberBoardIDs();
   bms.clearFaults();
@@ -556,72 +463,21 @@ void Controller::init() {
 /////////////////////////////////////////////////
 void Controller::standby() {
   balanceCells();
-  digitalWrite(OUTL_EVCC_ON, LOW);
-  digitalWrite(OUTL_NO_FAULT, chargerInhibit);
-  digitalWrite(OUTL_12V_BAT_CHRG, HIGH);
-  analogWrite(OUTPWM_PUMP, 0);
-}
-
-/////////////////////////////////////////////////
-/// \brief standbyDC2DC state is when the boat *is not connected*
-/// to a EVSE, not in run state and the 12V battery is being
-/// charged since it dipped bellow its low voltage threshold.
-/////////////////////////////////////////////////
-void Controller::standbyDC2DC() {
-  balanceCells();
-  digitalWrite(OUTL_EVCC_ON, LOW);
-  digitalWrite(OUTL_NO_FAULT, chargerInhibit);
-  digitalWrite(OUTL_12V_BAT_CHRG, LOW);
-  analogWrite(OUTPWM_PUMP, 0);
-}
-
-/////////////////////////////////////////////////
-/// \brief evseConnected state is when the boat *is connected*
-/// to a EVSE and is not yet charging or in between 2 charging
-/// cycles until it dips bellow its pack voltage threshold.
-/////////////////////////////////////////////////
-void Controller::evseConnected() {
-  balanceCells();
-  digitalWrite(OUTL_EVCC_ON, LOW);
-  digitalWrite(OUTL_NO_FAULT, chargerInhibit);
-  digitalWrite(OUTL_12V_BAT_CHRG, HIGH);
-  analogWrite(OUTPWM_PUMP, 0);
-}
-
-/////////////////////////////////////////////////
-/// \brief evseConnected state is when the boat *is connected*
-/// to a EVSE and is not yet charging or in between 2 charging
-/// cycles until it dips bellow its pack voltage threshold. 12V attery charging
-/////////////////////////////////////////////////
-void Controller::evseConnectedDC2DC() {
-  balanceCells();
-  digitalWrite(OUTL_EVCC_ON, LOW);
-  digitalWrite(OUTL_NO_FAULT, chargerInhibit);
-  digitalWrite(OUTL_12V_BAT_CHRG, LOW);
-  analogWrite(OUTPWM_PUMP, 0);
-}
-
-/////////////////////////////////////////////////
-/// \brief cargerCycle state is when the boat *is connected*
-/// to a EVSE and is cycling the EVCC to trigger a new charging cycle.
-/////////////////////////////////////////////////
-void Controller::chargerCycle() {
-  balanceCells();
   digitalWrite(OUTL_EVCC_ON, HIGH);
   digitalWrite(OUTL_NO_FAULT, chargerInhibit);
-  digitalWrite(OUTL_12V_BAT_CHRG, LOW);
+  digitalWrite(OUTL_12V_BAT_CHRG, !dc2dcON);
   analogWrite(OUTPWM_PUMP, 0);
 }
 
 /////////////////////////////////////////////////
-/// \brief preCharge state is simply waiting for the charge signal to be asserted by the charger
-/// following a cycling of its power.
+/// \brief pre_charge state is turning on the EVCC to charge the battery. If the EVSE is disconnected,
+/// it goes back to STANDBY.
 /////////////////////////////////////////////////
-void Controller::preCharge() {
+void Controller::pre_charge() {
   balanceCells();
   digitalWrite(OUTL_EVCC_ON, LOW);
   digitalWrite(OUTL_NO_FAULT, chargerInhibit);
-  digitalWrite(OUTL_12V_BAT_CHRG, LOW);
+  digitalWrite(OUTL_12V_BAT_CHRG, !dc2dcON);
   analogWrite(OUTPWM_PUMP, 0);
 }
 
@@ -672,12 +528,6 @@ void Controller::printControllerState() {
     case STANDBY:
       LOG_CONSOLE("=  state: STANDBY                                                                  =\n");
       break;
-    case STANDBY_DC2DC:
-      LOG_CONSOLE("=  state: STANDBY_DC2DC                                                            =\n");
-      break;
-    case CHARGER_CYCLE:
-      LOG_CONSOLE("=  state: CHARGER_CYCLE                                                            =\n");
-      break;
     case PRE_CHARGE:
       LOG_CONSOLE("=  state: PRE_CHARGE                                                               =\n");
       break;
@@ -686,12 +536,6 @@ void Controller::printControllerState() {
       break;
     case RUN:
       LOG_CONSOLE("=  state: RUN                                                                      =\n");
-      break;
-    case EVSE_CONNECTED:
-      LOG_CONSOLE("=  state: EVSE_CONNECTED                                                           =\n");
-      break;
-    case EVSE_CONNECTED_DC2DC:
-      LOG_CONSOLE("=  state: EVSE_CONNECTED_DC2DC                                                     =\n");
       break;
   }
   LOG_CONSOLE("=  Time since last reset:%-3d days, %02d:%02d:%02d                                        =\n",

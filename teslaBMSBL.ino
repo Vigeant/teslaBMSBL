@@ -67,7 +67,7 @@ void phase10hzB() {
 /////////////////////////////////////////////////
 void loop()
 {
-  uint32_t starttime, stoptime, delaytime, timespent;
+  uint32_t starttime, endtime, delaytime, timespent;
   uint32_t period = 200;
   bool phaseA = true;
   
@@ -81,12 +81,12 @@ void loop()
       phase10hzB();
     phaseA = !phaseA;    
 
-    stoptime = millis();
-    if (stoptime > starttime) {
-      timespent = stoptime - starttime;
+    endtime = millis();
+    if (endtime > starttime) {
+      timespent = endtime - starttime;
     } else {
       starttime = 0xffffffff - starttime;
-      timespent = starttime + stoptime;
+      timespent = starttime + endtime;
     }
     if (timespent >= period) {
       delaytime = 0;

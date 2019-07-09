@@ -8,7 +8,7 @@
 class Controller {
   public:
     enum ControllerState {
-      INIT, STANDBY, STANDBY_DC2DC, CHARGER_CYCLE, PRE_CHARGE, CHARGING, RUN, EVSE_CONNECTED, EVSE_CONNECTED_DC2DC
+      INIT, STANDBY, PRE_CHARGE, CHARGING, RUN
     };
     void doController();
     Controller();
@@ -78,6 +78,7 @@ class Controller {
 
     bool chargerInhibit;
     bool powerLimiter;
+    bool dc2dcON;
 
     //run-time functions
     void syncModuleDataObjects(); //gathers all the data from the boards and populates the BMSModel object instances
@@ -90,11 +91,7 @@ class Controller {
     ControllerState state;
     void init(); //reset all boards and assign address to each board
     void standby();
-    void standbyDC2DC();
-    void evseConnected();
-    void evseConnectedDC2DC();
-    void chargerCycle();
-    void preCharge();
+    void pre_charge();
     void charging();
     void run();
 
