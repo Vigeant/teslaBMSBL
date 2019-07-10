@@ -6,6 +6,7 @@
 void Controller::doController() {
   static int ticks = 0;
   static unsigned int bat12Vcyclestart = 0;
+  static int standbyTicks = 1;
   const int stateticks = 4;
   bat12vVoltage = (float)analogRead(INA_12V_BAT) / BAT12V_SCALING_DIVISOR ;
 
@@ -40,7 +41,7 @@ void Controller::doController() {
       if (digitalRead(INH_RUN) == HIGH) {
         ticks = 0;
         state = RUN;
-      } else if (bms.getLowCellVolt() < CHARGER_CYCLE_V_SETPOINT && bms.getHighCellVolt() < MAX_CHARGE_V_SETPOINT && ticks >= 25) {
+      } else if (bms.getLowCellVolt() < CHARGER_CYCLE_V_SETPOINT && bms.getHighCellVolt() < MAX_CHARGE_V_SETPOINT && ticks >= standbyTicks) {
         ticks = 0;
         state = PRE_CHARGE;
       }
@@ -102,26 +103,38 @@ void Controller::doController() {
   switch (state) {
 
     case INIT:
+      period = 200;
       init();
       break;
 
     case STANDBY:
+      if (SERIALCONSOLE){
+        period = 200;
+        standbyTicks = 12;
+      } else {
+        period = 2500;
+        standbyTicks = 1;
+      }
       standby();
       break;
 
     case PRE_CHARGE:
+      period = 200;
       pre_charge();
       break;
 
     case CHARGING:
+      period = 200;
       charging();
       break;
 
     case RUN:
+      period = 200;
       run();
       break;
 
     default:
+      period = 200;
       break;
   }
   ticks++;
@@ -350,9 +363,9 @@ void Controller::syncModuleDataObjects() {
 void Controller::balanceCells() {
   //balance for 1 second given that the controller wakes up every second.
   if (bms.getHighCellVolt() > PRECISION_BALANCE_V_SETPOINT) {
-    bms.balanceCells(1, PRECISION_BALANCE_CELL_V_OFFSET);
+    bms.balanceCells(5, PRECISION_BALANCE_CELL_V_OFFSET);
   } else if (bms.getHighCellVolt() > ROUGH_BALANCE_V_SETPOINT) {
-    bms.balanceCells(1, ROUGH_BALANCE_CELL_V_OFFSET);
+    bms.balanceCells(5, ROUGH_BALANCE_CELL_V_OFFSET);
   }
 }
 
@@ -451,6 +464,7 @@ void Controller::init() {
   chargerInhibit = false;
   powerLimiter = false;
   dc2dcON = false;
+  period = 200;
 
   bms.renumberBoardIDs();
   bms.clearFaults();
@@ -515,6 +529,13 @@ Controller::ControllerState Controller::getState() {
 /////////////////////////////////////////////////
 BMSModuleManager* Controller::getBMSPtr() {
   return &bms;
+}
+
+/////////////////////////////////////////////////
+/// \brief returns the main loop period the controller is expecting.
+/////////////////////////////////////////////////
+uint32_t Controller::getPeriodMillis() {
+  return period;
 }
 
 void Controller::printControllerState() {

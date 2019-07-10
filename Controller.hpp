@@ -15,6 +15,7 @@ class Controller {
     ControllerState getState();
     BMSModuleManager* getBMSPtr();
     void printControllerState();
+    uint32_t getPeriodMillis();
 
     //faults
     bool faultModuleLoop;
@@ -79,6 +80,7 @@ class Controller {
     bool chargerInhibit;
     bool powerLimiter;
     bool dc2dcON;
+    uint32_t period;
 
     //run-time functions
     void syncModuleDataObjects(); //gathers all the data from the boards and populates the BMSModel object instances

@@ -5,6 +5,8 @@
 ## dependencies
 - TeensyView libs
 	- https://github.com/sparkfun/SparkFun_TeensyView_Arduino_Library/tree/master/examples
+- Snooze for lower power consumption
+	- https://github.com/duff2013/Snooze
 	
 ## Error codes on teensyView
 
@@ -30,9 +32,13 @@ Speed: 115200
 ## state machine:
 [State machine](https://online.visual-paradigm.com/w/pmcoivfe/diagrams.jsp#diagram:proj=0&id=3)
 ## todo
-- [x] Change state machine to match actual charger controller behavior. 
-- [ ] sleep modes for the teensy
-	- [ ] full speed run in charging and run modes, 5s sleep otherwise.
-	- [ ] allow an option in the console to disable sleep for 1h to allow debugging.
+- [X] Change state machine to match actual charger controller behavior. 
+- [X] sleep modes for the teensy
+	- [X] full speed when a console is connected and in all but STANDBY mode, 5s sleep in STANDBY when no console is connected.
+	
+## particularities
+Due to the 5s deepsleep mode in standby, it is hard to connect the serial console. To make it easier, place the bms in run mode and connect.
+Due to the deepsleep mode, it is impossible to simply reprogram the teensy following the first sleep. It is therefore necessary to push the program button or short the P ang G pins on the board.
+The teensyview cannot be shut down as it is connected straight to the VDD pins.
 
 	

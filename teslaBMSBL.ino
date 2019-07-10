@@ -4,28 +4,38 @@
 #include "Logger.hpp"
 #include "Oled.hpp"
 #include "Controller.hpp"
+#include <Snooze.h>
 
 #define CPU_RESTART_ADDR (uint32_t *)0xE000ED0C
 #define CPU_RESTART_VAL 0x5FA0004
 #define CPU_RESTART (*CPU_RESTART_ADDR = CPU_RESTART_VAL);
 
 /*! \mainpage teslaBMSBL
- *
- * \section intro_sec Introduction
- *
- * A teensy based battery management system for Tesla battery modules.
- *
- * \section install_sec Installation
- *
- * \subsection step1 Step 1: Opening the box
- *  
- * etc...
- */
+
+   \section intro_sec Introduction
+
+   A teensy based battery management system for Tesla battery modules.
+
+   \section install_sec Installation
+
+   \subsection step1 Step 1: Opening the box
+
+   etc...
+*/
 
 //instantiate all objects
 static Controller controller_inst;        ///< The controller is responsible for orchestrating all major functions of the BMS.
 static Cons cons_inst(&controller_inst);  ///< The console is a 2 way user interface available on usb serial port at baud 115200.
 static Oled oled_inst(&controller_inst);  ///< The oled is a 1 way user interface displaying the most critical information.
+
+// Load drivers
+SnoozeTouch touch;
+SnoozeDigital digital;
+SnoozeTimer timer;
+SnoozeUSBSerial usbSerial;
+
+// install drivers to a SnoozeBlock
+SnoozeBlock config(timer, digital, usbSerial);
 
 /////////////////////////////////////////////////
 /// \brief The setup function runs once when you press reset or power the board.
@@ -40,7 +50,7 @@ void setup() {
 /////////////////////////////////////////////////
 /// Holds all the code that runs every 50ms.
 /////////////////////////////////////////////////
-void phase20hz() {
+void phase1main() {
   if (digitalRead(INL_SOFT_RST) == LOW) {
     //_reboot_Teensyduino_();
     CPU_RESTART;
@@ -51,14 +61,14 @@ void phase20hz() {
 /////////////////////////////////////////////////
 /// Holds code that runs every 100ms.
 /////////////////////////////////////////////////
-void phase10hzA() {
+void phase1A() {
   controller_inst.doController();
 }
 
 /////////////////////////////////////////////////
 /// Holds code that runs every 100ms.
 /////////////////////////////////////////////////
-void phase10hzB() {
+void phase1B() {
   oled_inst.doOled();
 }
 
@@ -70,16 +80,24 @@ void loop()
   uint32_t starttime, endtime, delaytime, timespent;
   uint32_t period = 200;
   bool phaseA = true;
-  
+  //int who;
+
+  //pinMode(INH_RUN, INPUT_PULLDOWN);
   for (;;) {
     starttime = millis();
 
-    phase20hz();
+    phase1main();
     if (phaseA)
-      phase10hzA();
+      phase1A();
     else
-      phase10hzB();
-    phaseA = !phaseA;    
+      phase1B();
+    phaseA = !phaseA;
+
+    //get loop period from controller
+    //digital.pinMode(INH_RUN, INPUT_PULLDOWN, RISING);//pin, mode, type
+    digital.pinMode(INL_SOFT_RST, INPUT_PULLUP, FALLING);//pin, mode, type
+    
+    period = controller_inst.getPeriodMillis();
 
     endtime = millis();
     if (endtime > starttime) {
@@ -93,6 +111,14 @@ void loop()
     } else {
       delaytime = period - timespent;
     }
-    delay(delaytime);
+
+    //sleep board instead of delay
+    if (delaytime > 200) {
+      timer.setTimer(delaytime);// milliseconds
+      //who = Snooze.deepSleep( config );
+      (void)Snooze.deepSleep( config );
+    } else {
+      delay(delaytime);
+    }
   }
 }
