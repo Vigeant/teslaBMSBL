@@ -37,8 +37,8 @@ Speed: 115200
 	- [X] full speed when a console is connected and in all but STANDBY mode, 5s sleep in STANDBY when no console is connected.
 	
 ## particularities
-Due to the 5s deepsleep mode in standby, it is hard to connect the serial console. To make it easier, place the bms in run mode and connect.
-Due to the deepsleep mode, it is impossible to simply reprogram the teensy following the first sleep. It is therefore necessary to push the program button or short the P ang G pins on the board.
+Due to the 5s deepsleep mode in standby, it is hard to connect the serial console. To make it easier, either connect within 1 minute of a reset or place the bms in run mode and connect.
+Due to the deepsleep mode, it is impossible to simply reprogram the teensy following the first sleep. To facilitate reprogramming, the board will not sleep for 1 minute following a reset.
 The teensyview cannot be shut down as it is connected straight to the VDD pins.
 
 	
