@@ -37,6 +37,7 @@ var searchData=
   ['getlowtemperature',['getLowTemperature',['../class_b_m_s_module_manager.html#a2fbf95790c1e73676ae17bd50d75ca96',1,'BMSModuleManager']]],
   ['getmodulevoltage',['getModuleVoltage',['../class_b_m_s_module.html#a0ac3055a18b9705c96c437385daaa1da',1,'BMSModule']]],
   ['getpackvoltage',['getPackVoltage',['../class_b_m_s_module_manager.html#ae3bfcdc8c70138b7d71e985eb0b18dc6',1,'BMSModuleManager']]],
+  ['getperiodmillis',['getPeriodMillis',['../class_controller.html#afb8faf8017ec37a89d547455a49433e2',1,'Controller']]],
   ['getstate',['getState',['../class_controller.html#a2458dc6f56f89eef36996cef2703dc39',1,'Controller']]],
   ['gettemperature',['getTemperature',['../class_b_m_s_module.html#a5421584a4902893b122fd12100f97877',1,'BMSModule']]]
 ];

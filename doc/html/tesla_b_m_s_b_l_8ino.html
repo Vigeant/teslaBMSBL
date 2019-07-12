@@ -62,7 +62,9 @@ $(function() {
 </div><!-- top -->
 <div class="header">
   <div class="summary">
-<a href="#func-members">Functions</a>  </div>
+<a href="#define-members">Macros</a> &#124;
+<a href="#func-members">Functions</a> &#124;
+<a href="#var-members">Variables</a>  </div>
   <div class="headertitle">
 <div class="title">teslaBMSBL.ino File Reference</div>  </div>
 </div><!--header-->
@@ -72,29 +74,60 @@ $(function() {
 <code>#include &quot;Logger.hpp&quot;</code><br />
 <code>#include &quot;Oled.hpp&quot;</code><br />
 <code>#include &quot;Controller.hpp&quot;</code><br />
+<code>#include &lt;Snooze.h&gt;</code><br />
 </div><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
+Macros</h2></td></tr>
+<tr class="memitem:a83b4fe5e7d8e7fba4e1ad4be7b9c2657"><td class="memItemLeft" align="right" valign="top"><a id="a83b4fe5e7d8e7fba4e1ad4be7b9c2657"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>CPU_RESTART_ADDR</b>&#160;&#160;&#160;(uint32_t *)0xE000ED0C</td></tr>
+<tr class="separator:a83b4fe5e7d8e7fba4e1ad4be7b9c2657"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeb0b93fc6b1a747b5c49bcd844078d32"><td class="memItemLeft" align="right" valign="top"><a id="aeb0b93fc6b1a747b5c49bcd844078d32"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>CPU_RESTART_VAL</b>&#160;&#160;&#160;0x5FA0004</td></tr>
+<tr class="separator:aeb0b93fc6b1a747b5c49bcd844078d32"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4e80f586887d617c458bb28c5d80921c"><td class="memItemLeft" align="right" valign="top"><a id="a4e80f586887d617c458bb28c5d80921c"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>CPU_RESTART</b>&#160;&#160;&#160;(*CPU_RESTART_ADDR = CPU_RESTART_VAL);</td></tr>
+<tr class="separator:a4e80f586887d617c458bb28c5d80921c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:abb093894ece89315ea2eded705651ead"><td class="memItemLeft" align="right" valign="top"><a id="abb093894ece89315ea2eded705651ead"></a>
+SnoozeBlock&#160;</td><td class="memItemRight" valign="bottom"><b>config</b> (timer, digital, usbSerial)</td></tr>
+<tr class="separator:abb093894ece89315ea2eded705651ead"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4fc01d736fe50cf5b977f755b675f11d"><td class="memItemLeft" align="right" valign="top"><a id="a4fc01d736fe50cf5b977f755b675f11d"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tesla_b_m_s_b_l_8ino.html#a4fc01d736fe50cf5b977f755b675f11d">setup</a> ()</td></tr>
 <tr class="memdesc:a4fc01d736fe50cf5b977f755b675f11d"><td class="mdescLeft">&#160;</td><td class="mdescRight">The setup function runs once when you press reset or power the board. <br /></td></tr>
 <tr class="separator:a4fc01d736fe50cf5b977f755b675f11d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab1c3c56aead6421d43de8fe6c9aa42b3"><td class="memItemLeft" align="right" valign="top"><a id="ab1c3c56aead6421d43de8fe6c9aa42b3"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tesla_b_m_s_b_l_8ino.html#ab1c3c56aead6421d43de8fe6c9aa42b3">phase20hz</a> ()</td></tr>
-<tr class="memdesc:ab1c3c56aead6421d43de8fe6c9aa42b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Holds all the code that runs every 50ms. <br /></td></tr>
-<tr class="separator:ab1c3c56aead6421d43de8fe6c9aa42b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6e8cac6fc6e1a353073670ddfe4ff359"><td class="memItemLeft" align="right" valign="top"><a id="a6e8cac6fc6e1a353073670ddfe4ff359"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tesla_b_m_s_b_l_8ino.html#a6e8cac6fc6e1a353073670ddfe4ff359">phase10hzA</a> ()</td></tr>
-<tr class="memdesc:a6e8cac6fc6e1a353073670ddfe4ff359"><td class="mdescLeft">&#160;</td><td class="mdescRight">Holds code that runs every 100ms. <br /></td></tr>
-<tr class="separator:a6e8cac6fc6e1a353073670ddfe4ff359"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a381e7703850f065b87cab3912636b1ea"><td class="memItemLeft" align="right" valign="top"><a id="a381e7703850f065b87cab3912636b1ea"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tesla_b_m_s_b_l_8ino.html#a381e7703850f065b87cab3912636b1ea">phase10hzB</a> ()</td></tr>
-<tr class="memdesc:a381e7703850f065b87cab3912636b1ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Holds code that runs every 100ms. <br /></td></tr>
-<tr class="separator:a381e7703850f065b87cab3912636b1ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acdedf4cd561abae225f304dce50c5a1e"><td class="memItemLeft" align="right" valign="top"><a id="acdedf4cd561abae225f304dce50c5a1e"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tesla_b_m_s_b_l_8ino.html#acdedf4cd561abae225f304dce50c5a1e">phase1main</a> ()</td></tr>
+<tr class="memdesc:acdedf4cd561abae225f304dce50c5a1e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Holds all the code that runs every 50ms. <br /></td></tr>
+<tr class="separator:acdedf4cd561abae225f304dce50c5a1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a317b7adc42e1b1dbe4024f220d05180a"><td class="memItemLeft" align="right" valign="top"><a id="a317b7adc42e1b1dbe4024f220d05180a"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tesla_b_m_s_b_l_8ino.html#a317b7adc42e1b1dbe4024f220d05180a">phase1A</a> ()</td></tr>
+<tr class="memdesc:a317b7adc42e1b1dbe4024f220d05180a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Holds code that runs every 100ms. <br /></td></tr>
+<tr class="separator:a317b7adc42e1b1dbe4024f220d05180a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaac46452573f99cb3f47512a08df60e2"><td class="memItemLeft" align="right" valign="top"><a id="aaac46452573f99cb3f47512a08df60e2"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tesla_b_m_s_b_l_8ino.html#aaac46452573f99cb3f47512a08df60e2">phase1B</a> ()</td></tr>
+<tr class="memdesc:aaac46452573f99cb3f47512a08df60e2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Holds code that runs every 100ms. <br /></td></tr>
+<tr class="separator:aaac46452573f99cb3f47512a08df60e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afe461d27b9c48d5921c00d521181f12f"><td class="memItemLeft" align="right" valign="top"><a id="afe461d27b9c48d5921c00d521181f12f"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tesla_b_m_s_b_l_8ino.html#afe461d27b9c48d5921c00d521181f12f">loop</a> ()</td></tr>
 <tr class="memdesc:afe461d27b9c48d5921c00d521181f12f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Once setup is complete, loop is called for ever. <br /></td></tr>
 <tr class="separator:afe461d27b9c48d5921c00d521181f12f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:ae9c0cbf911d649987b8672e8c7b795ed"><td class="memItemLeft" align="right" valign="top"><a id="ae9c0cbf911d649987b8672e8c7b795ed"></a>
+SnoozeTouch&#160;</td><td class="memItemRight" valign="bottom"><b>touch</b></td></tr>
+<tr class="separator:ae9c0cbf911d649987b8672e8c7b795ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8af313f0d683d6b74ba7f6828428428f"><td class="memItemLeft" align="right" valign="top"><a id="a8af313f0d683d6b74ba7f6828428428f"></a>
+SnoozeDigital&#160;</td><td class="memItemRight" valign="bottom"><b>digital</b></td></tr>
+<tr class="separator:a8af313f0d683d6b74ba7f6828428428f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a03dd0c5b48067987401595cdf30b613f"><td class="memItemLeft" align="right" valign="top"><a id="a03dd0c5b48067987401595cdf30b613f"></a>
+SnoozeTimer&#160;</td><td class="memItemRight" valign="bottom"><b>timer</b></td></tr>
+<tr class="separator:a03dd0c5b48067987401595cdf30b613f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0e36b838fedbc3f37e0c802bcec42e65"><td class="memItemLeft" align="right" valign="top"><a id="a0e36b838fedbc3f37e0c802bcec42e65"></a>
+SnoozeUSBSerial&#160;</td><td class="memItemRight" valign="bottom"><b>usbSerial</b></td></tr>
+<tr class="separator:a0e36b838fedbc3f37e0c802bcec42e65"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 <!-- start footer part -->

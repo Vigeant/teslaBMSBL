@@ -14,8 +14,8 @@ from scipy import misc
 import os
 
 path = './'
-#image = misc.imread(os.path.join(path, 'tesla_logo_PNG21_lcd.bmp'), flatten=1)
-image = misc.imread(os.path.join(path, 'esidewinder.bmp'), flatten=1)
+image = misc.imread(os.path.join(path, 'tesla_logo_PNG21_lcd_BMSBL.bmp'), flatten=1)
+#image = misc.imread(os.path.join(path, 'esidewinder.bmp'), flatten=1)
 
 print image
 

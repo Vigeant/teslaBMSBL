@@ -64,7 +64,7 @@ void Cons::doConsole() {
         memset(y,0,CONSOLEBUFFERSIZE);
         yptr = 0;
         lastyptr = 0;
-        LOG_CONSOLE(">> ");
+        LOG_CONSOLE("BMS> ");
         break; //not perfect but...
       } else {
         //LOG_CONSOLE("y[%d]:%c y[0]:0x%x", yptr, y[yptr], y[0]);

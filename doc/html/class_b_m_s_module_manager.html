@@ -85,9 +85,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:a26cca2180eda2fdbf06d91e270027327"><td class="memItemLeft" align="right" valign="top"><a id="a26cca2180eda2fdbf06d91e270027327"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>StopBalancing</b> ()</td></tr>
 <tr class="separator:a26cca2180eda2fdbf06d91e270027327"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adbbcd7b14e90684faf1a478ad53198b2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_m_s_module_manager.html#adbbcd7b14e90684faf1a478ad53198b2">balanceCells</a> (uint8_t duration)</td></tr>
-<tr class="memdesc:adbbcd7b14e90684faf1a478ad53198b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">perform a round of balancing.  <a href="#adbbcd7b14e90684faf1a478ad53198b2">More...</a><br /></td></tr>
-<tr class="separator:adbbcd7b14e90684faf1a478ad53198b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acdcd343a30c4979699ecf2fe1b27a92c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_m_s_module_manager.html#acdcd343a30c4979699ecf2fe1b27a92c">balanceCells</a> (uint8_t duration, float cell_v_offset)</td></tr>
+<tr class="memdesc:acdcd343a30c4979699ecf2fe1b27a92c"><td class="mdescLeft">&#160;</td><td class="mdescRight">perform a round of balancing.  <a href="#acdcd343a30c4979699ecf2fe1b27a92c">More...</a><br /></td></tr>
+<tr class="separator:acdcd343a30c4979699ecf2fe1b27a92c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1070d50fa128d714c41306722541a62b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_m_s_module_manager.html#a1070d50fa128d714c41306722541a62b">renumberBoardIDs</a> ()</td></tr>
 <tr class="memdesc:a1070d50fa128d714c41306722541a62b"><td class="mdescLeft">&#160;</td><td class="mdescRight">reset board addresses to a sequence from closest to BMS to farthest.  <a href="#a1070d50fa128d714c41306722541a62b">More...</a><br /></td></tr>
 <tr class="separator:a1070d50fa128d714c41306722541a62b"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -199,14 +199,14 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_m_s_module_manager.html#abe17826b95e88b428f751a508c28a46b">printPackSummary</a> ()</td></tr>
 <tr class="memdesc:abe17826b95e88b428f751a508c28a46b"><td class="mdescLeft">&#160;</td><td class="mdescRight">prints the pack summary to the console. <br /></td></tr>
 <tr class="separator:abe17826b95e88b428f751a508c28a46b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa31895c67adcb1988f4f823aad071ad3"><td class="memItemLeft" align="right" valign="top"><a id="aa31895c67adcb1988f4f823aad071ad3"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_m_s_module_manager.html#aa31895c67adcb1988f4f823aad071ad3">printPackDetails</a> ()</td></tr>
-<tr class="memdesc:aa31895c67adcb1988f4f823aad071ad3"><td class="mdescLeft">&#160;</td><td class="mdescRight">prints the pack details to the console. <br /></td></tr>
-<tr class="separator:aa31895c67adcb1988f4f823aad071ad3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a122cb48fcd8db98bceae7074ae14444f"><td class="memItemLeft" align="right" valign="top"><a id="a122cb48fcd8db98bceae7074ae14444f"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_b_m_s_module_manager.html#a122cb48fcd8db98bceae7074ae14444f">printPackGraph</a> ()</td></tr>
+<tr class="memdesc:a122cb48fcd8db98bceae7074ae14444f"><td class="mdescLeft">&#160;</td><td class="mdescRight">prints the pack details to the console. <br /></td></tr>
+<tr class="separator:a122cb48fcd8db98bceae7074ae14444f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="adbbcd7b14e90684faf1a478ad53198b2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adbbcd7b14e90684faf1a478ad53198b2">&#9670;&nbsp;</a></span>balanceCells()</h2>
+<a id="acdcd343a30c4979699ecf2fe1b27a92c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acdcd343a30c4979699ecf2fe1b27a92c">&#9670;&nbsp;</a></span>balanceCells()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -215,8 +215,18 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
           <td class="memname">void BMSModuleManager::balanceCells </td>
           <td>(</td>
           <td class="paramtype">uint8_t&#160;</td>
-          <td class="paramname"><em>duration</em></td><td>)</td>
+          <td class="paramname"><em>duration</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>cell_v_offset</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
 </div><div class="memdoc">

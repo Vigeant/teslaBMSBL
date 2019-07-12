@@ -44,7 +44,7 @@ void setup() {
   //console stuff
   pinMode(INL_SOFT_RST, INPUT_PULLUP);
   cons_inst.printMenu();
-  LOG_CONSOLE(">> ");
+  LOG_CONSOLE("BMS> ");
 }
 
 /////////////////////////////////////////////////

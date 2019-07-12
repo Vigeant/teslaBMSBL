@@ -72,6 +72,10 @@ $(function() {
 <li><a href="https://github.com/sparkfun/SparkFun_TeensyView_Arduino_Library/tree/master/examples">https://github.com/sparkfun/SparkFun_TeensyView_Arduino_Library/tree/master/examples</a></li>
 </ul>
 </li>
+<li>Snooze for lower power consumption<ul>
+<li><a href="https://github.com/duff2013/Snooze">https://github.com/duff2013/Snooze</a></li>
+</ul>
+</li>
 </ul>
 <h2>Error codes on teensyView</h2>
 <table class="markdownTable">
@@ -95,19 +99,24 @@ $(function() {
 <td class="markdownTableBodyCenter">H  </td><td class="markdownTableBodyNone">BMS 12V Battery Over Voltage Fault   </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyCenter">I  </td><td class="markdownTableBodyNone">BMS 12V Battery Under Voltage Fault   </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyCenter">J  </td><td class="markdownTableBodyNone">BMS Water Sensor 1 Fault   </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyCenter">K  </td><td class="markdownTableBodyNone">BMS Water Sensor 2 Fault   </td></tr>
 </table>
-<h2>todo</h2>
+<h2>Connection to USB serial console</h2>
+<p>Serial Line: COMX (X typically = 7) Speed: 115200</p>
+<h2>state machine:</h2>
+<p><a href="https://online.visual-paradigm.com/w/pmcoivfe/diagrams.jsp#diagram:proj=0&amp;id=3">State machine</a> </p><h2>todo</h2>
 <ul>
-<li>[X] assign all signals to pins</li>
-<li>[ ] Implement state machine<ul>
-<li>[X] noFault is driven differently from run to charging (run noFault is used to limit output while in charging it is used to prevent charging)</li>
-<li>[X] add dc2dc states in charging mode to support shutting down dc2dc in diagram</li>
-<li>[ ] implement state machine ni code to match diagram.</li>
-<li>[ ] update all states in the <a class="el" href="class_oled.html">Oled</a> class to match actual state machine.</li>
+<li>[X] Change state machine to match actual charger controller behavior.</li>
+<li>[X] sleep modes for the teensy<ul>
+<li>[X] full speed when a console is connected and in all but STANDBY mode, 5s sleep in STANDBY when no console is connected.</li>
 </ul>
 </li>
-<li>[X] update formula for pwm of cooling pump to floor at 25% duty cycle. </li>
 </ul>
+<h2>particularities</h2>
+<p>Due to the 5s deepsleep mode in standby, it is hard to connect the serial console. To make it easier, either connect within 1 minute of a reset or place the bms in run mode and connect. Due to the deepsleep mode, it is impossible to simply reprogram the teensy following the first sleep. To facilitate reprogramming, the board will not sleep for 1 minute following a reset. The teensyview cannot be shut down as it is connected straight to the VDD pins. </p>
 </div></div><!-- PageDoc -->
 </div><!-- contents -->
 <!-- start footer part -->

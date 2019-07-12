@@ -76,15 +76,10 @@ Public Types</h2></td></tr>
 <tr class="memitem:ae347a3207d8741eb1f0d45a9c63b9ad8"><td class="memItemLeft" align="right" valign="top"><a id="ae347a3207d8741eb1f0d45a9c63b9ad8"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><b>ControllerState</b> { <br />
 &#160;&#160;<b>INIT</b>, 
 <b>STANDBY</b>, 
-<b>STANDBY_DC2DC</b>, 
-<b>CHARGER_CYCLE</b>, 
-<br />
-&#160;&#160;<b>PRE_CHARGE</b>, 
+<b>PRE_CHARGE</b>, 
 <b>CHARGING</b>, 
-<b>RUN</b>, 
-<b>EVSE_CONNECTED</b>, 
 <br />
-&#160;&#160;<b>EVSE_CONNECTED_DC2DC</b>
+&#160;&#160;<b>RUN</b>
 <br />
  }</td></tr>
 <tr class="separator:ae347a3207d8741eb1f0d45a9c63b9ad8"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -97,7 +92,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="separator:aeabdcee18db71ee8d56dc229c062e907"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a95c56822d667e94b031451729ce069a9"><td class="memItemLeft" align="right" valign="top"><a id="a95c56822d667e94b031451729ce069a9"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_controller.html#a95c56822d667e94b031451729ce069a9">Controller</a> ()</td></tr>
-<tr class="memdesc:a95c56822d667e94b031451729ce069a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">When instantiated, the controller is in the init state ensuring that all the signal pins are set ptoperly. <br /></td></tr>
+<tr class="memdesc:a95c56822d667e94b031451729ce069a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">When instantiated, the controller is in the init state ensuring that all the signal pins are set properly. <br /></td></tr>
 <tr class="separator:a95c56822d667e94b031451729ce069a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2458dc6f56f89eef36996cef2703dc39"><td class="memItemLeft" align="right" valign="top"><a id="a2458dc6f56f89eef36996cef2703dc39"></a>
 ControllerState&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_controller.html#a2458dc6f56f89eef36996cef2703dc39">getState</a> ()</td></tr>
@@ -107,6 +102,13 @@ ControllerState&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
 <a class="el" href="class_b_m_s_module_manager.html">BMSModuleManager</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_controller.html#ad06b96f4675b21a770fdf53dcf890acc">getBMSPtr</a> ()</td></tr>
 <tr class="memdesc:ad06b96f4675b21a770fdf53dcf890acc"><td class="mdescLeft">&#160;</td><td class="mdescRight">returns the BMS instance to allow access to its members for reporting purposes. <br /></td></tr>
 <tr class="separator:ad06b96f4675b21a770fdf53dcf890acc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a895dd42b0c06e921c007a3c307b6a6b0"><td class="memItemLeft" align="right" valign="top"><a id="a895dd42b0c06e921c007a3c307b6a6b0"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>printControllerState</b> ()</td></tr>
+<tr class="separator:a895dd42b0c06e921c007a3c307b6a6b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afb8faf8017ec37a89d547455a49433e2"><td class="memItemLeft" align="right" valign="top"><a id="afb8faf8017ec37a89d547455a49433e2"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_controller.html#afb8faf8017ec37a89d547455a49433e2">getPeriodMillis</a> ()</td></tr>
+<tr class="memdesc:afb8faf8017ec37a89d547455a49433e2"><td class="mdescLeft">&#160;</td><td class="mdescRight">returns the main loop period the controller is expecting. <br /></td></tr>
+<tr class="separator:afb8faf8017ec37a89d547455a49433e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
@@ -137,6 +139,12 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>fault12VBatOV</b></td
 <tr class="memitem:ae4167815eea7c695c124b6c3a74fcf16"><td class="memItemLeft" align="right" valign="top"><a id="ae4167815eea7c695c124b6c3a74fcf16"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>fault12VBatUV</b></td></tr>
 <tr class="separator:ae4167815eea7c695c124b6c3a74fcf16"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa763ff4b5d1aa2a6e2271f040aeb180b"><td class="memItemLeft" align="right" valign="top"><a id="aa763ff4b5d1aa2a6e2271f040aeb180b"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>faultWatSen1</b></td></tr>
+<tr class="separator:aa763ff4b5d1aa2a6e2271f040aeb180b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa715077946220316417ca818bbd7565b"><td class="memItemLeft" align="right" valign="top"><a id="aa715077946220316417ca818bbd7565b"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>faultWatSen2</b></td></tr>
+<tr class="separator:aa715077946220316417ca818bbd7565b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a06cf75190ebda22abb294cc0cc641db2"><td class="memItemLeft" align="right" valign="top"><a id="a06cf75190ebda22abb294cc0cc641db2"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>sFaultModuleLoop</b></td></tr>
 <tr class="separator:a06cf75190ebda22abb294cc0cc641db2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -164,12 +172,87 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>sFault12VBatOV</b></t
 <tr class="memitem:accf6abd0e46ef4e105feb111b879f1cf"><td class="memItemLeft" align="right" valign="top"><a id="accf6abd0e46ef4e105feb111b879f1cf"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>sFault12VBatUV</b></td></tr>
 <tr class="separator:accf6abd0e46ef4e105feb111b879f1cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae7ea2751cd99c277448a8f378a2e94c4"><td class="memItemLeft" align="right" valign="top"><a id="ae7ea2751cd99c277448a8f378a2e94c4"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>sFaultWatSen1</b></td></tr>
+<tr class="separator:ae7ea2751cd99c277448a8f378a2e94c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac1227107587ca7c9a48cc28417102372"><td class="memItemLeft" align="right" valign="top"><a id="ac1227107587ca7c9a48cc28417102372"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>sFaultWatSen2</b></td></tr>
+<tr class="separator:ac1227107587ca7c9a48cc28417102372"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a622cb566915feb3e58df5df59e233d16"><td class="memItemLeft" align="right" valign="top"><a id="a622cb566915feb3e58df5df59e233d16"></a>
+uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>faultModuleLoopDB</b></td></tr>
+<tr class="separator:a622cb566915feb3e58df5df59e233d16"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abf4bbbfa554dc782d183cc09ec722c6d"><td class="memItemLeft" align="right" valign="top"><a id="abf4bbbfa554dc782d183cc09ec722c6d"></a>
+uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>faultBatMonDB</b></td></tr>
+<tr class="separator:abf4bbbfa554dc782d183cc09ec722c6d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8db3d201c3f13a5c1aae702742333e42"><td class="memItemLeft" align="right" valign="top"><a id="a8db3d201c3f13a5c1aae702742333e42"></a>
+uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>faultBMSSerialCommsDB</b></td></tr>
+<tr class="separator:a8db3d201c3f13a5c1aae702742333e42"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac333b209fa32d5b9739749372d5a96f2"><td class="memItemLeft" align="right" valign="top"><a id="ac333b209fa32d5b9739749372d5a96f2"></a>
+uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>faultBMSOVDB</b></td></tr>
+<tr class="separator:ac333b209fa32d5b9739749372d5a96f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac4e4209aa1ab25b4f632f2b4446da98e"><td class="memItemLeft" align="right" valign="top"><a id="ac4e4209aa1ab25b4f632f2b4446da98e"></a>
+uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>faultBMSUVDB</b></td></tr>
+<tr class="separator:ac4e4209aa1ab25b4f632f2b4446da98e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa2f5686974bc3a8298d9ae778fc6fda8"><td class="memItemLeft" align="right" valign="top"><a id="aa2f5686974bc3a8298d9ae778fc6fda8"></a>
+uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>faultBMSOTDB</b></td></tr>
+<tr class="separator:aa2f5686974bc3a8298d9ae778fc6fda8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaccbcbfa505ddbb106c17431b28e3cd7"><td class="memItemLeft" align="right" valign="top"><a id="aaccbcbfa505ddbb106c17431b28e3cd7"></a>
+uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>faultBMSUTDB</b></td></tr>
+<tr class="separator:aaccbcbfa505ddbb106c17431b28e3cd7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a853e1677b375c898b0a26b8ec7942bc4"><td class="memItemLeft" align="right" valign="top"><a id="a853e1677b375c898b0a26b8ec7942bc4"></a>
+uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>fault12VBatOVDB</b></td></tr>
+<tr class="separator:a853e1677b375c898b0a26b8ec7942bc4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9bbd3ad58526ae4ea374e30e31518796"><td class="memItemLeft" align="right" valign="top"><a id="a9bbd3ad58526ae4ea374e30e31518796"></a>
+uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>fault12VBatUVDB</b></td></tr>
+<tr class="separator:a9bbd3ad58526ae4ea374e30e31518796"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a65835f21685fc9b583dc66c524d12d96"><td class="memItemLeft" align="right" valign="top"><a id="a65835f21685fc9b583dc66c524d12d96"></a>
+uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>faultWatSen1DB</b></td></tr>
+<tr class="separator:a65835f21685fc9b583dc66c524d12d96"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a879185e9eee7fcc0887537d84c76b5d4"><td class="memItemLeft" align="right" valign="top"><a id="a879185e9eee7fcc0887537d84c76b5d4"></a>
+uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>faultWatSen2DB</b></td></tr>
+<tr class="separator:a879185e9eee7fcc0887537d84c76b5d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4768ac7903cde188997962a0d8477a8b"><td class="memItemLeft" align="right" valign="top"><a id="a4768ac7903cde188997962a0d8477a8b"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>faultModuleLoopTS</b></td></tr>
+<tr class="separator:a4768ac7903cde188997962a0d8477a8b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a999b703d6f1171a346ceb287529bf6a9"><td class="memItemLeft" align="right" valign="top"><a id="a999b703d6f1171a346ceb287529bf6a9"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>faultBatMonTS</b></td></tr>
+<tr class="separator:a999b703d6f1171a346ceb287529bf6a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2037a829c2f321836e41dcf97fb128df"><td class="memItemLeft" align="right" valign="top"><a id="a2037a829c2f321836e41dcf97fb128df"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>faultBMSSerialCommsTS</b></td></tr>
+<tr class="separator:a2037a829c2f321836e41dcf97fb128df"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a74408cee4d4c4d1afb80e143351c36b9"><td class="memItemLeft" align="right" valign="top"><a id="a74408cee4d4c4d1afb80e143351c36b9"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>faultBMSOVTS</b></td></tr>
+<tr class="separator:a74408cee4d4c4d1afb80e143351c36b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac55b399b641cccfc3461f6f07f3b92c8"><td class="memItemLeft" align="right" valign="top"><a id="ac55b399b641cccfc3461f6f07f3b92c8"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>faultBMSUVTS</b></td></tr>
+<tr class="separator:ac55b399b641cccfc3461f6f07f3b92c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a00983ff336cd18a1076641b349651857"><td class="memItemLeft" align="right" valign="top"><a id="a00983ff336cd18a1076641b349651857"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>faultBMSOTTS</b></td></tr>
+<tr class="separator:a00983ff336cd18a1076641b349651857"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a61c088946188fe2dc3f00d29df1e0304"><td class="memItemLeft" align="right" valign="top"><a id="a61c088946188fe2dc3f00d29df1e0304"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>faultBMSUTTS</b></td></tr>
+<tr class="separator:a61c088946188fe2dc3f00d29df1e0304"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7e6b87f040b9bf1a2e56ab273675dadb"><td class="memItemLeft" align="right" valign="top"><a id="a7e6b87f040b9bf1a2e56ab273675dadb"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>fault12VBatOVTS</b></td></tr>
+<tr class="separator:a7e6b87f040b9bf1a2e56ab273675dadb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af89b5e79a2e097d51e010a77360ecfd2"><td class="memItemLeft" align="right" valign="top"><a id="af89b5e79a2e097d51e010a77360ecfd2"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>fault12VBatUVTS</b></td></tr>
+<tr class="separator:af89b5e79a2e097d51e010a77360ecfd2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abd5e14480b1b051213897205a2ec933a"><td class="memItemLeft" align="right" valign="top"><a id="abd5e14480b1b051213897205a2ec933a"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>faultWatSen1TS</b></td></tr>
+<tr class="separator:abd5e14480b1b051213897205a2ec933a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adc764e09cade71140237509ac6f9a239"><td class="memItemLeft" align="right" valign="top"><a id="adc764e09cade71140237509ac6f9a239"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>faultWatSen2TS</b></td></tr>
+<tr class="separator:adc764e09cade71140237509ac6f9a239"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a59698ebb73bc8560820517f16d7f2bad"><td class="memItemLeft" align="right" valign="top"><a id="a59698ebb73bc8560820517f16d7f2bad"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>isFaulted</b></td></tr>
 <tr class="separator:a59698ebb73bc8560820517f16d7f2bad"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5bada1c4865116f49342b5098693b441"><td class="memItemLeft" align="right" valign="top"><a id="a5bada1c4865116f49342b5098693b441"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>stickyFaulted</b></td></tr>
 <tr class="separator:a5bada1c4865116f49342b5098693b441"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a82f9663e690678533d5f629fc671b7b1"><td class="memItemLeft" align="right" valign="top"><a id="a82f9663e690678533d5f629fc671b7b1"></a>
+float&#160;</td><td class="memItemRight" valign="bottom"><b>bat12vVoltage</b></td></tr>
+<tr class="separator:a82f9663e690678533d5f629fc671b7b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li><a class="el" href="_controller_8hpp_source.html">Controller.hpp</a></li>
