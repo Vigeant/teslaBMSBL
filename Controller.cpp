@@ -356,7 +356,7 @@ void Controller::syncModuleDataObjects() {
 
   stickyFaulted |= isFaulted;
   bms.clearFaults();
-  bms.sleepBoards();
+  //bms.sleepBoards();
 }
 
 /////////////////////////////////////////////////

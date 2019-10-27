@@ -526,10 +526,11 @@ void BMSModuleManager::printPackSummary()
 //////////////////////////////////////////////////
 void BMSModuleManager::printPackGraph()
 {
-  char graphLine[86];
-  int cellX;
+  char graphLine[200];
+  int cellX, coli;
   float deltaV =  highCellVolt - lowCellVolt;
   float rowV;
+  char barchar = 'Z';
   unsigned int seconds = millis()/1000;   
   
   memset(graphLine, 0, 86);
@@ -543,22 +544,29 @@ void BMSModuleManager::printPackGraph()
   //print graph header
   LOG_CONSOLE("          ");
   for (int mod = 0; mod < numFoundModules; mod ++){
-    LOG_CONSOLE("| M%-2d|" , mod + 1);
+    LOG_CONSOLE(" | M%-2d|" , mod + 1);
   }
   LOG_CONSOLE("\n");
 
   LOG_CONSOLE("          ");
   for (cellX = 0; cellX < numFoundModules * 6; cellX++){
+    if (cellX % 6 == 0){
+      LOG_CONSOLE(" ");
+    }
     LOG_CONSOLE("%d", cellX%6 + 1);
   }
   LOG_CONSOLE("\n");
   
   LOG_CONSOLE("          ");
-  for (cellX = 0; cellX < numFoundModules * 6; cellX++){
+  for (cellX = 0; cellX < numFoundModules * 7; cellX++){
     graphLine[cellX] = '=';
   }
   graphLine[cellX] = '\n';
   LOG_CONSOLE(graphLine);
+
+  /*for (int row = 128; row <= 256 ; row++){
+    LOG_CONSOLE("%i : %c ", row, row);
+  }*/
   
   for (int row = 40; row >= 0 ; row--){
     memset(graphLine, 0, 86);
@@ -568,43 +576,54 @@ void BMSModuleManager::printPackGraph()
     if (getHighCellVolt() > PRECISION_BALANCE_V_SETPOINT){
       if(rowV > getLowCellVolt() + PRECISION_BALANCE_CELL_V_OFFSET){
         LOG_CONSOLE("B ");
+        barchar = 'B';
       } else{
         LOG_CONSOLE("| ");
+        barchar = 177;
       }
     } else if (getHighCellVolt() > ROUGH_BALANCE_V_SETPOINT){
       if(rowV > getLowCellVolt() + ROUGH_BALANCE_CELL_V_OFFSET){
         LOG_CONSOLE("B ");
+        barchar = 'B';
       } else{
         LOG_CONSOLE("| ");
+        barchar = 177;
       }
     } else {
       LOG_CONSOLE("| ");
     }
-    
-    for (cellX = 0; cellX < numFoundModules * 6; cellX++){
+    for (cellX = 0, coli = 0; cellX < numFoundModules * 6; cellX++,coli++){
+      if (cellX % 6 == 0){
+        graphLine[coli] = '|';
+        coli ++;
+      }
       if (modules[cellX/6].getCellVoltage(cellX%6) < rowV){
-        graphLine[cellX] = ' ';
+        graphLine[coli] = ' ';
       } else {
-        graphLine[cellX] = 'X';
+        graphLine[coli] = barchar;
+        //graphLine[cellX] = 'X';
       }
     }
-    graphLine[cellX] = '\n';
+    graphLine[coli] = '\n';
     LOG_CONSOLE(graphLine);
   }
 
   LOG_CONSOLE("          ");
-  for (cellX = 0; cellX < numFoundModules * 6; cellX++){
+  for (cellX = 0; cellX < numFoundModules * 7; cellX++){
     graphLine[cellX] = '=';
   }
   graphLine[cellX] = '\n';
   LOG_CONSOLE(graphLine);
   LOG_CONSOLE("          ");
   for (cellX = 0; cellX < numFoundModules * 6; cellX++){
+    if (cellX % 6 == 0){
+      LOG_CONSOLE(" ");
+    }
     LOG_CONSOLE("%d", cellX%6 + 1);
   }
   LOG_CONSOLE("\n          ");
   for (int mod = 0; mod < numFoundModules; mod ++){
-    LOG_CONSOLE("| M%-2d|" , mod + 1);
+    LOG_CONSOLE(" | M%-2d|" , mod + 1);
   }
   LOG_CONSOLE("\n");
 }
