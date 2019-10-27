@@ -355,7 +355,7 @@ void Controller::syncModuleDataObjects() {
   if (faultWatSen2) faultWatSen2TS = millis() / 1000;
 
   stickyFaulted |= isFaulted;
-  //bms.clearFaults();
+  bms.clearFaults();
   bms.sleepBoards();
 }
 
@@ -365,8 +365,10 @@ void Controller::syncModuleDataObjects() {
 void Controller::balanceCells() {
   //balance for 1 second given that the controller wakes up every second.
   if (bms.getHighCellVolt() > PRECISION_BALANCE_V_SETPOINT) {
+    //LOG_CONSOLE("precision balance\n");
     bms.balanceCells(5, PRECISION_BALANCE_CELL_V_OFFSET);
   } else if (bms.getHighCellVolt() > ROUGH_BALANCE_V_SETPOINT) {
+    //LOG_CONSOLE("rough balance\n");
     bms.balanceCells(5, ROUGH_BALANCE_CELL_V_OFFSET);
   }
 }
