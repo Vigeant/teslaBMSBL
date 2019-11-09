@@ -375,7 +375,7 @@ void Controller::balanceCells() {
 
 /////////////////////////////////////////////////
 /// \brief computes the duty cycle required for the pwm controlling the coolant pump.
-/// The duty cycle is inverted to allow amplifying the 0-3.3V to 0-5V using a transistor.
+///
 /// Returns a float from 0.0 - 1.0 that must be adjusted to the PWM range (0-255).
 ///
 /// @param the temparature in C
@@ -389,8 +389,7 @@ float Controller::getCoolingPumpDuty(float temp) {
   } else if (temp > COOLING_HIGHT_SETPOINT) {
     return 1.0;
   } else {
-    //return COOLING_A * temp + COOLING_B;
-    return 1 - (COOLING_A * temp + COOLING_B); //flipped polarity to allow amplifying to 0-5V using a transistor
+    return COOLING_A * temp + COOLING_B;
   }
 }
 
@@ -400,7 +399,6 @@ float Controller::getCoolingPumpDuty(float temp) {
 void Controller::init() {
   pinMode(OUTL_12V_BAT_CHRG, OUTPUT);
   pinMode(OUTPWM_PUMP, OUTPUT); //PWM use analogWrite(OUTPWM_PUMP, 0-255);
-  analogWrite(OUTPWM_PUMP, 255); //immediately set to off (inverted)
   pinMode(INL_BAT_PACK_FAULT, INPUT_PULLUP);
   pinMode(INL_BAT_MON_FAULT, INPUT_PULLUP);
   pinMode(INL_EVSE_DISC, INPUT_PULLUP);
@@ -486,7 +484,7 @@ void Controller::standby() {
   digitalWrite(OUTL_EVCC_ON, HIGH);
   digitalWrite(OUTL_NO_FAULT, chargerInhibit);
   digitalWrite(OUTL_12V_BAT_CHRG, !dc2dcON);
-  analogWrite(OUTPWM_PUMP, 255); //max = off once amplified
+  analogWrite(OUTPWM_PUMP, 0);
 }
 
 /////////////////////////////////////////////////
@@ -498,7 +496,7 @@ void Controller::pre_charge() {
   digitalWrite(OUTL_EVCC_ON, LOW);
   digitalWrite(OUTL_NO_FAULT, chargerInhibit);
   digitalWrite(OUTL_12V_BAT_CHRG, !dc2dcON);
-  analogWrite(OUTPWM_PUMP, 255); //max = off once amplified
+  analogWrite(OUTPWM_PUMP, 0);
 }
 
 /////////////////////////////////////////////////
