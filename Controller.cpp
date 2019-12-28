@@ -6,7 +6,7 @@
 void Controller::doController() {
   static int ticks = 0;
   static unsigned int bat12Vcyclestart = 0;
-  static int standbyTicks = 1;
+  static int standbyTicks = 1; //1 because ticks slow down
   const int stateticks = 4;
   bat12vVoltage = (float)analogRead(INA_12V_BAT) / BAT12V_SCALING_DIVISOR ;
 
@@ -324,8 +324,9 @@ void Controller::syncModuleDataObjects() {
     fault12VBatUV = false;
   }
 
-  chargerInhibit = faultModuleLoop || faultBatMon || faultBMSSerialComms || faultBMSOV || faultBMSOT || faultWatSen1 || faultWatSen2;
-  powerLimiter = faultModuleLoop || faultBatMon || faultBMSSerialComms || faultBMSUV || faultBMSOT;
+  chargerInhibit = faultModuleLoop || faultBatMon || faultBMSSerialComms || faultBMSOV || faultBMSUT || faultBMSOT || faultWatSen1 || faultWatSen2;
+  powerLimiter   = faultModuleLoop || faultBatMon || faultBMSSerialComms || faultBMSOV || faultBMSUT || faultBMSOT || faultWatSen1 || faultWatSen2 || faultBMSUV;
+  //powerLimiter = faultModuleLoop || faultBatMon || faultBMSSerialComms || faultBMSUV || faultBMSOT;
   isFaulted =  chargerInhibit || faultBMSUV || faultBMSUT || fault12VBatOV || fault12VBatUV;
 
   //update stiky faults
