@@ -9077,7 +9077,7 @@ VFP: IC-10141&lt;br&gt;</description>
 <wire x1="30.48" y1="119.38" x2="30.48" y2="134.62" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="PWM_PUMP" class="0">
+<net name="N$4" class="0">
 <segment>
 <pinref part="R5" gate="G$1" pin="2"/>
 <wire x1="160.02" y1="15.24" x2="165.1" y2="15.24" width="0.1524" layer="91"/>
@@ -9088,7 +9088,6 @@ VFP: IC-10141&lt;br&gt;</description>
 <pinref part="C4" gate="G$1" pin="+"/>
 <wire x1="165.1" y1="12.7" x2="165.1" y2="15.24" width="0.1524" layer="91"/>
 <junction x="165.1" y="15.24"/>
-<label x="177.8" y="45.72" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="N$13" class="0">

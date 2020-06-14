@@ -8868,6 +8868,13 @@ VFP: IC-10141&lt;br&gt;</description>
 <pinref part="U6" gate="G$1" pin="IN4"/>
 <wire x1="73.66" y1="-83.82" x2="116.84" y2="-83.82" width="0.1524" layer="91"/>
 </segment>
+<segment>
+<pinref part="R16" gate="G$1" pin="2"/>
+<wire x1="167.64" y1="96.52" x2="149.86" y2="96.52" width="0.1524" layer="91"/>
+<wire x1="142.24" y1="111.76" x2="167.64" y2="111.76" width="0.1524" layer="91"/>
+<wire x1="167.64" y1="111.76" x2="167.64" y2="96.52" width="0.1524" layer="91"/>
+<label x="142.24" y="111.76" size="1.778" layer="95"/>
+</segment>
 </net>
 <net name="N$1" class="0">
 <segment>
@@ -9077,7 +9084,7 @@ VFP: IC-10141&lt;br&gt;</description>
 <wire x1="30.48" y1="119.38" x2="30.48" y2="134.62" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="PWM_PUMP" class="0">
+<net name="N$4" class="0">
 <segment>
 <pinref part="R5" gate="G$1" pin="2"/>
 <wire x1="160.02" y1="15.24" x2="165.1" y2="15.24" width="0.1524" layer="91"/>
@@ -9088,27 +9095,12 @@ VFP: IC-10141&lt;br&gt;</description>
 <pinref part="C4" gate="G$1" pin="+"/>
 <wire x1="165.1" y1="12.7" x2="165.1" y2="15.24" width="0.1524" layer="91"/>
 <junction x="165.1" y="15.24"/>
-<label x="177.8" y="45.72" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="N$13" class="0">
 <segment>
 <pinref part="R18" gate="G$1" pin="1"/>
 <pinref part="JP1" gate="A" pin="2"/>
-</segment>
-</net>
-<net name="RUN" class="0">
-<segment>
-<pinref part="R16" gate="G$1" pin="2"/>
-<wire x1="149.86" y1="96.52" x2="162.56" y2="96.52" width="0.1524" layer="91"/>
-<wire x1="162.56" y1="96.52" x2="162.56" y2="109.22" width="0.1524" layer="91"/>
-<wire x1="162.56" y1="109.22" x2="187.96" y2="109.22" width="0.1524" layer="91"/>
-<label x="172.72" y="111.76" size="1.778" layer="95"/>
-</segment>
-<segment>
-<pinref part="J1" gate="G$1" pin="J8"/>
-<wire x1="256.54" y1="109.22" x2="241.3" y2="109.22" width="0.1524" layer="91"/>
-<label x="233.68" y="109.22" size="1.778" layer="95"/>
 </segment>
 </net>
 </nets>

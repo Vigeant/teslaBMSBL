@@ -29,7 +29,7 @@ static Cons cons_inst(&controller_inst);  ///< The console is a 2 way user inter
 static Oled oled_inst(&controller_inst);  ///< The oled is a 1 way user interface displaying the most critical information.
 
 // Load drivers
-SnoozeTouch touch;
+//SnoozeTouch touch;
 SnoozeDigital digital;
 SnoozeTimer timer;
 SnoozeUSBSerial usbSerial;
