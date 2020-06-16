@@ -91,6 +91,7 @@ class Controller {
     float getCoolingPumpDuty(float);
 
     ControllerState state;
+    void setOutput(int pin, int state);
     void init(); //reset all boards and assign address to each board
     void standby();
     void pre_charge();

@@ -36,7 +36,7 @@
 #define INL_CHARGING          20    //CHARGING signal from EVCC.
 #define INA_12V_BAT           A7    //PIN21 12v battery monitor. Analog input with 12V to 3.3V voltage divider.
 #define OUTL_EVCC_ON          22    //drive low to power on EVCC. Cycling this signal will force a new charge cycle.
-#define OUTL_NO_FAULT         23    //drive low to signal no fault to EVCC. Required for EVCC to charge.
+#define OUTH_FAULT         23    //drive low to signal no fault to EVCC. Required for EVCC to charge.
 
 //top side
 //short P and G to reset board into program mode using push button

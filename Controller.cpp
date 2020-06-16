@@ -110,7 +110,7 @@ void Controller::doController() {
     case STANDBY:
       //prevents sleeping if the console is connected or if within 1 minute of a hard reset.
       //The teensy wont let reprogram if it slept once so this allows reprograming within 1 minute.
-      if (SERIALCONSOLE || millis() < 60000){
+      if (SERIALCONSOLE || millis() < 60000) {
         period = 200;
         standbyTicks = 12;
       } else {
@@ -398,7 +398,7 @@ float Controller::getCoolingPumpDuty(float temp) {
 /// \brief reset all boards, assign address to each board and configure their thresholds
 /////////////////////////////////////////////////
 void Controller::init() {
-  pinMode(OUTL_12V_BAT_CHRG, OUTPUT);
+  pinMode(OUTL_12V_BAT_CHRG, INPUT);
   pinMode(OUTPWM_PUMP, OUTPUT); //PWM use analogWrite(OUTPWM_PUMP, 0-255);
   pinMode(INL_BAT_PACK_FAULT, INPUT_PULLUP);
   pinMode(INL_BAT_MON_FAULT, INPUT_PULLUP);
@@ -407,7 +407,7 @@ void Controller::init() {
   pinMode(INL_CHARGING, INPUT_PULLUP);
   pinMode(INA_12V_BAT, INPUT);  // [0-1023] = analogRead(INA_12V_BAT)
   pinMode(OUTL_EVCC_ON, OUTPUT);
-  pinMode(OUTL_NO_FAULT, OUTPUT);
+  pinMode(OUTH_FAULT, OUTPUT);
   pinMode(INL_WATER_SENS1, INPUT_PULLUP);
   pinMode(INL_WATER_SENS2, INPUT_PULLUP);
 
@@ -475,6 +475,15 @@ void Controller::init() {
   bms.clearFaults();
 }
 
+
+void Controller::setOutput(int pin, int state){
+  if (state == 1) {
+    pinMode(pin, INPUT);
+  } else {
+    pinMode(pin, OUTPUT);
+    digitalWrite(pin, state);
+  }
+}
 /////////////////////////////////////////////////
 /// \brief standby state is when the boat *is not connected*
 /// to a EVSE, not in run state and the 12V battery is above
@@ -482,9 +491,10 @@ void Controller::init() {
 /////////////////////////////////////////////////
 void Controller::standby() {
   balanceCells();
-  digitalWrite(OUTL_EVCC_ON, HIGH);
-  digitalWrite(OUTL_NO_FAULT, chargerInhibit);
-  digitalWrite(OUTL_12V_BAT_CHRG, !dc2dcON);
+  setOutput(OUTL_EVCC_ON, HIGH);
+  setOutput(OUTH_FAULT, chargerInhibit);
+  setOutput(OUTL_12V_BAT_CHRG, !dc2dcON);
+
   analogWrite(OUTPWM_PUMP, 0);
 }
 
@@ -494,9 +504,9 @@ void Controller::standby() {
 /////////////////////////////////////////////////
 void Controller::pre_charge() {
   balanceCells();
-  digitalWrite(OUTL_EVCC_ON, LOW);
-  digitalWrite(OUTL_NO_FAULT, chargerInhibit);
-  digitalWrite(OUTL_12V_BAT_CHRG, !dc2dcON);
+  setOutput(OUTL_EVCC_ON, LOW);
+  setOutput(OUTH_FAULT, chargerInhibit);
+  setOutput(OUTL_12V_BAT_CHRG, !dc2dcON);
   analogWrite(OUTPWM_PUMP, 0);
 }
 
@@ -506,9 +516,9 @@ void Controller::pre_charge() {
 /////////////////////////////////////////////////
 void Controller::charging() {
   balanceCells();
-  digitalWrite(OUTL_EVCC_ON, LOW);
-  digitalWrite(OUTL_NO_FAULT, chargerInhibit);
-  digitalWrite(OUTL_12V_BAT_CHRG, LOW);
+  setOutput(OUTL_EVCC_ON, LOW);
+  setOutput(OUTH_FAULT, chargerInhibit);
+  setOutput(OUTL_12V_BAT_CHRG, LOW);
   analogWrite(OUTPWM_PUMP, (uint8_t) (getCoolingPumpDuty(bms.getHighTemperature()) * 255 ));
 }
 
@@ -516,9 +526,9 @@ void Controller::charging() {
 /// \brief run state is turned on and ready to operate.
 /////////////////////////////////////////////////
 void Controller::run() {
-  digitalWrite(OUTL_EVCC_ON, HIGH);
-  digitalWrite(OUTL_NO_FAULT, powerLimiter);
-  digitalWrite(OUTL_12V_BAT_CHRG, LOW);
+  setOutput(OUTL_EVCC_ON, HIGH);
+  setOutput(OUTH_FAULT, powerLimiter);
+  setOutput(OUTL_12V_BAT_CHRG, LOW);
   analogWrite(OUTPWM_PUMP, (uint8_t) (getCoolingPumpDuty(bms.getHighTemperature()) * 255 ));
 }
 
