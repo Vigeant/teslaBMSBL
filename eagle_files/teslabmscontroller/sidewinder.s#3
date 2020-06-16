@@ -9033,6 +9033,11 @@ VFP: IC-10141&lt;br&gt;</description>
 <label x="180.34" y="35.56" size="1.778" layer="95"/>
 <pinref part="J2" gate="G$1" pin="J7"/>
 </segment>
+<segment>
+<pinref part="U6" gate="G$1" pin="IN12"/>
+<wire x1="139.7" y1="-86.36" x2="157.48" y2="-86.36" width="0.1524" layer="91"/>
+<label x="152.4" y="-86.36" size="1.778" layer="95"/>
+</segment>
 </net>
 <net name="N$5" class="0">
 <segment>
@@ -9124,6 +9129,11 @@ VFP: IC-10141&lt;br&gt;</description>
 <wire x1="66.04" y1="-45.72" x2="66.04" y2="-38.1" width="0.1524" layer="91"/>
 <wire x1="66.04" y1="-38.1" x2="58.42" y2="-38.1" width="0.1524" layer="91"/>
 <label x="60.96" y="-38.1" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="U6" gate="G$1" pin="IN15"/>
+<wire x1="139.7" y1="-78.74" x2="157.48" y2="-78.74" width="0.1524" layer="91"/>
+<label x="152.4" y="-78.74" size="1.778" layer="95"/>
 </segment>
 </net>
 </nets>
