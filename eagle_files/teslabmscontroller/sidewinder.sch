@@ -8704,22 +8704,10 @@ VFP: IC-10141&lt;br&gt;</description>
 <junction x="205.74" y="91.44"/>
 <pinref part="C8" gate="G$1" pin="1"/>
 </segment>
-</net>
-<net name="N$2" class="0">
 <segment>
-<pinref part="R16" gate="G$1" pin="1"/>
-<pinref part="B1" gate="G$1" pin="A5/19/SCL0"/>
-<wire x1="50.8" y1="81.28" x2="88.9" y2="81.28" width="0.1524" layer="91"/>
-<wire x1="88.9" y1="81.28" x2="88.9" y2="96.52" width="0.1524" layer="91"/>
-<wire x1="88.9" y1="96.52" x2="119.38" y2="96.52" width="0.1524" layer="91"/>
-<pinref part="R12" gate="G$1" pin="2"/>
-<wire x1="119.38" y1="96.52" x2="132.08" y2="96.52" width="0.1524" layer="91"/>
-<wire x1="132.08" y1="96.52" x2="139.7" y2="96.52" width="0.1524" layer="91"/>
-<wire x1="119.38" y1="91.44" x2="119.38" y2="96.52" width="0.1524" layer="91"/>
-<junction x="119.38" y="96.52"/>
-<wire x1="132.08" y1="88.9" x2="132.08" y2="96.52" width="0.1524" layer="91"/>
-<junction x="132.08" y="96.52"/>
-<pinref part="C9" gate="G$1" pin="1"/>
+<pinref part="U5" gate="G$1" pin="IN9"/>
+<wire x1="208.28" y1="147.32" x2="223.52" y2="147.32" width="0.1524" layer="91"/>
+<label x="223.52" y="147.32" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="12VBAT_MON" class="0">
@@ -9113,18 +9101,6 @@ VFP: IC-10141&lt;br&gt;</description>
 </net>
 <net name="RUN" class="0">
 <segment>
-<pinref part="R16" gate="G$1" pin="2"/>
-<wire x1="149.86" y1="96.52" x2="162.56" y2="96.52" width="0.1524" layer="91"/>
-<wire x1="162.56" y1="96.52" x2="162.56" y2="109.22" width="0.1524" layer="91"/>
-<wire x1="162.56" y1="109.22" x2="187.96" y2="109.22" width="0.1524" layer="91"/>
-<label x="172.72" y="111.76" size="1.778" layer="95"/>
-</segment>
-<segment>
-<pinref part="J1" gate="G$1" pin="J8"/>
-<wire x1="256.54" y1="109.22" x2="241.3" y2="109.22" width="0.1524" layer="91"/>
-<label x="233.68" y="109.22" size="1.778" layer="95"/>
-</segment>
-<segment>
 <pinref part="R19" gate="G$1" pin="2"/>
 <wire x1="66.04" y1="-45.72" x2="66.04" y2="-38.1" width="0.1524" layer="91"/>
 <wire x1="66.04" y1="-38.1" x2="58.42" y2="-38.1" width="0.1524" layer="91"/>
@@ -9134,6 +9110,41 @@ VFP: IC-10141&lt;br&gt;</description>
 <pinref part="U6" gate="G$1" pin="IN15"/>
 <wire x1="139.7" y1="-78.74" x2="157.48" y2="-78.74" width="0.1524" layer="91"/>
 <label x="152.4" y="-78.74" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="U5" gate="G$1" pin="IN12"/>
+<wire x1="208.28" y1="154.94" x2="223.52" y2="154.94" width="0.1524" layer="91"/>
+<label x="223.52" y="154.94" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="R16" gate="G$1" pin="1"/>
+<pinref part="B1" gate="G$1" pin="A5/19/SCL0"/>
+<wire x1="50.8" y1="81.28" x2="88.9" y2="81.28" width="0.1524" layer="91"/>
+<wire x1="88.9" y1="81.28" x2="88.9" y2="96.52" width="0.1524" layer="91"/>
+<wire x1="88.9" y1="96.52" x2="119.38" y2="96.52" width="0.1524" layer="91"/>
+<pinref part="R12" gate="G$1" pin="2"/>
+<wire x1="119.38" y1="96.52" x2="132.08" y2="96.52" width="0.1524" layer="91"/>
+<wire x1="132.08" y1="96.52" x2="139.7" y2="96.52" width="0.1524" layer="91"/>
+<wire x1="119.38" y1="91.44" x2="119.38" y2="96.52" width="0.1524" layer="91"/>
+<junction x="119.38" y="96.52"/>
+<wire x1="132.08" y1="88.9" x2="132.08" y2="96.52" width="0.1524" layer="91"/>
+<junction x="132.08" y="96.52"/>
+<pinref part="C9" gate="G$1" pin="1"/>
+<label x="101.6" y="99.06" size="1.778" layer="95"/>
+</segment>
+</net>
+<net name="RUN_SW" class="0">
+<segment>
+<pinref part="R16" gate="G$1" pin="2"/>
+<wire x1="149.86" y1="96.52" x2="162.56" y2="96.52" width="0.1524" layer="91"/>
+<wire x1="162.56" y1="96.52" x2="162.56" y2="109.22" width="0.1524" layer="91"/>
+<wire x1="162.56" y1="109.22" x2="187.96" y2="109.22" width="0.1524" layer="91"/>
+<label x="172.72" y="111.76" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="J1" gate="G$1" pin="J8"/>
+<wire x1="256.54" y1="109.22" x2="241.3" y2="109.22" width="0.1524" layer="91"/>
+<label x="231.14" y="109.22" size="1.778" layer="95"/>
 </segment>
 </net>
 </nets>
@@ -9148,8 +9159,6 @@ VFP: IC-10141&lt;br&gt;</description>
 <approved hash="104,1,17.78,35.56,B1,AGND,GND,,,"/>
 <approved hash="204,1,17.78,43.18,B1,VUSB,,,,"/>
 <approved hash="202,1,185.42,162.56,U5,IN2,,,,"/>
-<approved hash="202,1,208.28,147.32,U5,IN9,,,,"/>
-<approved hash="202,1,208.28,154.94,U5,IN12,,,,"/>
 <approved hash="202,1,208.28,157.48,U5,IN13,,,,"/>
 <approved hash="202,1,208.28,160.02,U5,IN14,,,,"/>
 <approved hash="202,1,208.28,162.56,U5,IN15,,,,"/>
@@ -9160,10 +9169,8 @@ VFP: IC-10141&lt;br&gt;</description>
 <approved hash="202,1,139.7,-93.98,U6,IN9,,,,"/>
 <approved hash="202,1,139.7,-91.44,U6,IN10,,,,"/>
 <approved hash="202,1,139.7,-88.9,U6,IN11,,,,"/>
-<approved hash="202,1,139.7,-86.36,U6,IN12,,,,"/>
 <approved hash="202,1,139.7,-83.82,U6,IN13,,,,"/>
 <approved hash="202,1,139.7,-81.28,U6,IN14,,,,"/>
-<approved hash="202,1,139.7,-78.74,U6,IN15,,,,"/>
 <approved hash="208,1,213.36,170.18,+5V,sup,,,,"/>
 <approved hash="208,1,256.54,132.08,+5V,sup,,,,"/>
 <approved hash="208,1,12.7,-7.62,+5V,sup,,,,"/>

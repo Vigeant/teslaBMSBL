@@ -59,7 +59,7 @@ void Controller::doController() {
         if (digitalRead(INL_EVSE_DISC) == LOW) {
           ticks = 0;
           state = STANDBY;
-        } else if (digitalRead(INL_CHARGING) == LOW) {
+        } else if (digitalRead(INH_CHARGING) == HIGH) {
           ticks = 0;
           state = CHARGING;
         }
@@ -74,7 +74,7 @@ void Controller::doController() {
         state = RUN;
       }
 #else
-      if (digitalRead(INL_EVSE_DISC) == LOW || digitalRead(INL_CHARGING) == HIGH) {
+      if (digitalRead(INL_EVSE_DISC) == LOW || digitalRead(INH_CHARGING) == LOW) {
         ticks = 0;
         state = STANDBY;
       }
@@ -404,7 +404,7 @@ void Controller::init() {
   pinMode(INL_BAT_MON_FAULT, INPUT_PULLUP);
   pinMode(INL_EVSE_DISC, INPUT_PULLUP);
   pinMode(INH_RUN, INPUT_PULLDOWN);
-  pinMode(INL_CHARGING, INPUT_PULLUP);
+  pinMode(INH_CHARGING, INPUT_PULLDOWN);
   pinMode(INA_12V_BAT, INPUT);  // [0-1023] = analogRead(INA_12V_BAT)
   pinMode(OUTL_EVCC_ON, OUTPUT);
   pinMode(OUTH_FAULT, OUTPUT);

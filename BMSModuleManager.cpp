@@ -427,7 +427,7 @@ void BMSModuleManager::printPackSummary()
               getPackVoltage(), getAvgCellVolt(), getAvgTemperature());
   LOG_CONSOLE("INL_EVSE_DISC: %d\n", digitalRead(INL_EVSE_DISC));
   LOG_CONSOLE("INH_RUN: %d\n", digitalRead(INH_RUN));
-  LOG_CONSOLE("INL_CHARGING: %d\n", digitalRead(INL_CHARGING));
+  LOG_CONSOLE("INH_CHARGING: %d\n", digitalRead(INH_CHARGING));
   
   //testing scafolding
   LOG_CONSOLE("getLowCellVolt() < CHARGER_CYCLE_V_SETPOINT    : %f < %f?\n" , getLowCellVolt(),CHARGER_CYCLE_V_SETPOINT);

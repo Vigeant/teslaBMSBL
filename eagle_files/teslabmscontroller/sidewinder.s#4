@@ -8013,8 +8013,8 @@ VFP: IC-10141&lt;br&gt;</description>
 <class number="0" name="default" width="0.3048" drill="0.508">
 <clearance class="0" value="0.3048"/>
 </class>
-<class number="1" name="VCC" width="0.6096" drill="0.508">
-<clearance class="1" value="0.6096"/>
+<class number="1" name="VCC" width="0.508" drill="0.508">
+<clearance class="1" value="0.508"/>
 </class>
 </classes>
 <modules>

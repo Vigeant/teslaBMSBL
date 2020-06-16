@@ -31,12 +31,12 @@
 #define OLED_PIN_RESET        15
 #define INL_BAT_PACK_FAULT    16    //Tesla Battery pack fault.
 #define INL_BAT_MON_FAULT     17    //Battery Monitor Fault.
-#define INL_EVSE_DISC         18    //Electric Vehicle Supply Equipment Disconnected (from EVCC).
+#define INL_EVSE_DISC         18    //Electric Vehicle Supply Equipment Disconnected (from EVCC). (set Out2)
 #define INH_RUN               19    //RUN signal from power relay with voltage divider from 12V to 3.3V.
-#define INL_CHARGING          20    //CHARGING signal from EVCC.
+#define INH_CHARGING          20    //CHARGING signal from EVCC. (Set Out1 to charging switched 12V)
 #define INA_12V_BAT           A7    //PIN21 12v battery monitor. Analog input with 12V to 3.3V voltage divider.
 #define OUTL_EVCC_ON          22    //drive low to power on EVCC. Cycling this signal will force a new charge cycle.
-#define OUTH_FAULT         23    //drive low to signal no fault to EVCC. Required for EVCC to charge.
+#define OUTH_FAULT            23    //drive low to signal no fault to EVCC. Required for EVCC to charge.
 
 //top side
 //short P and G to reset board into program mode using push button
