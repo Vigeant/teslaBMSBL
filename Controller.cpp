@@ -29,18 +29,21 @@ void Controller::doController() {
         state = PRE_CHARGE;
       }
 #else
-      if (dc2dcON == 0 && bat12vVoltage < DC2DC_CYCLE_V_SETPOINT) {
+      if (dc2dcON_H == 0 && bat12vVoltage < DC2DC_CYCLE_V_SETPOINT) {
         bat12Vcyclestart = (millis() / 1000);
-        dc2dcON = 1;
-      } else if ( dc2dcON == 1 && (bat12Vcyclestart + DC2DC_CYCLE_TIME_S) < (millis() / 1000)) {
+        dc2dcON_H = 1;
+      } else if ( dc2dcON_H == 1 && ((millis() / 1000) > bat12Vcyclestart + DC2DC_CYCLE_TIME_S)) {
         // I am ignoring the time counter loop around as it will simply result in a short charge cycle
         // followed with a proper charging cycle.
-        dc2dcON = 0;
+        dc2dcON_H = 0;
       }
 
       if (digitalRead(INH_RUN) == HIGH) {
         ticks = 0;
         state = RUN;
+      } else if (digitalRead(INH_CHARGING) == HIGH) {
+        ticks = 0;
+        state = CHARGING;   
       } else if (bms.getLowCellVolt() < CHARGER_CYCLE_V_SETPOINT && bms.getHighCellVolt() < MAX_CHARGE_V_SETPOINT && ticks >= standbyTicks) {
         ticks = 0;
         state = PRE_CHARGE;
@@ -55,8 +58,8 @@ void Controller::doController() {
         state = CHARGING;
       }
 #else
-      if (ticks >= 4) { //adjust to give time to the EVCC to properly boot
-        if (digitalRead(INL_EVSE_DISC) == LOW) {
+      if (ticks >= 8) { //adjust to give time to the EVCC to properly boot
+        if ( (digitalRead(INL_EVSE_DISC) == LOW) || (digitalRead(INH_CHARGING) == LOW) ) {
           ticks = 0;
           state = STANDBY;
         } else if (digitalRead(INH_CHARGING) == HIGH) {
@@ -468,7 +471,7 @@ void Controller::init() {
 
   chargerInhibit = false;
   powerLimiter = false;
-  dc2dcON = false;
+  dc2dcON_H = false;
   period = 200;
 
   bms.renumberBoardIDs();
@@ -493,7 +496,7 @@ void Controller::standby() {
   balanceCells();
   setOutput(OUTL_EVCC_ON, HIGH);
   setOutput(OUTH_FAULT, chargerInhibit);
-  setOutput(OUTL_12V_BAT_CHRG, !dc2dcON);
+  setOutput(OUTL_12V_BAT_CHRG, !dc2dcON_H);
 
   analogWrite(OUTPWM_PUMP, 0);
 }
@@ -506,7 +509,7 @@ void Controller::pre_charge() {
   balanceCells();
   setOutput(OUTL_EVCC_ON, LOW);
   setOutput(OUTH_FAULT, chargerInhibit);
-  setOutput(OUTL_12V_BAT_CHRG, !dc2dcON);
+  setOutput(OUTL_12V_BAT_CHRG, !dc2dcON_H);
   analogWrite(OUTPWM_PUMP, 0);
 }
 
@@ -526,7 +529,7 @@ void Controller::charging() {
 /// \brief run state is turned on and ready to operate.
 /////////////////////////////////////////////////
 void Controller::run() {
-  setOutput(OUTL_EVCC_ON, HIGH);
+  setOutput(OUTL_EVCC_ON, LOW); //required so that the EVSE_DISC is valid (will inhibit the motor controller is boat is connected)
   setOutput(OUTH_FAULT, powerLimiter);
   setOutput(OUTL_12V_BAT_CHRG, LOW);
   analogWrite(OUTPWM_PUMP, (uint8_t) (getCoolingPumpDuty(bms.getHighTemperature()) * 255 ));

@@ -79,7 +79,7 @@ class Controller {
 
     bool chargerInhibit;
     bool powerLimiter;
-    bool dc2dcON;
+    bool dc2dcON_H;
     uint32_t period;
 
     //run-time functions
