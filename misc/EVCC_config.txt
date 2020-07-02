@@ -1,0 +1,34 @@
+Indication Default Function
+LED OUT1 tracks the state of the EVCC LED3
+CHARGE ON when charging
+BUZZER OUT3 ON when the Pack is in HVC or LVC or the cell loop is not good
+J1772_DISCONNECTED OUT2 ON when the J1772 cable is disconnected4
+HVC ON when the Pack is in HVC (only available when using a CAN BMS)
+LVC ON when the Pack is in LVC (only available when using a CAN BMS)
+
+
+evcc> reset profile 1
+evcc> set profile 1
+evcc> set linec J1772
+evcc> set maxv 168.0
+evcc> set out1 CHARGE
+evcc> set out3 CHARGE
+evcc> set termt 24.0
+evcc> enable loopground
+
+evcc> show config
+  bms      : loop
+  canbr    : 250kbps
+  OUT1     : CHARGE
+  OUT2     : EVSEDISC
+  OUT3     : CHARGE
+  charger  : tsm2500
+  linec    :  J1772
+  maxv     : 168.0V
+  maxc     :   2.0A
+  termc    :   0.1A
+  termt    :  24.0hr
+  options  : canterm (CAN termination resistor enabled)
+           : loopground (loop OK if loop2 grounded)
+
+

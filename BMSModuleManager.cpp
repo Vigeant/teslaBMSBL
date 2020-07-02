@@ -225,6 +225,8 @@ void BMSModuleManager::getAllVoltTemp() {
     }
   }
   float tempLowCellVolt = 5.0;
+  if (TESTING_MODE == 1) tempLowCellVolt = 3.8;
+  
   for (int y = 0; y < MAX_MODULE_ADDR; y++)
   {
     if (modules[y].getAddress() > 0) {

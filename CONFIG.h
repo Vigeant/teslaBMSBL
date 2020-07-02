@@ -4,6 +4,7 @@
 
 //enable testing mode that simply cycles through all states instead of triggers
 //#define STATECYCLING 1
+#define TESTING_MODE 0
 
 #define FAULT_DEBOUNCE_COUNT 3
 
