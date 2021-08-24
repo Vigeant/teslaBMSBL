@@ -58,7 +58,7 @@ void Controller::doController() {
         state = CHARGING;
       }
 #else
-      if (ticks >= 15) { //adjust to give time to the EVCC to properly boot (15 ticks == 3 seconds
+      if (ticks >= 15 && ticks <=100) { //adjust to give time to the EVCC to properly boot (15 ticks == 3 seconds
         if ( (digitalRead(INL_EVSE_DISC) == LOW) || (digitalRead(INH_CHARGING) == LOW) ) {
           ticks = 0;
           state = STANDBY;
@@ -66,6 +66,10 @@ void Controller::doController() {
           ticks = 0;
           state = CHARGING;
         }
+      } else if (ticks > 100) {
+        ticks = 0;
+        state = STANDBY;
+        //TODO log error that charger did not start. Maybe a charger start fault.
       }
 #endif
       break;
@@ -77,7 +81,7 @@ void Controller::doController() {
         state = RUN;
       }
 #else
-      if (digitalRead(INL_EVSE_DISC) == LOW || digitalRead(INH_CHARGING) == LOW) {
+      if (digitalRead(INL_EVSE_DISC) == LOW || digitalRead(INH_CHARGING) == LOW || bms.getHighCellVolt() >= MAX_CHARGE_V_SETPOINT) {
         ticks = 0;
         state = STANDBY;
       }
