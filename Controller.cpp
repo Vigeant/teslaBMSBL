@@ -483,7 +483,7 @@ void Controller::init() {
 }
 
 /////////////////////////////////////////////////
-/// \brief This helper function allows floating an output when driving its state to 1 or grounding it.
+/// \brief This helper function allows mimicking an open collector output (floating or gorund).
 /////////////////////////////////////////////////
 void Controller::setOutput(int pin, int state){
   if (state == 1) {
