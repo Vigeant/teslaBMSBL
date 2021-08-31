@@ -482,7 +482,9 @@ void Controller::init() {
   bms.clearFaults();
 }
 
-
+/////////////////////////////////////////////////
+/// \brief This helper function allows floating an output when driving its state to 1 or grounding it.
+/////////////////////////////////////////////////
 void Controller::setOutput(int pin, int state){
   if (state == 1) {
     pinMode(pin, INPUT);
@@ -493,8 +495,7 @@ void Controller::setOutput(int pin, int state){
 }
 /////////////////////////////////////////////////
 /// \brief standby state is when the boat *is not connected*
-/// to a EVSE, not in run state and the 12V battery is above
-/// its low voltage threshold.
+/// to a EVSE and not in run state.
 /////////////////////////////////////////////////
 void Controller::standby() {
   balanceCells();
@@ -533,7 +534,7 @@ void Controller::charging() {
 /// \brief run state is turned on and ready to operate.
 /////////////////////////////////////////////////
 void Controller::run() {
-  setOutput(OUTL_EVCC_ON, LOW); //required so that the EVSE_DISC is valid (will inhibit the motor controller is boat is connected)
+  setOutput(OUTL_EVCC_ON, LOW); //required so that the EVSE_DISC is valid (will inhibit the motor controller if EVSE is connected)
   setOutput(OUTH_FAULT, powerLimiter);
   setOutput(OUTL_12V_BAT_CHRG, LOW);
   analogWrite(OUTPWM_PUMP, (uint8_t) (getCoolingPumpDuty(bms.getHighTemperature()) * 255 ));
