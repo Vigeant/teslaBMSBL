@@ -521,7 +521,8 @@ void BMSModuleManager::printPackSummary()
   LOG_CONSOLE("INH_CHARGING: %d\n", digitalRead(INH_CHARGING));
   
   //testing scafolding
-  LOG_CONSOLE("getLowCellVolt() < CHARGER_CYCLE_V_SETPOINT    : %f < %f?\n" , getLowCellVolt(),CHARGER_CYCLE_V_SETPOINT);
+  LOG_CONSOLE("getHighCellVolt() < CHARGER_CYCLE_V_SETPOINT    : %f < %f?\n" , getHighCellVolt(),CHARGER_CYCLE_V_SETPOINT);
+  LOG_CONSOLE("getHighCellVolt() < MAX_CHARGE_V_SETPOINT    : %f < %f?\n" , getHighCellVolt(),MAX_CHARGE_V_SETPOINT);
 }
 
 /////////////////////////////////////////////////

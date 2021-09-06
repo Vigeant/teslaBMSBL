@@ -44,7 +44,7 @@ void Controller::doController() {
       } else if (digitalRead(INH_CHARGING) == HIGH) {
         ticks = 0;
         state = CHARGING;   
-      } else if (bms.getLowCellVolt() < CHARGER_CYCLE_V_SETPOINT && bms.getHighCellVolt() < MAX_CHARGE_V_SETPOINT && ticks >= standbyTicks) {
+      } else if (bms.getHighCellVolt() < CHARGER_CYCLE_V_SETPOINT && bms.getHighCellVolt() < MAX_CHARGE_V_SETPOINT && ticks >= standbyTicks) {
         ticks = 0;
         state = PRE_CHARGE;
       }
@@ -81,7 +81,7 @@ void Controller::doController() {
         state = RUN;
       }
 #else
-      if (digitalRead(INL_EVSE_DISC) == LOW || digitalRead(INH_CHARGING) == LOW || bms.getHighCellVolt() >= MAX_CHARGE_V_SETPOINT) {
+      if (digitalRead(INL_EVSE_DISC) == LOW || digitalRead(INH_CHARGING) == LOW) {
         ticks = 0;
         state = STANDBY;
       }
@@ -331,10 +331,15 @@ void Controller::syncModuleDataObjects() {
     fault12VBatUV = false;
   }
 
+  //added bms.getHighCellVolt() >= MAX_CHARGE_V_SETPOINT to stop charging even if charging in run state.
   chargerInhibit = faultModuleLoop || faultBatMon || faultBMSSerialComms || faultBMSOV || faultBMSUT || faultBMSOT || faultWatSen1 || faultWatSen2;
+  chargerInhibit |= bms.getHighCellVolt() >= MAX_CHARGE_V_SETPOINT;
   powerLimiter   = faultModuleLoop || faultBatMon || faultBMSSerialComms || faultBMSOV || faultBMSUT || faultBMSOT || faultWatSen1 || faultWatSen2 || faultBMSUV;
+  powerLimiter |= bms.getHighCellVolt() >= MAX_CHARGE_V_SETPOINT;
   //powerLimiter = faultModuleLoop || faultBatMon || faultBMSSerialComms || faultBMSUV || faultBMSOT;
   isFaulted =  chargerInhibit || faultBMSUV || faultBMSUT || fault12VBatOV || fault12VBatUV;
+
+  if (chargerInhibit) LOG_INFO("chargerInhibit line asserted!\n");
 
   //update stiky faults
   sFaultModuleLoop |= faultModuleLoop;

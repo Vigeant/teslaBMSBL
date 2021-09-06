@@ -53,7 +53,7 @@
 //stop charging (if possible)
 #define MAX_CHARGE_V_SETPOINT 4.1f
 //cycle charger to force a charging cycle
-#define CHARGER_CYCLE_V_SETPOINT 3.9f
+#define CHARGER_CYCLE_V_SETPOINT 4.0f
 //issue a warning on OLED and serial console if a cell is that close to a OV or UV fault.
 #define WARN_CELL_V_OFFSET 0.1f
 
