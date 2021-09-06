@@ -43,7 +43,7 @@ void Oled::printFormat1() {
 
   oled.setFontType(2);         // 7-segment font
   oled.setCursor(col0, oled.getLCDHeight() / 2);
-  oled.print(controller_inst_ptr->getBMSPtr()->getPackVoltage());
+  oled.print(controller_inst_ptr->getBMSPtr()->getPackVoltage(),1);
   oled.setCursor(col1, oled.getLCDHeight() / 2);
   oled.print(controller_inst_ptr->getBMSPtr()->getAvgTemperature());
   oled.display();
