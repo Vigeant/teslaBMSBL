@@ -50,7 +50,7 @@
 #define CANBUS_ADDRESS 1
 #define OVER_V_SETPOINT 4.2f
 #define UNDER_V_SETPOINT 3.0f
-//stop charging (if possible)
+//stop charging 
 #define MAX_CHARGE_V_SETPOINT 4.1f
 //cycle charger to force a charging cycle
 #define CHARGER_CYCLE_V_SETPOINT 4.0f
