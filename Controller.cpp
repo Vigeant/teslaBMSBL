@@ -58,7 +58,7 @@ void Controller::doController() {
         state = CHARGING;
       }
 #else
-      if (ticks >= 15 && ticks <=100) { //adjust to give time to the EVCC to properly boot (15 ticks == 3 seconds
+      if (ticks >= 50 && ticks <=100) { //adjust to give time to the EVCC to properly boot (15 ticks == 3 seconds
         if ( (digitalRead(INL_EVSE_DISC) == LOW) || (digitalRead(INH_CHARGING) == LOW) ) {
           ticks = 0;
           state = STANDBY;
