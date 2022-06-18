@@ -397,6 +397,8 @@ void Controller::balanceCells() {
 #define COOLING_A (1.0 - FLOOR_DUTY_COOLANT_PUMP) / (COOLING_HIGHT_SETPOINT - COOLING_LOWT_SETPOINT)
 #define COOLING_B FLOOR_DUTY_COOLANT_PUMP - COOLING_A * COOLING_LOWT_SETPOINT
 float Controller::getCoolingPumpDuty(float temp) {
+  return 1.0; //always fully on.
+  /*
   if (temp < COOLING_LOWT_SETPOINT) {
     return FLOOR_DUTY_COOLANT_PUMP;
   } else if (temp > COOLING_HIGHT_SETPOINT) {
@@ -404,6 +406,7 @@ float Controller::getCoolingPumpDuty(float temp) {
   } else {
     return COOLING_A * temp + COOLING_B;
   }
+  */
 }
 
 /////////////////////////////////////////////////
