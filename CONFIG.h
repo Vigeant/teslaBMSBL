@@ -71,7 +71,7 @@
 //start precision balancing when highest cell reaches this setpoint (taken from tom debree)
 #define PRECISION_BALANCE_V_SETPOINT 3.9f
 //precision balance all cells above the lowest cell by this offset (taken from tom debree)
-#define PRECISION_BALANCE_CELL_V_OFFSET 0.04f
+#define PRECISION_BALANCE_CELL_V_OFFSET 0.02f
 //start rough balancing when highest cell reaches this setpoint
 #define ROUGH_BALANCE_V_SETPOINT 3.4f
 //rough balance all cells above the lowest cell by this offset
