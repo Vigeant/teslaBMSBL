@@ -35,10 +35,10 @@ Speed: 115200
 - [X] Change state machine to match actual charger controller behavior. 
 - [X] sleep modes for the teensy
 	- [X] full speed when a console is connected and in all but STANDBY mode, 5s sleep in STANDBY when no console is connected.
-- [ ] state transitions en V1
+- [X] state transitions en V1
 - [ ] display all IO in console
 - [ ] set bat mon to 176V
-- [ ] add post charge state to give time for the charger to properly shutoff.
+- [X] add post charge state to give time for the charger to properly shutoff.
 	
 ## particularities
 Due to the 5s deepsleep mode in standby, it is hard to connect the serial console. To make it easier, either connect within 1 minute of a reset or place the bms in run mode and connect.

@@ -19,6 +19,7 @@ void Controller::doController() {
       if (ticks >= stateticks) {
         ticks = 0;
         state = STANDBY;
+        LOG_INFO("Transition to STANDBY\n");
       }
       break;
     /**************** ****************/
@@ -27,6 +28,7 @@ void Controller::doController() {
       if (ticks >= stateticks) {
         ticks = 0;
         state = PRE_CHARGE;
+        LOG_INFO("Transition to PRE_CHARGE\n");
       }
 #else
       if (dc2dcON_H == 0 && bat12vVoltage < DC2DC_CYCLE_V_SETPOINT) {
@@ -41,12 +43,15 @@ void Controller::doController() {
       if (digitalRead(INH_RUN) == HIGH) {
         ticks = 0;
         state = RUN;
+        LOG_INFO("Transition to RUN\n");
       } else if (digitalRead(INH_CHARGING) == HIGH) {
         ticks = 0;
-        state = CHARGING;   
+        state = CHARGING;
+        LOG_INFO("Transition to CHARGING\n");   
       } else if (bms.getHighCellVolt() < CHARGER_CYCLE_V_SETPOINT && bms.getHighCellVolt() < MAX_CHARGE_V_SETPOINT && ticks >= standbyTicks) {
         ticks = 0;
         state = PRE_CHARGE;
+        LOG_INFO("Transition to PRE_CHARGE\n");
       }
 #endif
       break;
@@ -56,20 +61,24 @@ void Controller::doController() {
       if (ticks >= stateticks) {
         ticks = 0;
         state = CHARGING;
+        LOG_INFO("Transition to CHARGING\n");
       }
 #else
       if (ticks >= 50 && ticks <=100) { //adjust to give time to the EVCC to properly boot (5 ticks == 1 seconds)
         if ( (digitalRead(INL_EVSE_DISC) == LOW) || (digitalRead(INH_CHARGING) == LOW) ) {
           ticks = 0;
           state = STANDBY;
+          LOG_INFO("Transition to STANDBY\n");
         } else if (digitalRead(INH_CHARGING) == HIGH) {
           ticks = 0;
           state = CHARGING;
+          LOG_INFO("Transition to CHARGING\n");
         }
       } else if (ticks > 100) {
         ticks = 0;
         state = STANDBY;
-        //TODO log error that charger did not start. Maybe a charger start fault.
+        LOG_ERR("charger did not start!!!\n");
+        LOG_INFO("Transition to STANDBY\n");
       }
 #endif
       break;
@@ -78,12 +87,32 @@ void Controller::doController() {
 #ifdef STATECYCLING
       if (ticks >= stateticks) {
         ticks = 0;
-        state = RUN;
+        state = POST_CHARGE;
+        LOG_INFO("Transition to POST_CHARGE\n");
       }
 #else
       if (digitalRead(INL_EVSE_DISC) == LOW || digitalRead(INH_CHARGING) == LOW) {
         ticks = 0;
+        state = POST_CHARGE;
+        LOG_INFO("Transition to POST_CHARGE\n");
+      }
+#endif
+      break;
+    /**************** ****************/
+    case POST_CHARGE:
+#ifdef STATECYCLING
+      if (ticks >= stateticks) {
+        ticks = 0;
+        state = RUN;
+        LOG_INFO("Transition to RUN\n");
+      }
+#else
+      //adjust to give time to the EVCC to properly go to sleep (5 ticks == 1 seconds)
+      //This will happen if the loop evcc input (fault line) is asserted.
+      if (ticks >= 50 && digitalRead(INH_CHARGING) == LOW) {
+        ticks = 0;
         state = STANDBY;
+        LOG_INFO("Transition to STANDBY\n");
       }
 #endif
       break;
@@ -93,11 +122,13 @@ void Controller::doController() {
       if (ticks >= stateticks) {
         ticks = 0;
         state = INIT;
+        LOG_INFO("Transition to INIT\n");
       }
 #else
       if (digitalRead(INH_RUN ) == LOW) {
         ticks = 0;
         state = STANDBY;
+        LOG_INFO("Transition to STANDBY\n");
       }
 #endif
       break;
@@ -115,9 +146,9 @@ void Controller::doController() {
       break;
 
     case STANDBY:
-      //prevents sleeping if the console is connected or if within 1 minute of a hard reset.
-      //The teensy wont let reprogram if it slept once so this allows reprograming within 1 minute.
-      if (SERIALCONSOLE || millis() < 60000) {
+      //prevents sleeping if the console is connected or if within 10 minutes of a hard reset.
+      //The teensy wont let reprogram if it slept once so this allows reprograming within 10 minutes.
+      if (SERIALCONSOLE || millis() < 600000) {
         period = 200;
         standbyTicks = 12;
       } else {
@@ -137,6 +168,11 @@ void Controller::doController() {
       charging();
       break;
 
+    case POST_CHARGE:
+      period = 200;
+      post_charge();
+      break;
+
     case RUN:
       period = 200;
       run();
@@ -147,6 +183,11 @@ void Controller::doController() {
       break;
   }
   ticks++;
+  //set outputs
+  setOutput(OUTL_EVCC_ON, outL_evcc_on_buffer);
+  setOutput(OUTH_FAULT, outH_fault_buffer);
+  setOutput(OUTL_12V_BAT_CHRG, outL_12V_bat_chrg_buffer);
+  analogWrite(OUTPWM_PUMP, outpwm_pump_buffer);
 }
 
 /////////////////////////////////////////////////
@@ -397,6 +438,7 @@ void Controller::balanceCells() {
 #define COOLING_A (1.0 - FLOOR_DUTY_COOLANT_PUMP) / (COOLING_HIGHT_SETPOINT - COOLING_LOWT_SETPOINT)
 #define COOLING_B FLOOR_DUTY_COOLANT_PUMP - COOLING_A * COOLING_LOWT_SETPOINT
 float Controller::getCoolingPumpDuty(float temp) {
+  //LOG_INFO("Cooling Pump Set To Max duty\n");
   return 1.0; //always fully on.
   /*
   if (temp < COOLING_LOWT_SETPOINT) {
@@ -486,12 +528,17 @@ void Controller::init() {
   dc2dcON_H = false;
   period = 200;
 
+  outL_12V_bat_chrg_buffer = 0;
+  outpwm_pump_buffer = 255;
+  outL_evcc_on_buffer = 1;
+  outH_fault_buffer = 0; 
+
   bms.renumberBoardIDs();
   bms.clearFaults();
 }
 
 /////////////////////////////////////////////////
-/// \brief This helper function allows mimicking an open collector output (floating or gorund).
+/// \brief This helper function allows mimicking an open collector output (floating or ground).
 /////////////////////////////////////////////////
 void Controller::setOutput(int pin, int state){
   if (state == 1) {
@@ -507,11 +554,10 @@ void Controller::setOutput(int pin, int state){
 /////////////////////////////////////////////////
 void Controller::standby() {
   balanceCells();
-  setOutput(OUTL_EVCC_ON, HIGH);
-  setOutput(OUTH_FAULT, chargerInhibit);
-  setOutput(OUTL_12V_BAT_CHRG, !dc2dcON_H);
-
-  analogWrite(OUTPWM_PUMP, 0);
+  outL_evcc_on_buffer = HIGH;
+  outH_fault_buffer = chargerInhibit;
+  outL_12V_bat_chrg_buffer = !dc2dcON_H;
+  outpwm_pump_buffer = 0;
 }
 
 /////////////////////////////////////////////////
@@ -520,10 +566,10 @@ void Controller::standby() {
 /////////////////////////////////////////////////
 void Controller::pre_charge() {
   balanceCells();
-  setOutput(OUTL_EVCC_ON, LOW);
-  setOutput(OUTH_FAULT, chargerInhibit);
-  setOutput(OUTL_12V_BAT_CHRG, !dc2dcON_H);
-  analogWrite(OUTPWM_PUMP, 0);
+  outL_evcc_on_buffer = LOW;
+  outH_fault_buffer = chargerInhibit;
+  outL_12V_bat_chrg_buffer = !dc2dcON_H;
+  outpwm_pump_buffer = 0;
 }
 
 /////////////////////////////////////////////////
@@ -532,20 +578,31 @@ void Controller::pre_charge() {
 /////////////////////////////////////////////////
 void Controller::charging() {
   balanceCells();
-  setOutput(OUTL_EVCC_ON, LOW);
-  setOutput(OUTH_FAULT, chargerInhibit);
-  setOutput(OUTL_12V_BAT_CHRG, LOW);
-  analogWrite(OUTPWM_PUMP, (uint8_t) (getCoolingPumpDuty(bms.getHighTemperature()) * 255 ));
+  outL_evcc_on_buffer = LOW;
+  outH_fault_buffer = chargerInhibit;
+  outL_12V_bat_chrg_buffer = LOW;
+  outpwm_pump_buffer = (uint8_t) (getCoolingPumpDuty(bms.getHighTemperature()) * 255 );
 }
 
+/////////////////////////////////////////////////
+/// \brief post_charging state is when the boat is finishing a charge
+/// to to let the EVCC go back to sleep.
+/////////////////////////////////////////////////
+void Controller::post_charge() {
+  balanceCells();
+  outL_evcc_on_buffer = HIGH;      // de-assert key switch ignition KSI to the EVCC
+  outH_fault_buffer = HIGH; //keep asserting the loop to the EVCC until it goes to sleep
+  outL_12V_bat_chrg_buffer = HIGH; //stop DC2DC
+  outpwm_pump_buffer = (uint8_t) (getCoolingPumpDuty(bms.getHighTemperature()) * 255 );
+}
 /////////////////////////////////////////////////
 /// \brief run state is turned on and ready to operate.
 /////////////////////////////////////////////////
 void Controller::run() {
-  setOutput(OUTL_EVCC_ON, LOW); //required so that the EVSE_DISC is valid (will inhibit the motor controller if EVSE is connected)
-  setOutput(OUTH_FAULT, powerLimiter);
-  setOutput(OUTL_12V_BAT_CHRG, LOW);
-  analogWrite(OUTPWM_PUMP, (uint8_t) (getCoolingPumpDuty(bms.getHighTemperature()) * 255 ));
+  outL_evcc_on_buffer = LOW;      //required so that the EVSE_DISC is valid (will inhibit the motor controller if EVSE is connected)
+  outH_fault_buffer = powerLimiter;
+  outL_12V_bat_chrg_buffer = LOW;
+  outpwm_pump_buffer = (uint8_t) (getCoolingPumpDuty(bms.getHighTemperature()) * 255 );
 }
 
 /////////////////////////////////////////////////
@@ -571,6 +628,10 @@ uint32_t Controller::getPeriodMillis() {
 
 void Controller::printControllerState() {
   uint32_t seconds = millis() / 1000;
+  LOG_CONSOLE("OUTL_EVCC_ON: %d\n", outL_evcc_on_buffer);
+  LOG_CONSOLE("OUTH_FAULT: %d\n", outH_fault_buffer);
+  LOG_CONSOLE("OUTL_12V_BAT_CHRG: %d\n", outL_12V_bat_chrg_buffer);
+  LOG_CONSOLE("OUTPWM_PUMP: %d\n",outpwm_pump_buffer);
   LOG_CONSOLE("====================================================================================\n");
   LOG_CONSOLE("=                     BMS Controller registered faults                             =\n");
   switch (state) {
@@ -585,6 +646,9 @@ void Controller::printControllerState() {
       break;
     case CHARGING:
       LOG_CONSOLE("=  state: CHARGING                                                                 =\n");
+      break;
+    case POST_CHARGE:
+      LOG_CONSOLE("=  state: POST_CHARGE                                                              =\n");
       break;
     case RUN:
       LOG_CONSOLE("=  state: RUN                                                                      =\n");

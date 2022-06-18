@@ -8,7 +8,7 @@
 class Controller {
   public:
     enum ControllerState {
-      INIT, STANDBY, PRE_CHARGE, CHARGING, RUN
+      INIT, STANDBY, PRE_CHARGE, CHARGING, POST_CHARGE, RUN
     };
     void doController();
     Controller();
@@ -73,6 +73,11 @@ class Controller {
     bool stickyFaulted;
     float bat12vVoltage;
 
+    bool outL_12V_bat_chrg_buffer;
+    uint8_t outpwm_pump_buffer;
+    bool outL_evcc_on_buffer;
+    bool outH_fault_buffer;  
+
   private:
 
     BMSModuleManager bms;
@@ -96,6 +101,7 @@ class Controller {
     void standby();
     void pre_charge();
     void charging();
+    void post_charge();
     void run();
 
 };
