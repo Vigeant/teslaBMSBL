@@ -45,4 +45,3 @@ Due to the 5s deepsleep mode in standby, it is hard to connect the serial consol
 Due to the deepsleep mode, it is impossible to simply reprogram the teensy following the first sleep. To facilitate reprogramming, the board will not sleep for 1 minute following a reset.
 The teensyview cannot be shut down as it is connected straight to the VDD pins.
 
-	

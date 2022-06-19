@@ -91,10 +91,15 @@ void Controller::doController() {
         LOG_INFO("Transition to POST_CHARGE\n");
       }
 #else
-      if (digitalRead(INL_EVSE_DISC) == LOW || digitalRead(INH_CHARGING) == LOW) {
+      if (ticks >= 5 && (digitalRead(INL_EVSE_DISC) == LOW || digitalRead(INH_CHARGING) == LOW)) {
         ticks = 0;
         state = POST_CHARGE;
         LOG_INFO("Transition to POST_CHARGE\n");
+      } else if (digitalRead(INL_EVSE_DISC) == LOW || digitalRead(INH_CHARGING) == LOW) {
+        //debounce error by letting ticks go up.
+        LOG_INFO("INL_EVSE_DISC == LOW || INH_CHARGING == LOW\n");
+      } else {
+        ticks = 0;
       }
 #endif
       break;
@@ -380,7 +385,9 @@ void Controller::syncModuleDataObjects() {
   //powerLimiter = faultModuleLoop || faultBatMon || faultBMSSerialComms || faultBMSUV || faultBMSOT;
   isFaulted =  chargerInhibit || faultBMSUV || faultBMSUT || fault12VBatOV || fault12VBatUV;
 
-  if (chargerInhibit) LOG_INFO("chargerInhibit line asserted!\n");
+  if (bms.getHighCellVolt() >= MAX_CHARGE_V_SETPOINT) LOG_INFO("bms.getHighCellVolt()[%.2f] >= MAX_CHARGE_V_SETPOINT", bms.getHighCellVolt());
+  if (chargerInhibit) LOG_INFO("chargerInhibit (fault) line asserted!\n");
+  if (powerLimiter) LOG_INFO("powerLimiter (fault) line asserted!\n");
 
   //update stiky faults
   sFaultModuleLoop |= faultModuleLoop;
@@ -528,8 +535,8 @@ void Controller::init() {
   dc2dcON_H = false;
   period = 200;
 
-  outL_12V_bat_chrg_buffer = 0;
-  outpwm_pump_buffer = 255;
+  outL_12V_bat_chrg_buffer = 1;
+  outpwm_pump_buffer = 0;
   outL_evcc_on_buffer = 1;
   outH_fault_buffer = 0; 
 
@@ -579,7 +586,8 @@ void Controller::pre_charge() {
 void Controller::charging() {
   balanceCells();
   outL_evcc_on_buffer = LOW;
-  outH_fault_buffer = chargerInhibit;
+  //outL_evcc_on_buffer = HIGH;
+  outH_fault_buffer = powerLimiter;//chargerInhibit;
   outL_12V_bat_chrg_buffer = LOW;
   outpwm_pump_buffer = (uint8_t) (getCoolingPumpDuty(bms.getHighTemperature()) * 255 );
 }

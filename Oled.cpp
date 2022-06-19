@@ -43,7 +43,7 @@ void Oled::printFormat1() {
 
   oled.setFontType(2);         // 7-segment font
   oled.setCursor(col0, oled.getLCDHeight() / 2);
-  oled.print(controller_inst_ptr->getBMSPtr()->getPackVoltage(),1);
+  oled.print(controller_inst_ptr->getBMSPtr()->getPackVoltage(), 1);
   oled.setCursor(col1, oled.getLCDHeight() / 2);
   oled.print(controller_inst_ptr->getBMSPtr()->getAvgTemperature());
   oled.display();
@@ -136,6 +136,9 @@ void Oled::printFormat5() {
       break;
     case Controller::CHARGING:
       Oled::printCentre("CHARGING", 1);
+      break;
+    case Controller::POST_CHARGE:
+      Oled::printCentre("PRE_CHARGE", 1);
       break;
     case Controller::RUN:
       Oled::printCentre("RUN", 1);
