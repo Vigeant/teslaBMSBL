@@ -53,7 +53,7 @@
 //stop charging 
 #define MAX_CHARGE_V_SETPOINT 4.2f
 //cycle charger to force a charging cycle
-#define CHARGER_CYCLE_V_SETPOINT 4.0f
+#define CHARGER_CYCLE_V_SETPOINT 4.18f
 //issue a warning on OLED and serial console if a cell is that close to a OV or UV fault.
 #define WARN_CELL_V_OFFSET 0.1f
 
@@ -64,20 +64,20 @@
 #define COOLING_LOWT_SETPOINT 25.0f  //threashold at wich coolant pump gradually increases duty up to max.
 #define COOLING_HIGHT_SETPOINT 35.0f //threshold at wich coolant pump is at maximum duty
 
-#define OVER_T_SETPOINT 40.0f       //Tesla seam to allow reaching 45C while supercharging
+#define OVER_T_SETPOINT 45.0f       //Tesla seam to allow reaching 45C while supercharging; in discharge, 60C is ok.
 #define UNDER_T_SETPOINT -10.0f
 //issue a warning on OLED and serial console if T is that close to a OT or UT fault.
 #define WARN_T_OFFSET 5.0f
 //start precision balancing when highest cell reaches this setpoint (taken from tom debree)
-#define PRECISION_BALANCE_V_SETPOINT 3.9f
+#define PRECISION_BALANCE_V_SETPOINT 4.0f
 //precision balance all cells above the lowest cell by this offset (taken from tom debree)
-#define PRECISION_BALANCE_CELL_V_OFFSET 0.02f
+#define PRECISION_BALANCE_CELL_V_OFFSET 0.005f
 //start rough balancing when highest cell reaches this setpoint
 #define ROUGH_BALANCE_V_SETPOINT 3.4f
 //rough balance all cells above the lowest cell by this offset
 #define ROUGH_BALANCE_CELL_V_OFFSET 0.10f
 //DC 2 DC 12V battery charging cycle trigger
-#define DC2DC_CYCLE_V_SETPOINT 12.0f
+#define DC2DC_CYCLE_V_SETPOINT 12.5f
 //DC 2 DC 12V battery charging cycle time in seconds
 #define DC2DC_CYCLE_TIME_S 3600
 //12V battery OV setpoint
