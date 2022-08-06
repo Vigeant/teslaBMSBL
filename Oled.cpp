@@ -137,6 +137,9 @@ void Oled::printFormat5() {
     case Controller::CHARGING:
       Oled::printCentre("CHARGING", 1);
       break;
+    case Controller::TRICKLE_CHARGING:
+      Oled::printCentre("TRICKLE_CHARGING", 1);
+      break;
     case Controller::POST_CHARGE:
       Oled::printCentre("PRE_CHARGE", 1);
       break;

@@ -45,8 +45,15 @@
 //Set to the proper port for your USB connection - SerialUSB on Due (Native) or Serial for Due (Programming) or Teensy
 #define SERIALCONSOLE   Serial
 
+/*
+ * State machine
+ */
+// Loop periods for the state machine of the controller
+#define LOOP_PERIOD_ACTIVE_MS 200
+#define LOOP_PERIOD_STANDBY_MS 2500
+
 #define VERSION 1
-#define CANBUS_SPEED 500000
+#define CANBUS_SPEED 250000
 #define CANBUS_ADDRESS 1
 #define OVER_V_SETPOINT 4.25f
 #define UNDER_V_SETPOINT 3.0f
@@ -54,6 +61,8 @@
 #define MAX_CHARGE_V_SETPOINT 4.2f
 //cycle charger to force a charging cycle
 #define CHARGER_CYCLE_V_SETPOINT 4.18f
+//transition to trickle charging when highest cell reaches this value.
+#define TRICKLE_CHARGE_V_SETPOINT 4.19f
 //issue a warning on OLED and serial console if a cell is that close to a OV or UV fault.
 #define WARN_CELL_V_OFFSET 0.1f
 

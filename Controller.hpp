@@ -8,7 +8,7 @@
 class Controller {
   public:
     enum ControllerState {
-      INIT, STANDBY, PRE_CHARGE, CHARGING, POST_CHARGE, RUN
+      INIT, STANDBY, PRE_CHARGE, CHARGING, TRICKLE_CHARGING,POST_CHARGE, RUN
     };
     void doController();
     Controller();
@@ -101,6 +101,7 @@ class Controller {
     void standby();
     void pre_charge();
     void charging();
+    void trickle_charging();
     void post_charge();
     void run();
 
