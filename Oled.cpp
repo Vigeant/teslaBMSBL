@@ -171,40 +171,11 @@ void Oled::printStickyFaults() {
   oled.print("sFault Codes");
   oled.setCursor(col0, oled.getLCDHeight() / 2);
 
-  if (controller_inst_ptr->sFaultModuleLoop) {
-    oled.print("A");
+  for (uint16_t i = 0; i < sizeof(controller_inst_ptr->faults)/sizeof(controller_inst_ptr->faults[0]) ; i++){
+    if (controller_inst_ptr->faults[i].sFault) {
+      oled.print(controller_inst_ptr->faults[i].code);
+    }
   }
-  if (controller_inst_ptr->sFaultBatMon) {
-    oled.print("B");
-  }
-  if (controller_inst_ptr->sFaultBMSSerialComms) {
-    oled.print("C");
-  }
-  if (controller_inst_ptr->sFaultBMSOV) {
-    oled.print("D");
-  }
-  if (controller_inst_ptr->sFaultBMSUV) {
-    oled.print("E");
-  }
-  if (controller_inst_ptr->sFaultBMSOT) {
-    oled.print("F");
-  }
-  if (controller_inst_ptr->sFaultBMSUT) {
-    oled.print("G");
-  }
-  if (controller_inst_ptr->sFault12VBatOV) {
-    oled.print("H");
-  }
-  if (controller_inst_ptr->sFault12VBatUV) {
-    oled.print("I");
-  }
-  if (controller_inst_ptr->sFaultWatSen1) {
-    oled.print("J");
-  }
-  if (controller_inst_ptr->sFaultWatSen2) {
-    oled.print("K");
-  }
-
   oled.display();
 }
 
@@ -217,40 +188,11 @@ void Oled::printFaults() {
   oled.print("Fault Codes");
   oled.setCursor(col0, oled.getLCDHeight() / 2);
 
-  if (controller_inst_ptr->faultModuleLoop) {
-    oled.print("A");
+  for (uint16_t i = 0; i < sizeof(controller_inst_ptr->faults)/sizeof(controller_inst_ptr->faults[0]) ; i++){
+    if (controller_inst_ptr->faults[i].fault) {
+      oled.print(controller_inst_ptr->faults[i].code);
+    }
   }
-  if (controller_inst_ptr->faultBatMon) {
-    oled.print("B");
-  }
-  if (controller_inst_ptr->faultBMSSerialComms) {
-    oled.print("C");
-  }
-  if (controller_inst_ptr->faultBMSOV) {
-    oled.print("D");
-  }
-  if (controller_inst_ptr->faultBMSUV) {
-    oled.print("E");
-  }
-  if (controller_inst_ptr->faultBMSOT) {
-    oled.print("F");
-  }
-  if (controller_inst_ptr->faultBMSUT) {
-    oled.print("G");
-  }
-  if (controller_inst_ptr->fault12VBatOV) {
-    oled.print("H");
-  }
-  if (controller_inst_ptr->fault12VBatUV) {
-    oled.print("I");
-  }
-  if (controller_inst_ptr->faultWatSen1) {
-    oled.print("J");
-  }
-  if (controller_inst_ptr->faultWatSen2) {
-    oled.print("K");
-  }
-
   oled.display();
 }
 

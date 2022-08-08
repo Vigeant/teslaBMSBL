@@ -232,6 +232,25 @@ Controller::Controller() {
   state = INIT;
 }
 
+void Controller::assertFault(faultNames fautlName) {
+  faults[fautlName].debounceCounter += 1;
+  if (faults[fautlName].debounceCounter >= FAULT_DEBOUNCE_COUNT) {
+    if (!faults[fautlName].fault) {
+      LOG_ERROR(faults[fautlName].msgAsserted);
+    }
+    faults[fautlName].fault = true;
+    faults[fautlName].sFault = true;
+    faults[fautlName].timeStamp = millis() / 1000;
+    faults[fautlName].debounceCounter = FAULT_DEBOUNCE_COUNT;
+  }
+}
+
+void Controller::deAssertFault(faultNames fautlName) {
+  if (faults[fautlName].fault) LOG_ERROR(faults[fautlName].msgDeAsserted);
+  faults[fautlName].debounceCounter = 0;
+  faults[fautlName].fault = false;
+}
+
 /////////////////////////////////////////////////
 /// \brief gather all the data from the boards and check for any faults.
 /////////////////////////////////////////////////
@@ -241,209 +260,86 @@ void Controller::syncModuleDataObjects() {
   bms.getAllVoltTemp();
 
   if (bms.getLineFault()) {
-    faultBMSSerialCommsDB += 1;
-    if (faultBMSSerialCommsDB >= FAULT_DEBOUNCE_COUNT) {
-      if (!faultBMSSerialComms) {
-        LOG_ERROR("Serial communication with battery modules lost!\n");
-      }
-      faultBMSSerialComms = true;
-      faultBMSSerialCommsDB = FAULT_DEBOUNCE_COUNT;
-    }
+    assertFault(FBMSSerialComms);
   } else {
-    if (faultBMSSerialComms) LOG_INFO("Serial communication with battery modules re-established!\n");
-    faultBMSSerialCommsDB = 0;
-    faultBMSSerialComms = false;
+    deAssertFault(FBMSSerialComms);
   }
 
   if (digitalRead(INL_BAT_PACK_FAULT) == LOW) {
-    faultModuleLoopDB += 1;
-    if (faultModuleLoopDB >= FAULT_DEBOUNCE_COUNT) {
-      if (!faultModuleLoop) {
-        LOG_ERROR("One or more BMS modules have asserted the fault loop!\n");
-      }
-      faultModuleLoop = true;
-      faultModuleLoopDB = FAULT_DEBOUNCE_COUNT;
-    }
+    assertFault(FModuleLoop);
   } else {
-    if (faultModuleLoop) LOG_INFO("All modules have deasserted the fault loop\n");
-    faultModuleLoopDB = 0;
-    faultModuleLoop = false;
+    deAssertFault(FModuleLoop);
   }
 
   if (digitalRead(INL_BAT_MON_FAULT) == LOW) {
-    faultBatMonDB += 1;
-    if (faultBatMonDB >= FAULT_DEBOUNCE_COUNT) {
-      if (!faultBatMon) {
-        LOG_ERROR("The battery monitor asserted the fault loop!\n");
-      }
-      faultBatMon = true;
-      faultBatMonDB = FAULT_DEBOUNCE_COUNT;
-    }
+    assertFault(FBatMon);
   } else {
-    if (faultBatMon) LOG_INFO("The battery monitor deasserted the fault loop\n");
-    faultBatMonDB = 0;
-    faultBatMon = false;
+    deAssertFault(FBatMon);
   }
 
   if (digitalRead(INL_WATER_SENS1) == LOW) {
-    faultWatSen1DB += 1;
-    if (faultWatSen1DB >= FAULT_DEBOUNCE_COUNT) {
-      if (!faultWatSen1) {
-        LOG_ERROR("The battery water sensor 1 is reporting water!\n");
-      }
-      faultWatSen1 = true;
-      faultWatSen1DB = FAULT_DEBOUNCE_COUNT;
-    }
+    assertFault(FWatSen1);
   } else {
-    if (faultWatSen1) LOG_INFO("The battery water sensor 1 is reporting dry.\n");
-    faultWatSen1DB = 0;
-    faultWatSen1 = false;
+    deAssertFault(FWatSen1);
   }
 
   if (digitalRead(INL_WATER_SENS2) == LOW) {
-    faultWatSen2DB += 1;
-    if (faultWatSen2DB >= FAULT_DEBOUNCE_COUNT) {
-      if (!faultWatSen2) {
-        LOG_ERROR("The battery water sensor 2 is reporting water!\n");
-      }
-      faultWatSen2 = true;
-      faultWatSen2DB = FAULT_DEBOUNCE_COUNT;
-    }
+    assertFault(FWatSen2);
   } else {
-    if (faultWatSen2) LOG_INFO("The battery water sensor 2 is reporting dry.\n");
-    faultWatSen2DB = 0;
-    faultWatSen2 = false;
+    deAssertFault(FWatSen2);
   }
 
   if ( bms.getHighCellVolt() > OVER_V_SETPOINT) {
-    faultBMSOVDB += 1;
-    if (faultBMSOVDB >= FAULT_DEBOUNCE_COUNT) {
-      if (!faultBMSOV) {
-        LOG_ERROR("OVER_V_SETPOINT: %.2fV, highest cell:%.2fV\n", OVER_V_SETPOINT, bms.getHighCellVolt());
-      }
-      faultBMSOV = true;
-      faultBMSOVDB = FAULT_DEBOUNCE_COUNT;
-    }
+    assertFault(FBMSOV);
   } else {
-    if (faultBMSOV) LOG_INFO("All cells are back under OV threshold\n");
-    faultBMSOVDB = 0;
-    faultBMSOV = false;
+    deAssertFault(FBMSOV);
   }
 
   if ( bms.getLowCellVolt() < UNDER_V_SETPOINT) {
-    faultBMSUVDB += 1;
-    if (faultBMSUVDB >= FAULT_DEBOUNCE_COUNT) {
-      if (!faultBMSUV) {
-        LOG_ERROR("UNDER_V_SETPOINT: %.2fV, lowest cell:%.2fV\n", UNDER_V_SETPOINT, bms.getLowCellVolt());
-      }
-      faultBMSUV = true;
-      faultBMSUVDB = FAULT_DEBOUNCE_COUNT;
-    }
+    assertFault(FBMSUV);
   } else {
-    if (faultBMSUV) LOG_INFO("All cells are back over UV threshold\n");
-    faultBMSUVDB = 0;
-    faultBMSUV = false;
+    deAssertFault(FBMSUV);
   }
 
   if ( bms.getHighTemperature() > OVER_T_SETPOINT) {
-    faultBMSOTDB += 1;
-    if (faultBMSOTDB >= FAULT_DEBOUNCE_COUNT) {
-      if (!faultBMSOT) {
-        LOG_ERROR("OVER_T_SETPOINT: %.2fV, highest module:%.2fV\n", UNDER_V_SETPOINT, bms.getHighTemperature());
-      }
-      faultBMSOT = true;
-      faultBMSOTDB = FAULT_DEBOUNCE_COUNT;
-    }
+    assertFault(FBMSOT);
   } else {
-    if (faultBMSOT) LOG_INFO("All modules are back under the OT threshold\n");
-    faultBMSOTDB = 0;
-    faultBMSOT = false;
+    deAssertFault(FBMSOT);
   }
 
   if ( bms.getLowTemperature() < UNDER_T_SETPOINT) {
-    faultBMSUTDB += 1;
-    if (faultBMSUTDB >= FAULT_DEBOUNCE_COUNT) {
-      if (!faultBMSUT) {
-        LOG_ERROR("UNDER_T_SETPOINT: %.2fV, lowest module:%.2fV\n", UNDER_T_SETPOINT, bms.getLowTemperature());
-      }
-      faultBMSUT = true;
-      faultBMSUTDB = FAULT_DEBOUNCE_COUNT;
-    }
+    assertFault(FBMSUT);
   } else {
-    if (faultBMSUT) LOG_INFO("All modules are back over the UT threshold\n");
-    faultBMSUTDB = 0;
-    faultBMSUT = false;
+    deAssertFault(FBMSUT);
   }
 
   bat12vVoltage = (float)analogRead(INA_12V_BAT) / BAT12V_SCALING_DIVISOR ;
-  //LOG_INFO("bat12vVoltage: %.2f\n", bat12vVoltage);
   if ( bat12vVoltage > BAT12V_OVER_V_SETPOINT) {
-    fault12VBatOVDB += 1;
-    if (fault12VBatOVDB >= FAULT_DEBOUNCE_COUNT) {
-      if (!fault12VBatOV) {
-        LOG_ERROR("12VBAT_OVER_V_SETPOINT: %.2fV, V:%.2fV\n", BAT12V_OVER_V_SETPOINT, bat12vVoltage);
-      }
-      fault12VBatOV = true;
-      fault12VBatOVDB = FAULT_DEBOUNCE_COUNT;
-    }
+    assertFault(F12VBatOV);
   } else {
-    if (fault12VBatOV) LOG_INFO("12V battery back under the OV threshold\n");
-    fault12VBatOVDB = 0;
-    fault12VBatOV = false;
+    deAssertFault(F12VBatOV);
   }
 
   if ( bat12vVoltage < BAT12V_UNDER_V_SETPOINT) {
-    fault12VBatUVDB += 1;
-    if (fault12VBatUVDB >= FAULT_DEBOUNCE_COUNT) {
-      if (!fault12VBatUV) {
-        LOG_ERROR("12VBAT_UNDER_V_SETPOINT: %.2fV, V:%.2fV\n", BAT12V_UNDER_V_SETPOINT, bat12vVoltage);
-      }
-      fault12VBatUV = true;
-      fault12VBatUVDB = FAULT_DEBOUNCE_COUNT;
-    }
+    assertFault(F12VBatUV);
   } else {
-    if (fault12VBatUV) LOG_INFO("12V battery back over the UV threshold\n");
-    fault12VBatUVDB = 0;
-    fault12VBatUV = false;
+    deAssertFault(F12VBatUV);
   }
 
-  //added bms.getHighCellVolt() >= MAX_CHARGE_V_SETPOINT to stop charging even if charging in run state.
-  chargerInhibit = faultModuleLoop || faultBatMon || faultBMSSerialComms || faultBMSOV || faultBMSUT || faultBMSOT || faultWatSen1 || faultWatSen2;
+  chargerInhibit = false;
+  powerLimiter = false;
+  isFaulted = false;
+  for (uint16_t i = 0; i < sizeof(faults)/sizeof(faults[0]) ; i++){
+    if (faults[i].chargeFault) chargerInhibit |= faults[i].fault;
+    if (faults[i].runFault) powerLimiter |= faults[i].fault;
+    isFaulted |= faults[i].fault;
+  }
   chargerInhibit |= bms.getHighCellVolt() >= MAX_CHARGE_V_SETPOINT;
-  powerLimiter   = faultModuleLoop || faultBatMon || faultBMSSerialComms || faultBMSOV || faultBMSUT || faultBMSOT || faultWatSen1 || faultWatSen2 || faultBMSUV;
-  powerLimiter |= bms.getHighCellVolt() >= MAX_CHARGE_V_SETPOINT;
-  //powerLimiter = faultModuleLoop || faultBatMon || faultBMSSerialComms || faultBMSUV || faultBMSOT;
-  isFaulted =  chargerInhibit || faultBMSUV || faultBMSUT || fault12VBatOV || fault12VBatUV;
+  powerLimiter |= bms.getHighCellVolt() >= MAX_CHARGE_V_SETPOINT; //added in case charging in run mode.
 
   if (bms.getHighCellVolt() >= MAX_CHARGE_V_SETPOINT) LOG_INFO("bms.getHighCellVolt()[%.2f] >= MAX_CHARGE_V_SETPOINT", bms.getHighCellVolt());
   if (chargerInhibit) LOG_INFO("chargerInhibit (fault) line asserted!\n");
   if (powerLimiter) LOG_INFO("powerLimiter (fault) line asserted!\n");
-
-  //update stiky faults
-  sFaultModuleLoop |= faultModuleLoop;
-  sFaultBatMon |= faultBatMon;
-  sFaultBMSSerialComms |= faultBMSSerialComms;
-  sFaultBMSOV |= faultBMSOV;
-  sFaultBMSUV |= faultBMSUV;
-  sFaultBMSOT |= faultBMSUV;
-  sFaultBMSUT |= faultBMSUT;
-  sFault12VBatOV |= fault12VBatOV;
-  sFault12VBatUV |= fault12VBatUV;
-  sFaultWatSen1 |= faultWatSen1;
-  sFaultWatSen2 |= faultWatSen2;
-
-  //update time stamps
-  if (faultModuleLoop) faultModuleLoopTS = millis() / 1000;
-  if (faultBatMon) faultBatMonTS = millis() / 1000;
-  if (faultBMSSerialComms) faultBMSSerialCommsTS = millis() / 1000;
-  if (faultBMSOV) faultBMSOVTS = millis() / 1000;
-  if (faultBMSUV) faultBMSUVTS = millis() / 1000;
-  if (faultBMSOT) faultBMSOTTS = millis() / 1000;
-  if (faultBMSUT) faultBMSUTTS = millis() / 1000;
-  if (fault12VBatOV) fault12VBatOVTS = millis() / 1000;
-  if (fault12VBatUV) fault12VBatUVTS = millis() / 1000;
-  if (faultWatSen1) faultWatSen1TS = millis() / 1000;
-  if (faultWatSen2) faultWatSen2TS = millis() / 1000;
 
   stickyFaulted |= isFaulted;
   bms.clearFaults();
@@ -456,10 +352,10 @@ void Controller::syncModuleDataObjects() {
 void Controller::balanceCells() {
   //balance for 1 second given that the controller wakes up every second.
   if (bms.getHighCellVolt() > PRECISION_BALANCE_V_SETPOINT) {
-    //LOG_CONSOLE("precision balance\n");
+    LOG_INFO("precision balance\n");
     bms.balanceCells(5, PRECISION_BALANCE_CELL_V_OFFSET);
   } else if (bms.getHighCellVolt() > ROUGH_BALANCE_V_SETPOINT) {
-    //LOG_CONSOLE("rough balance\n");
+    LOG_INFO("rough balance\n");
     bms.balanceCells(5, ROUGH_BALANCE_CELL_V_OFFSET);
   }
 }
@@ -504,58 +400,6 @@ void Controller::init() {
   pinMode(OUTH_FAULT, OUTPUT);
   pinMode(INL_WATER_SENS1, INPUT_PULLUP);
   pinMode(INL_WATER_SENS2, INPUT_PULLUP);
-
-  //faults
-  faultModuleLoop = false;
-  faultBatMon = false;
-  faultBMSSerialComms = false;
-  faultBMSOV = false;
-  faultBMSUV = false;
-  faultBMSOT = false;
-  faultBMSUT = false;
-  fault12VBatOV = false;
-  fault12VBatUV = false;
-  faultWatSen1 = false;
-  faultWatSen2 = false;
-
-  //sticky faults
-  sFaultModuleLoop = false;
-  sFaultBatMon = false;
-  sFaultBMSSerialComms = false;
-  sFaultBMSOV = false;
-  sFaultBMSUV = false;
-  sFaultBMSOT = false;
-  sFaultBMSUT = false;
-  sFault12VBatOV = false;
-  sFault12VBatUV = false;
-  sFaultWatSen1 = false;
-  sFaultWatSen2 = false;
-
-  //faults debounce counters
-  faultModuleLoopDB = 0;
-  faultBatMonDB = 0;
-  faultBMSSerialCommsDB = 0;
-  faultBMSOVDB = 0;
-  faultBMSUVDB = 0;
-  faultBMSOTDB = 0;
-  faultBMSUTDB = 0;
-  fault12VBatOVDB = 0;
-  fault12VBatUVDB = 0;
-  faultWatSen1DB = 0;
-  faultWatSen2DB = 0;
-
-  //faults time stamps (TS)
-  faultModuleLoopTS = 0;
-  faultBatMonTS = 0;
-  faultBMSSerialCommsTS = 0;
-  faultBMSOVTS = 0;
-  faultBMSUVTS = 0;
-  faultBMSOTTS = 0;
-  faultBMSUTTS = 0;
-  fault12VBatOVTS = 0;
-  fault12VBatUVTS = 0;
-  faultWatSen1TS = 0;
-  faultWatSen2TS = 0;
 
   isFaulted = false;
   stickyFaulted = false;
@@ -712,26 +556,9 @@ void Controller::printControllerState() {
   LOG_CONSOLE("====================================================================================\n");
   LOG_CONSOLE("%-22s   last fault time\n", "Fault Name");
   LOG_CONSOLE("----------------------   -----------------------------------------------------------\n");
-  if (sFaultModuleLoop) LOG_CONSOLE("%-22s @ %-3d days, %02d:%02d:%02d\n",
-                                      "faultModuleLoop", faultModuleLoopTS / 86400, (faultModuleLoopTS % 86400) / 3600, (faultModuleLoopTS % 3600) / 60, (faultModuleLoopTS % 60));
-  if (sFaultBatMon) LOG_CONSOLE("%-22s @ %-3d days, %02d:%02d:%02d\n",
-                                  "faultBatMon", faultBatMonTS / 86400, (faultBatMonTS % 86400) / 3600, (faultBatMonTS % 3600) / 60, (faultBatMonTS % 60));
-  if (sFaultBMSSerialComms) LOG_CONSOLE("%-22s @ %-3d days, %02d:%02d:%02d\n",
-                                          "faultBMSSerialComms", faultBMSSerialCommsTS / 86400, (faultBMSSerialCommsTS % 86400) / 3600, (faultBMSSerialCommsTS % 3600) / 60, (faultBMSSerialCommsTS % 60));
-  if (sFaultBMSOV) LOG_CONSOLE("%-22s @ %-3d days, %02d:%02d:%02d\n",
-                                 "faultBMSOV", faultBMSOVTS / 86400, (faultBMSOVTS % 86400) / 3600, (faultBMSOVTS % 3600) / 60, (faultBMSOVTS % 60));
-  if (sFaultBMSUV) LOG_CONSOLE("%-22s @ %-3d days, %02d:%02d:%02d\n",
-                                 "faultBMSUV", faultBMSUVTS / 86400, (faultBMSUVTS % 86400) / 3600, (faultBMSUVTS % 3600) / 60, (faultBMSUVTS % 60));
-  if (sFaultBMSOT) LOG_CONSOLE("%-22s @ %-3d days, %02d:%02d:%02d\n",
-                                 "faultBMSOT", faultBMSOTTS / 86400, (faultBMSOTTS % 86400) / 3600, (faultBMSOTTS % 3600) / 60, (faultBMSOTTS % 60));
-  if (sFaultBMSUT) LOG_CONSOLE("%-22s @ %-3d days, %02d:%02d:%02d\n",
-                                 "faultBMSUT", faultBMSUTTS / 86400, (faultBMSUTTS % 86400) / 3600, (faultBMSUTTS % 3600) / 60, (faultBMSUTTS % 60));
-  if (sFault12VBatOV) LOG_CONSOLE("%-22s @ %-3d days, %02d:%02d:%02d\n",
-                                    "fault12VBatOV", fault12VBatOVTS / 86400, (fault12VBatOVTS % 86400) / 3600, (fault12VBatOVTS % 3600) / 60, (fault12VBatOVTS % 60));
-  if (sFault12VBatUV) LOG_CONSOLE("%-22s @ %-3d days, %02d:%02d:%02d\n",
-                                    "fault12VBatUV", fault12VBatUVTS / 86400, (fault12VBatUVTS % 86400) / 3600, (fault12VBatUVTS % 3600) / 60, (fault12VBatUVTS % 60));
-  if (sFaultWatSen1) LOG_CONSOLE("%-22s @ %-3d days, %02d:%02d:%02d\n",
-                                   "faultWatSen1", faultWatSen1TS / 86400, (faultWatSen1TS % 86400) / 3600, (faultWatSen1TS % 3600) / 60, (faultWatSen1TS % 60));
-  if (sFaultWatSen2) LOG_CONSOLE("%-22s @ %-3d days, %02d:%02d:%02d\n",
-                                   "faultWatSen2", faultWatSen2TS / 86400, (faultWatSen2TS % 86400) / 3600, (faultWatSen2TS % 3600) / 60, (faultWatSen2TS % 60));
+  for (uint16_t i = 0; i < sizeof(faults)/sizeof(faults[0]) ; i++){
+    if (faults[i].sFault) {
+      LOG_CONSOLE("%-22s @ %-3d days, %02d:%02d:%02d\n", faults[i].name, faults[i].timeStamp / 86400, (faults[i].timeStamp % 86400) / 3600, (faults[i].timeStamp % 3600) / 60, (faults[i].timeStamp % 60));
+    }
+  }
 }

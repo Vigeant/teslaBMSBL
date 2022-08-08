@@ -8,7 +8,7 @@
 class Controller {
   public:
     enum ControllerState {
-      INIT, STANDBY, PRE_CHARGE, CHARGING, TRICKLE_CHARGING,POST_CHARGE, RUN
+      INIT, STANDBY, PRE_CHARGE, CHARGING, TRICKLE_CHARGING, POST_CHARGE, RUN
     };
     void doController();
     Controller();
@@ -17,57 +17,35 @@ class Controller {
     void printControllerState();
     uint32_t getPeriodMillis();
 
-    //faults
-    bool faultModuleLoop;
-    bool faultBatMon;
-    bool faultBMSSerialComms;
-    bool faultBMSOV;
-    bool faultBMSUV;
-    bool faultBMSOT;
-    bool faultBMSUT;
-    bool fault12VBatOV;
-    bool fault12VBatUV;
-    bool faultWatSen1;
-    bool faultWatSen2;
+    //faults overhaul
+    enum faultNames { FModuleLoop, FBatMon, FBMSSerialComms, FBMSOV, FBMSUV, FBMSOT, FBMSUT, F12VBatOV, F12VBatUV, FWatSen1, FWatSen2};
 
-    //sticky faults
-    bool sFaultModuleLoop;
-    bool sFaultBatMon;
-    bool sFaultBMSSerialComms;
-    bool sFaultBMSOV;
-    bool sFaultBMSUV;
-    bool sFaultBMSOT;
-    bool sFaultBMSUT;
-    bool sFault12VBatOV;
-    bool sFault12VBatUV;
-    bool sFaultWatSen1;
-    bool sFaultWatSen2;
+    typedef struct Fault {
+      char name[50];
+      char code[2];
+      bool fault;
+      bool sFault;
+      bool chargeFault;
+      bool runFault;
+      char msgAsserted[100];
+      char msgDeAsserted[100];
+      uint8_t debounceCounter;
+      uint32_t timeStamp;
+    } fault_t;
 
-    //faults debounce counters (DB)
-    uint8_t faultModuleLoopDB;
-    uint8_t faultBatMonDB;
-    uint8_t faultBMSSerialCommsDB;
-    uint8_t faultBMSOVDB;
-    uint8_t faultBMSUVDB;
-    uint8_t faultBMSOTDB;
-    uint8_t faultBMSUTDB;
-    uint8_t fault12VBatOVDB;
-    uint8_t fault12VBatUVDB;
-    uint8_t faultWatSen1DB;
-    uint8_t faultWatSen2DB;
-
-    //faults time stamps (TS)
-    uint32_t faultModuleLoopTS;
-    uint32_t faultBatMonTS;
-    uint32_t faultBMSSerialCommsTS;
-    uint32_t faultBMSOVTS;
-    uint32_t faultBMSUVTS;
-    uint32_t faultBMSOTTS;
-    uint32_t faultBMSUTTS;
-    uint32_t fault12VBatOVTS;
-    uint32_t fault12VBatUVTS;
-    uint32_t faultWatSen1TS;
-    uint32_t faultWatSen2TS;
+    fault_t faults[11] = {
+      [0] = { .name = "ModuleLoop", .code = "A", .fault = false, .sFault = false, .chargeFault = true, .runFault = true, .msgAsserted = "One or more BMS modules have asserted the fault loop!\n", .msgDeAsserted = "All modules have deasserted the fault loop\n" },
+      [1] = { .name = "BatMon", .code = "B", .fault = false, .sFault = false, .chargeFault = true, .runFault = true, .msgAsserted = "The battery monitor asserted a fault!\n", .msgDeAsserted = "The battery monitor deasserted a fault\n"},
+      [2] = { .name = "BMSSerialComms", .code = "C", .fault = false, .sFault = false, .chargeFault = true, .runFault = true, .msgAsserted = "Serial communication with battery modules lost!\n", .msgDeAsserted = "Serial communication with battery modules re-established!\n" },
+      [3] = { .name = "BMSOV", .code = "D", .fault = false, .sFault = false, .chargeFault = true, .runFault = true, .msgAsserted = "A cell reached a voltage higher than the OV threshold\n", .msgDeAsserted = "All cells are back under OV threshold\n"},
+      [4] = { .name = "BMSUV", .code = "E", .fault = false, .sFault = false, .chargeFault = false, .runFault = true, .msgAsserted = "A cell reached a voltage lower than the UV threshold\n", .msgDeAsserted = "All cells are back over UV threshold\n"},
+      [5] = { .name = "BMSOT", .code = "F", .fault = false, .sFault = false, .chargeFault = true, .runFault = true, .msgAsserted = "A module reached a temp higher than the OT threshold\n", .msgDeAsserted = "All modules are back under OT threshold\n"},
+      [6] = { .name = "BMSUT", .code = "G", .fault = false, .sFault = false, .chargeFault = true, .runFault = true, .msgAsserted = "A module reached a temp lower than the UT threshold\n", .msgDeAsserted = "All modules are back over UT threshold\n"},
+      [7] = { .name = "12VBatOV", .code = "H", .fault = false, .sFault = false, .chargeFault = false, .runFault = false, .msgAsserted = "12V battery reached a voltage higher than the OV threshold\n", .msgDeAsserted = "12V battery back under the OV threshold\n"},
+      [8] = { .name = "12VBatUV", .code = "I", .fault = false, .sFault = false, .chargeFault = false, .runFault = true, .msgAsserted = "12V battery reached a voltage lower than the UV threshold\n", .msgDeAsserted = "12V battery back over the UV threshold\n"},
+      [9] = { .name = "WatSen1", .code = "J", .fault = false, .sFault = false, .chargeFault = true, .runFault = true, .msgAsserted = "The battery water sensor 1 is reporting water!\n", .msgDeAsserted = "The battery water sensor 1 is reporting dry.\n"},
+      [10] = { .name = "WatSen2", .code = "K", .fault = false, .sFault = false, .chargeFault = true, .runFault = true, .msgAsserted = "The battery water sensor 2 is reporting water!\n", .msgDeAsserted = "The battery water sensor 2 is reporting dry.\n"}
+    };
 
     bool isFaulted;
     bool stickyFaulted;
@@ -76,7 +54,7 @@ class Controller {
     bool outL_12V_bat_chrg_buffer;
     uint8_t outpwm_pump_buffer;
     bool outL_evcc_on_buffer;
-    bool outH_fault_buffer;  
+    bool outH_fault_buffer;
 
   private:
 
@@ -88,6 +66,8 @@ class Controller {
     uint32_t period;
 
     //run-time functions
+    void assertFault(faultNames fautlName);
+    void deAssertFault(faultNames fautlName);
     void syncModuleDataObjects(); //gathers all the data from the boards and populates the BMSModel object instances
     void balanceCells(); //balances the cells according to thresholds in the BMSModuleManager
 
