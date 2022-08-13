@@ -60,7 +60,7 @@
 //stop charging 
 #define MAX_CHARGE_V_SETPOINT 4.2f
 //cycle charger to force a charging cycle
-#define CHARGER_CYCLE_V_SETPOINT 4.18f
+#define CHARGER_CYCLE_V_SETPOINT 4.17f
 //transition to trickle charging when highest cell reaches this value.
 #define TRICKLE_CHARGE_V_SETPOINT 4.19f
 //issue a warning on OLED and serial console if a cell is that close to a OV or UV fault.
