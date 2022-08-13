@@ -236,7 +236,7 @@ void Controller::assertFault(faultNames fautlName) {
   faults[fautlName].debounceCounter += 1;
   if (faults[fautlName].debounceCounter >= FAULT_DEBOUNCE_COUNT) {
     if (!faults[fautlName].fault) {
-      LOG_ERROR(faults[fautlName].msgAsserted);
+      LOG_ERR(faults[fautlName].msgAsserted);
     }
     faults[fautlName].fault = true;
     faults[fautlName].sFault = true;
@@ -246,7 +246,9 @@ void Controller::assertFault(faultNames fautlName) {
 }
 
 void Controller::deAssertFault(faultNames fautlName) {
-  if (faults[fautlName].fault) LOG_ERROR(faults[fautlName].msgDeAsserted);
+  if (faults[fautlName].fault) {
+    LOG_ERR(faults[fautlName].msgDeAsserted);
+  }
   faults[fautlName].debounceCounter = 0;
   faults[fautlName].fault = false;
 }
@@ -329,7 +331,7 @@ void Controller::syncModuleDataObjects() {
   chargerInhibit = false;
   powerLimiter = false;
   isFaulted = false;
-  for (uint16_t i = 0; i < sizeof(faults)/sizeof(faults[0]) ; i++){
+  for (uint16_t i = 0; i < sizeof(faults) / sizeof(faults[0]) ; i++) {
     if (faults[i].chargeFault) chargerInhibit |= faults[i].fault;
     if (faults[i].runFault) powerLimiter |= faults[i].fault;
     isFaulted |= faults[i].fault;
@@ -556,7 +558,7 @@ void Controller::printControllerState() {
   LOG_CONSOLE("====================================================================================\n");
   LOG_CONSOLE("%-22s   last fault time\n", "Fault Name");
   LOG_CONSOLE("----------------------   -----------------------------------------------------------\n");
-  for (uint16_t i = 0; i < sizeof(faults)/sizeof(faults[0]) ; i++){
+  for (uint16_t i = 0; i < sizeof(faults) / sizeof(faults[0]) ; i++) {
     if (faults[i].sFault) {
       LOG_CONSOLE("%-22s @ %-3d days, %02d:%02d:%02d\n", faults[i].name, faults[i].timeStamp / 86400, (faults[i].timeStamp % 86400) / 3600, (faults[i].timeStamp % 3600) / 60, (faults[i].timeStamp % 60));
     }
