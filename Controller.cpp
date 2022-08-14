@@ -97,7 +97,12 @@ void Controller::doController() {
         LOG_INFO("Transition to POST_CHARGE\n");
       } else if (digitalRead(INL_EVSE_DISC) == LOW || digitalRead(INH_CHARGING) == LOW) {
         //debounce error by letting ticks go up to 5.
-        LOG_INFO("INL_EVSE_DISC == LOW || INH_CHARGING == LOW\n");
+        //LOG_INFO("INL_EVSE_DISC == LOW || INH_CHARGING == LOW\n");
+        if (digitalRead(INL_EVSE_DISC) == LOW){
+          LOG_INFO("INL_EVSE_DISC == LOW\n");
+        } else if ( digitalRead(INH_CHARGING) == LOW) {
+          LOG_INFO("INH_CHARGING == LOW\n");
+        }
       } else if (bms.getHighCellVolt() > TRICKLE_CHARGE_V_SETPOINT) {
         ticks = 0;
         state = TRICKLE_CHARGING;
