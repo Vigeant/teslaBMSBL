@@ -43,7 +43,7 @@ SnoozeBlock config(timer, digital, usbSerial);
 void setup() {
   //console stuff
   pinMode(INL_SOFT_RST, INPUT_PULLUP);
-  cons_inst.printMenu();
+  //cons_inst.printMenu();
   LOG_CONSOLE("BMS> ");
 }
 

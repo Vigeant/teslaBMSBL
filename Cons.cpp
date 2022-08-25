@@ -2,107 +2,92 @@
 #include "CONFIG.h"
 #include <stdio.h>
 #include <stdarg.h>
+#include <stdlib.h>
 
 #define CONSOLEBUFFERSIZE 64
 
+#define CR '\r'
+#define LF '\n'
+#define BS '\b'
+#define NULLCHAR '\0'
+#define SPACE ' '
+
 /////////////////////////////////////////////////
-/// \brief This is the consoles main function where commands and interpreted every tick.
+/// \brief This is the consoles main function where commands are interpreted every tick.
 /////////////////////////////////////////////////
-void Cons::doConsole() {
-  static char y[CONSOLEBUFFERSIZE] = {0};
-  static unsigned char lastyptr = 0;
-  static unsigned char yptr = 0;
-  static unsigned char numB = 0;
-  if (SERIALCONSOLE.available()) {
-    numB = SERIALCONSOLE.readBytesUntil('\n', &y[lastyptr], CONSOLEBUFFERSIZE - 1 - lastyptr);
+#define COMMAND_BUFFER_LENGTH        64                        //length of serial buffer for incoming commands
+static char   cmdLine[COMMAND_BUFFER_LENGTH + 1];                 //Read commands into this buffer from Serial.  +1 in length for a termination char
 
-    //LOG_CONSOLE("lastyptr: 0x%x, yptr: 0x%x, numB: 0x%x\r\n", lastyptr, yptr, numB);
+// Add all commands before the null ptr
+CliCommand* cliCommands[] = { new CommandPrintMenu(),
+              new ShowStatus(),
+              new ShowGraph(),
+              new ShowCSV(),
+              new SetVerbose(),
+              0
+};
 
-
-    while (yptr < lastyptr + numB) {
-      if ((y[yptr] == '\n') || (y[yptr] == '\r')) {
-        LOG_CONSOLE("\r\n");
-        //LOG_CONSOLE("LL%c", y[0]);
-        switch (y[0]) {
-          case '1':
-            controller_inst_ptr->getBMSPtr()->printPackSummary();
-            LOG_CONSOLE("12V Battery: %.2fV \n", controller_inst_ptr->bat12vVoltage);
-            controller_inst_ptr->printControllerState();
-            break;
-
-          case '2':
-            controller_inst_ptr->getBMSPtr()->printPackGraph();
-            break;
-
-          case '3':
-            controller_inst_ptr->getBMSPtr()->printAllCSV();
-            break;
-
-          case 'v':
-            if (y[1] >= 0x30 && y[1] <= 0x35) {
-              log_inst.setLoglevel((Logger::LogLevel)(y[1] - 0x30));
-              LOG_DEBUG("logLevel set to :%d\n", log_inst.getLogLevel());
-              LOG_INFO("logLevel set to :%d\n", log_inst.getLogLevel());
-              LOG_WARN("logLevel set to :%d\n", log_inst.getLogLevel());
-              LOG_ERROR("logLevel set to :%d\n", log_inst.getLogLevel());
-              LOG_CONSOLE("logLevel set to :%d\n", log_inst.getLogLevel());
-            } else {
-              LOG_CONSOLE("logLevel out of bounds (0-5)\n");
-            }
-            break;
-
-          case 'h':
-          case '?':
-            printMenu();
-            break;
-
-          case '\n':
-          case '\r':
-          default:
-            break;
+bool getCommandLineFromSerialPort(char * commandLine) {
+  static uint8_t charsRead = 0;                      //note: COMAND_BUFFER_LENGTH must be less than 255 chars long
+  //read asynchronously until full command input
+  while (Serial.available()) {
+    char c = Serial.read();
+    switch (c) {
+      case CR:      //likely have full command in buffer now, commands are terminated by CR and/or LF
+      case LF:
+        commandLine[charsRead] = NULLCHAR;       //null terminate our command char array
+        if (charsRead >= 0)  {
+          charsRead = 0;                           //charsRead is static, so have to reset
+          //Serial.println(commandLine);
+          Serial.println("");
+          return true;
         }
-        memset(y,0,CONSOLEBUFFERSIZE);
-        yptr = 0;
-        lastyptr = 0;
-        LOG_CONSOLE("BMS> ");
-        break; //not perfect but...
-      } else {
-        //LOG_CONSOLE("y[%d]:%c y[0]:0x%x", yptr, y[yptr], y[0]);
-        LOG_CONSOLE("%c", y[yptr]);
-        yptr++;
-      }
+        break;
+      case BS:// handle backspace in input: put a space in last char
+      case 0x7f:
+        if (charsRead > 0) {                        //and adjust commandLine and charsRead
+          commandLine[--charsRead] = NULLCHAR;
+          Serial.print("\b \b");
+        }
+        break;
+      default:
+        // c = tolower(c);
+        if (charsRead < COMMAND_BUFFER_LENGTH) {
+          commandLine[charsRead++] = c;
+          Serial.print(commandLine[charsRead - 1]);
+        }
+        commandLine[charsRead] = NULLCHAR;     //just in case
+        break;
     }
-
-    //wait for next tick
-    lastyptr = yptr;
   }
+  return false;
 }
 
-/////////////////////////////////////////////////
-/// \brief Prints banner and menu to the console.
-/////////////////////////////////////////////////
-void Cons::printMenu() {
-  LOG_CONSOLE("\n\\||||||||/   \\||||||||/   |||||||||/   ||           \\||||||||/\n");
-  LOG_CONSOLE("    ||                    ||           ||\n");
-  LOG_CONSOLE("    ||       \\||||||||/   ||||||||||   ||           ||||||||||\n");
-  LOG_CONSOLE("    ||                            ||   ||           ||      ||\n");
-  LOG_CONSOLE("    ||       \\||||||||/   /|||||||||   |||||||||/   ||      ||\n\n");
-  LOG_CONSOLE("              Battery Management System by GuilT\n");
-  LOG_CONSOLE("\n************************* SYSTEM MENU *************************\n");
-  LOG_CONSOLE("GENERAL SYSTEM CONFIGURATION\n\n");
-  LOG_CONSOLE("   h or ? = help (displays this message)\n");
-  LOG_CONSOLE("   1 = display BMS status summary\n");
-  LOG_CONSOLE("   2 = print cell voltage graph\n");
-  LOG_CONSOLE("   3 = output BMS details in CSV format\n");
-  LOG_CONSOLE("   vX verbose (X=0:debug, X=1:info, X=2:warn, X=3:error, X=4:Cons)\n");
-  LOG_CONSOLE("\n");
+void Cons::doConsole() {
+  uint32_t i;
+  char * ptrToCommandName;
+  if ( getCommandLineFromSerialPort(cmdLine) ) {
+    ptrToCommandName = strtok(cmdLine, delimiters);
+    for (i = 0; cliCommands[i] != 0; i++) {
+      if (strcmp(ptrToCommandName, cliCommands[i]->tokenLong) == 0 || strcmp(ptrToCommandName, cliCommands[i]->tokenShort) == 0) {
+        if (cliCommands[i]->doCommand() != 0){
+          Serial.printf("  Command failed: %s\n", ptrToCommandName);
+        }
+        break;
+      }
+    }
+    if (cliCommands[i] == 0){
+      Serial.printf("  Command not found: %s\n", ptrToCommandName);
+    }
+    Serial.print("BMS> ");
+  }
 }
 
 /////////////////////////////////////////////////
 /// \brief Constructor
 /////////////////////////////////////////////////
 Cons::Cons(Controller* cont_inst_ptr) {
-  // initialize serial communication at 9600 bits per second:
+  // initialize serial communication at 115200 bits per second:
   SERIALCONSOLE.begin(115200);
   SERIALCONSOLE.setTimeout(15);
   controller_inst_ptr = cont_inst_ptr;
