@@ -46,18 +46,20 @@
 #define SERIALCONSOLE   Serial
 
 /*
- * State machine
- */
+   State machine
+*/
 // Loop periods for the state machine of the controller
 #define LOOP_PERIOD_ACTIVE_MS 200
 #define LOOP_PERIOD_STANDBY_MS 2500
+
+
 
 #define VERSION 1
 #define CANBUS_SPEED 250000
 #define CANBUS_ADDRESS 1
 #define OVER_V_SETPOINT 4.25f
 #define UNDER_V_SETPOINT 3.0f
-//stop charging 
+//stop charging
 #define MAX_CHARGE_V_SETPOINT 4.2f
 //cycle charger to force a charging cycle
 #define CHARGER_CYCLE_V_SETPOINT 4.17f
@@ -67,12 +69,11 @@
 #define WARN_CELL_V_OFFSET 0.1f
 
 /*
- * cooling system setings
- */
+   cooling system setings
+*/
 #define FLOOR_DUTY_COOLANT_PUMP 0.25f // 0.0 - 1.0
 #define COOLING_LOWT_SETPOINT 25.0f  //threashold at wich coolant pump gradually increases duty up to max.
 #define COOLING_HIGHT_SETPOINT 35.0f //threshold at wich coolant pump is at maximum duty
-
 #define OVER_T_SETPOINT 45.0f       //Tesla seam to allow reaching 45C while supercharging; in discharge, 60C is ok.
 #define UNDER_T_SETPOINT -10.0f
 //issue a warning on OLED and serial console if T is that close to a OT or UT fault.
@@ -94,5 +95,59 @@
 //12V battery UV setpoint
 #define BAT12V_UNDER_V_SETPOINT 10.0f
 //12V battery ADC devisor 0-1023 -> 0-15V
-//#define BAT12V_SCALING_DIVISOR 68.0f
 #define BAT12V_SCALING_DIVISOR 61.78f
+
+typedef struct {
+  uint32_t magic_bytes = 0xdeadbeef;
+  uint32_t version;
+  uint32_t canbus_speed;
+  uint32_t canbus_address;
+  float over_v_setpoint;
+  float under_v_setpoint;
+  //stop charging
+  float max_charge_v_setpoint;
+  //cycle charger to force a charging cycle
+  float charger_cycle_v_setpoint;
+  //transition to trickle charging when highest cell reaches this value.
+  float trickle_charge_v_setpoint;
+  //issue a warning on OLED and serial console if a cell is that close to a OV or UV fault.
+  float warn_cell_v_offset;
+  // 0.0 - 1.0
+  float floor_duty_coolant_pump;
+  //threashold at wich coolant pump gradually increases duty up to max.
+  float cooling_lowt_setpoint;
+  //threshold at wich coolant pump is at maximum duty
+  float cooling_hight_setpoint;
+  //Tesla seam to allow reaching 45C while supercharging; in discharge, 60C is ok.
+  float over_t_setpoint;
+  float under_t_setpoint;
+  //issue a warning on OLED and serial console if T is that close to a OT or UT fault.
+  float warn_t_offset;
+  //start precision balancing when highest cell reaches this setpoint (taken from tom debree)
+  float precision_balance_v_setpoint;
+  //precision balance all cells above the lowest cell by this offset (taken from tom debree)
+  float precision_balance_cell_v_offset;
+  //start rough balancing when highest cell reaches this setpoint
+  float rough_balance_v_setpoint;
+  //rough balance all cells above the lowest cell by this offset
+  float rough_balance_cell_v_offset;
+  //DC 2 DC 12V battery charging cycle trigger
+  float dc2dc_cycle_v_setpoint;
+  //DC 2 DC 12V battery charging cycle time in seconds
+  float dc2dc_cycle_time_s;
+  //12V battery OV setpoint
+  float bat12v_over_v_setpoint;
+  //12V battery UV setpoint
+  float bat12v_under_v_setpoint;
+  //12V battery ADC devisor 0-1023 -> 0-15V
+  float bat12v_scaling_divisor;
+} EEPROM_settings_values_t;
+
+
+typedef struct {
+  EEPROM_settings_values_t es;
+  EEPROM_settings_values_t es_defaults;
+  EEPROM_settings_values_t es_min;
+  EEPROM_settings_values_t es_max;
+} EEPROM_settings_t;
+//es = eeprom settings
