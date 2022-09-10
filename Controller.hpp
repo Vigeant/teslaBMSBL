@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include "CONFIG.h"
+#include "Config.hpp"
 #include "BMSModuleManager.hpp"
 
 #ifndef CONTROLLER_HPP_
@@ -14,6 +14,7 @@ class Controller {
     Controller();
     ControllerState getState();
     BMSModuleManager* getBMSPtr();
+    Settings* getSettingsPtr();
     void printControllerState();
     uint32_t getPeriodMillis();
 
@@ -57,7 +58,7 @@ class Controller {
     bool outH_fault_buffer;
 
   private:
-
+    Settings settings;
     BMSModuleManager bms;
 
     bool chargerInhibit;

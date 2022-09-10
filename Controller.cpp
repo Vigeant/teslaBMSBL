@@ -1,6 +1,13 @@
 #include "Controller.hpp"
 
 /////////////////////////////////////////////////
+/// \brief When instantiated, the controller is in the init state ensuring that all the signal pins are set properly.
+/////////////////////////////////////////////////
+Controller::Controller() {
+  state = INIT;
+}
+
+/////////////////////////////////////////////////
 /// \brief Orchestrates the activities within the BMS via a state machine.
 /////////////////////////////////////////////////
 void Controller::doController() {
@@ -228,13 +235,6 @@ void Controller::doController() {
   setOutput(OUTH_FAULT, outH_fault_buffer);
   setOutput(OUTL_12V_BAT_CHRG, outL_12V_bat_chrg_buffer);
   analogWrite(OUTPWM_PUMP, outpwm_pump_buffer);
-}
-
-/////////////////////////////////////////////////
-/// \brief When instantiated, the controller is in the init state ensuring that all the signal pins are set properly.
-/////////////////////////////////////////////////
-Controller::Controller() {
-  state = INIT;
 }
 
 void Controller::assertFault(faultNames fautlName) {
@@ -511,6 +511,13 @@ void Controller::run() {
 /////////////////////////////////////////////////
 Controller::ControllerState Controller::getState() {
   return state;
+}
+
+/////////////////////////////////////////////////
+/// \brief returns the Settings instance to allow access to its members.
+/////////////////////////////////////////////////
+Settings* Controller::getSettingsPtr() {
+  return &settings;
 }
 
 /////////////////////////////////////////////////

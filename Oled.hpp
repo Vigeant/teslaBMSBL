@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include "CONFIG.h"
+#include "Config.hpp"
 #include "Controller.hpp"
 
 #include <TeensyView.h>  // Include the SFE_TeensyView library

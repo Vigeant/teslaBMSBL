@@ -1,5 +1,5 @@
 #include "Cons.hpp"
-#include "CONFIG.h"
+#include "Config.hpp"
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
@@ -15,23 +15,14 @@
 /////////////////////////////////////////////////
 /// \brief This is the consoles main function where commands are interpreted every tick.
 /////////////////////////////////////////////////
-#define COMMAND_BUFFER_LENGTH        64                        //length of serial buffer for incoming commands
-static char   cmdLine[COMMAND_BUFFER_LENGTH + 1];                 //Read commands into this buffer from Serial.  +1 in length for a termination char
 
-// Add all commands before the null ptr
-CliCommand* cliCommands[] = { new CommandPrintMenu(),
-              new ShowStatus(),
-              new ShowGraph(),
-              new ShowCSV(),
-              new SetVerbose(),
-              0
-};
-
-bool getCommandLineFromSerialPort(char * commandLine) {
+bool Cons::getCommandLineFromSerialPort(char * commandLine) {
   static uint8_t charsRead = 0;                      //note: COMAND_BUFFER_LENGTH must be less than 255 chars long
   //read asynchronously until full command input
   while (Serial.available()) {
+    //Serial.println("Available");
     char c = Serial.read();
+    //Serial.printf("Received %d\n", c);
     switch (c) {
       case CR:      //likely have full command in buffer now, commands are terminated by CR and/or LF
       case LF:
@@ -66,17 +57,21 @@ bool getCommandLineFromSerialPort(char * commandLine) {
 void Cons::doConsole() {
   uint32_t i;
   char * ptrToCommandName;
+  //Serial.println("do Console");
   if ( getCommandLineFromSerialPort(cmdLine) ) {
+    //Serial.println("got something");
     ptrToCommandName = strtok(cmdLine, delimiters);
-    for (i = 0; cliCommands[i] != 0; i++) {
+    for (i = 0; i < NUMBER_OF_COMMANDS; i++) {
+      //Serial.println(cliCommands[i]->tokenLong);
+      //Serial.flush();
       if (strcmp(ptrToCommandName, cliCommands[i]->tokenLong) == 0 || strcmp(ptrToCommandName, cliCommands[i]->tokenShort) == 0) {
-        if (cliCommands[i]->doCommand() != 0){
+        if (cliCommands[i]->doCommand() != 0) {
           Serial.printf("  Command failed: %s\n", ptrToCommandName);
         }
         break;
       }
     }
-    if (cliCommands[i] == 0){
+    if (cliCommands[i] == 0) {
       Serial.printf("  Command not found: %s\n", ptrToCommandName);
     }
     Serial.print("BMS> ");
@@ -91,4 +86,11 @@ Cons::Cons(Controller* cont_inst_ptr) {
   SERIALCONSOLE.begin(115200);
   SERIALCONSOLE.setTimeout(15);
   controller_inst_ptr = cont_inst_ptr;
+  uint32_t i = 0;
+  if (i < NUMBER_OF_COMMANDS) {cliCommands[i++] = new CommandPrintMenu(cliCommands);}
+  if (i < NUMBER_OF_COMMANDS) {cliCommands[i++] = new ShowStatus(controller_inst_ptr);}
+  if (i < NUMBER_OF_COMMANDS) {cliCommands[i++] = new ShowConfig(controller_inst_ptr->getSettingsPtr());}
+  if (i < NUMBER_OF_COMMANDS) {cliCommands[i++] = new ShowGraph(controller_inst_ptr);}
+  if (i < NUMBER_OF_COMMANDS) {cliCommands[i++] = new ShowCSV(controller_inst_ptr);}
+  if (i < NUMBER_OF_COMMANDS) {cliCommands[i++] = new SetVerbose();}
 }

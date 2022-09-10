@@ -3,6 +3,8 @@
 #include <string.h>
 //#include <vector>
 
+
+
 class CliCommand {
   public:
     virtual int doCommand() = 0;
@@ -10,19 +12,34 @@ class CliCommand {
     const char* tokenLong;
     const char* tokenShort;
     const char* help;
+  protected:
+    CliCommand** cliCommands;
+    Controller* controller_inst_ptr;
 };
 
-//class CommandPrintMenu;
-extern CliCommand* cliCommands[];
-static Controller* controller_inst_ptr;
+class Cons {
+  public:
+    Cons(Controller* cont_inst_ptr);
+    void doConsole();
+    static const uint32_t NUMBER_OF_COMMANDS = 6;
+    static const uint32_t COMMAND_BUFFER_LENGTH = 64;  //length of serial buffer for incoming commands
+
+  private:
+    char  cmdLine[COMMAND_BUFFER_LENGTH + 1];  //Read commands into this buffer from Serial.  +1 in length for a termination char
+    CliCommand* cliCommands[NUMBER_OF_COMMANDS];
+    Controller* controller_inst_ptr;
+    const char *delimiters            = ", \n";
+    bool getCommandLineFromSerialPort(char * commandLine);
+};
 
 class CommandPrintMenu : public CliCommand {
   public:
-    CommandPrintMenu() {
+    CommandPrintMenu(CliCommand** cliComm) {
       name = "Help";
       tokenLong = "help";
       tokenShort = "h";
       help = " | show this help";
+      cliCommands = cliComm;
     }
     int doCommand() {
       uint32_t i;
@@ -36,7 +53,7 @@ class CommandPrintMenu : public CliCommand {
       Serial.print("\n************************* SYSTEM MENU *************************\n");
       Serial.print("GENERAL SYSTEM CONFIGURATION\n\n");
 
-      for (i = 0; cliCommands[i] != 0; i++) {
+      for (i = 0; i < Cons::NUMBER_OF_COMMANDS; i++) {
         printed = strlen(cliCommands[i]->tokenShort) + strlen(cliCommands[i]->tokenLong);
         if (printed >= 18) {
           printed = 17;
@@ -62,13 +79,31 @@ class CommandPrintMenu : public CliCommand {
     }
 };
 
+class ShowConfig : public CliCommand {
+  public:
+    ShowConfig(Settings* sett) {
+      name = "Show Config";
+      tokenLong = "config";
+      tokenShort = "c";
+      help = " | show all configuration settings";
+      settings = sett;
+    }
+    int doCommand() {
+      settings->printSettings();
+      return 0;
+    }
+   private:
+    Settings* settings;
+};
+
 class ShowStatus : public CliCommand {
   public:
-    ShowStatus() {
+    ShowStatus(Controller* cont_inst_ptr) {
       name = "Show Status";
       tokenLong = "status";
       tokenShort = "1";
       help = " | shortcut to show BMS status summary";
+      controller_inst_ptr = cont_inst_ptr;
     }
     int doCommand() {
       controller_inst_ptr->getBMSPtr()->printPackSummary();
@@ -80,11 +115,12 @@ class ShowStatus : public CliCommand {
 
 class ShowGraph : public CliCommand {
   public:
-    ShowGraph() {
+    ShowGraph(Controller* cont_inst_ptr) {
       name = "Show Graph";
       tokenLong = "graph";
       tokenShort = "2";
       help = " | shortcut to show cell volatage graph";
+      controller_inst_ptr = cont_inst_ptr;
     }
     int doCommand() {
       controller_inst_ptr->getBMSPtr()->printPackGraph();
@@ -94,11 +130,12 @@ class ShowGraph : public CliCommand {
 
 class ShowCSV : public CliCommand {
   public:
-    ShowCSV() {
+    ShowCSV(Controller* cont_inst_ptr) {
       name = "Show CSV";
       tokenLong = "CSV";
       tokenShort = "3";
       help = " | shortcut to show BMS details in CSV format";
+      controller_inst_ptr = cont_inst_ptr;
     }
     int doCommand() {
       controller_inst_ptr->getBMSPtr()->printAllCSV();
@@ -131,12 +168,4 @@ class SetVerbose : public CliCommand {
       Serial.print("missing logLevel eg.: BMS> v 3\n");
       return 1;
     }
-};
-
-class Cons {
-  public:
-    Cons(Controller*);
-    void doConsole();
-  private:
-    const char *delimiters            = ", \n";
 };
