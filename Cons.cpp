@@ -55,23 +55,19 @@ bool Cons::getCommandLineFromSerialPort(char * commandLine) {
 }
 
 void Cons::doConsole() {
-  uint32_t i;
   char * ptrToCommandName;
-  //Serial.println("do Console");
   if ( getCommandLineFromSerialPort(cmdLine) ) {
-    //Serial.println("got something");
     ptrToCommandName = strtok(cmdLine, delimiters);
-    for (i = 0; i < NUMBER_OF_COMMANDS; i++) {
-      //Serial.println(cliCommands[i]->tokenLong);
-      //Serial.flush();
-      if (strcmp(ptrToCommandName, cliCommands[i]->tokenLong) == 0 || strcmp(ptrToCommandName, cliCommands[i]->tokenShort) == 0) {
-        if (cliCommands[i]->doCommand() != 0) {
+    auto i = cliCommands.begin() ;
+    for (; i != cliCommands.end() ; i++) {
+      if (strcmp(ptrToCommandName, (*i)->tokenLong) == 0 || strcmp(ptrToCommandName, (*i)->tokenShort) == 0) {
+        if ((*i)->doCommand() != 0) {
           Serial.printf("  Command failed: %s\n", ptrToCommandName);
         }
         break;
       }
     }
-    if (cliCommands[i] == 0) {
+    if (i == cliCommands.end()) {
       Serial.printf("  Command not found: %s\n", ptrToCommandName);
     }
     Serial.print("BMS> ");
@@ -81,16 +77,22 @@ void Cons::doConsole() {
 /////////////////////////////////////////////////
 /// \brief Constructor
 /////////////////////////////////////////////////
-Cons::Cons(Controller* cont_inst_ptr) {
+Cons::Cons(Controller * cont_inst_ptr):
+  commandPrintMenu(&cliCommands),
+  showConfig(cont_inst_ptr->getSettingsPtr()),
+  setParam(cont_inst_ptr->getSettingsPtr()),
+  showStatus(cont_inst_ptr),
+  showGraph(cont_inst_ptr),
+  showCSV(cont_inst_ptr)
+{
   // initialize serial communication at 115200 bits per second:
   SERIALCONSOLE.begin(115200);
   SERIALCONSOLE.setTimeout(15);
   controller_inst_ptr = cont_inst_ptr;
-  uint32_t i = 0;
-  if (i < NUMBER_OF_COMMANDS) {cliCommands[i++] = new CommandPrintMenu(cliCommands);}
-  if (i < NUMBER_OF_COMMANDS) {cliCommands[i++] = new ShowStatus(controller_inst_ptr);}
-  if (i < NUMBER_OF_COMMANDS) {cliCommands[i++] = new ShowConfig(controller_inst_ptr->getSettingsPtr());}
-  if (i < NUMBER_OF_COMMANDS) {cliCommands[i++] = new ShowGraph(controller_inst_ptr);}
-  if (i < NUMBER_OF_COMMANDS) {cliCommands[i++] = new ShowCSV(controller_inst_ptr);}
-  if (i < NUMBER_OF_COMMANDS) {cliCommands[i++] = new SetVerbose();}
+  cliCommands.push_back(&commandPrintMenu);
+  cliCommands.push_back(&showConfig);
+  cliCommands.push_back(&setParam);
+  cliCommands.push_back(&showStatus);
+  cliCommands.push_back(&showGraph);
+  cliCommands.push_back(&showCSV);
 }

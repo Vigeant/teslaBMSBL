@@ -58,8 +58,9 @@
 
 class Param {
   public:
-    virtual void prettyPrint();
     const char* paramName;
+    virtual void prettyPrint();
+    virtual int32_t setVal(const char * valStr);
   protected:
     bool editable = true;
     const char* description;
@@ -78,6 +79,7 @@ template <class C> class ParamImpl : public Param {
     }
 
     void prettyPrint() ;
+    int32_t setVal(const char * );
 
     C getVal() {
       return value;
@@ -122,7 +124,7 @@ class Settings {
     ParamImpl<float> bat12v_over_v_setpoint;
     ParamImpl<float> bat12v_under_v_setpoint;
     ParamImpl<float> bat12v_scaling_divisor;
-    
+
   private:
     std::list<Param*> parameters;
 

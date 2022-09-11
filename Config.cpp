@@ -1,4 +1,6 @@
 #include "Config.hpp"
+#include <string>
+#include <errno.h>
 
 Settings::Settings () :
   magic_bytes("magic_bytes", false, 0xdeadbeef, 0xdeadbeef, 0, 0, "Magic byte to identify eeprom was initialized"),
@@ -55,7 +57,7 @@ Settings::Settings () :
   parameters.push_back(&bat12v_over_v_setpoint);
   parameters.push_back(&bat12v_under_v_setpoint);
   parameters.push_back(&bat12v_scaling_divisor);
-  
+
 }
 
 void Settings::printSettings() {
@@ -64,17 +66,74 @@ void Settings::printSettings() {
     (*i)->prettyPrint();
   }
 }
+
 template <>
 void ParamImpl<uint32_t>::prettyPrint() {
-  Serial.printf("%35s = %-10u | %-10u | [%10u , %-10u] | %s\n", paramName, value, valueDefault, valueMin, valueMax, description);
+  Serial.printf("%35s | %-10u | %-10u | [%10u , %-10u] | %s\n", paramName, value, valueDefault, valueMin, valueMax, description);
 }
+
 template <>
 void ParamImpl<int32_t>::prettyPrint() {
-  Serial.printf("%35s = %-10d | %-10d | [%10d , %-10d] | %s\n", paramName, value, valueDefault, valueMin, valueMax, description);
+  Serial.printf("%35s | %-10d | %-10d | [%10d , %-10d] | %s\n", paramName, value, valueDefault, valueMin, valueMax, description);
 }
+
 template <>
 void ParamImpl<float>::prettyPrint() {
-  Serial.printf("%35s = %-10.3f | %-10.3f | [%10.3f , %-10.3f] | %s\n", paramName, value, valueDefault, valueMin, valueMax, description);
+  Serial.printf("%35s | %-10.3f | %-10.3f | [%10.3f , %-10.3f] | %s\n", paramName, value, valueDefault, valueMin, valueMax, description);
+}
+
+template <>
+int32_t ParamImpl<uint32_t>::setVal(const char * valStr) {
+  char* endptr;
+  uint32_t tempValue;
+  errno = 0;    // To distinguish success/failure after call
+  tempValue = strtoul(valStr, &endptr, 10);
+  // Check for various possible errors
+  if (errno == ERANGE || (errno != 0 && tempValue == 0) || tempValue > valueMax || tempValue < valueMin) {
+    return -1;
+  }
+  // check if digits were found
+  if (endptr == valStr) {
+    return -2;
+  }
+  value = tempValue;
+  return 0;
+}
+
+template <>
+int32_t ParamImpl<int32_t>::setVal(const char * valStr) {
+  char* endptr;
+  int32_t tempValue;
+  errno = 0;    // To distinguish success/failure after call
+  tempValue = strtol(valStr, &endptr, 10);
+  // Check for various possible errors
+  if (errno == ERANGE || (errno != 0 && tempValue == 0) || tempValue > valueMax || tempValue < valueMin) {
+    return -1;
+  }
+  // check if digits were found
+  if (endptr == valStr) {
+    return -2;
+  }
+  value = tempValue;
+  return 0;
+}
+
+template <>
+int32_t ParamImpl<float>::setVal(const char * valStr) {
+  char* endptr;
+  float tempValue;
+  errno = 0;    // To distinguish success/failure after call
+  tempValue = strtof(valStr, &endptr);
+  // Check for various possible errors
+  if (errno == ERANGE || (errno != 0 && tempValue == 0) || tempValue > valueMax || tempValue < valueMin) {
+    return -1;
+  }
+  // check if digits were found
+  if (endptr == valStr) {
+    return -2;
+  }
+  value = tempValue;
+  return 0;
 }
 
 Param * Settings::getParam(const char* name) {

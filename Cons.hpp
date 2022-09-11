@@ -1,6 +1,7 @@
 #include "Logger.hpp"
 #include "Controller.hpp"
 #include <string.h>
+#include <list>
 //#include <vector>
 
 
@@ -13,28 +14,13 @@ class CliCommand {
     const char* tokenShort;
     const char* help;
   protected:
-    CliCommand** cliCommands;
+    //CliCommand** cliCommands;
     Controller* controller_inst_ptr;
-};
-
-class Cons {
-  public:
-    Cons(Controller* cont_inst_ptr);
-    void doConsole();
-    static const uint32_t NUMBER_OF_COMMANDS = 6;
-    static const uint32_t COMMAND_BUFFER_LENGTH = 64;  //length of serial buffer for incoming commands
-
-  private:
-    char  cmdLine[COMMAND_BUFFER_LENGTH + 1];  //Read commands into this buffer from Serial.  +1 in length for a termination char
-    CliCommand* cliCommands[NUMBER_OF_COMMANDS];
-    Controller* controller_inst_ptr;
-    const char *delimiters            = ", \n";
-    bool getCommandLineFromSerialPort(char * commandLine);
 };
 
 class CommandPrintMenu : public CliCommand {
   public:
-    CommandPrintMenu(CliCommand** cliComm) {
+    CommandPrintMenu(std::list<CliCommand*> *cliComm) {
       name = "Help";
       tokenLong = "help";
       tokenShort = "h";
@@ -42,7 +28,7 @@ class CommandPrintMenu : public CliCommand {
       cliCommands = cliComm;
     }
     int doCommand() {
-      uint32_t i;
+      //uint32_t i;
       uint32_t printed;
       Serial.print("\n\\||||||||/   \\||||||||/   |||||||||/   ||           \\||||||||/\n");
       Serial.print("    ||                    ||           ||\n");
@@ -53,30 +39,32 @@ class CommandPrintMenu : public CliCommand {
       Serial.print("\n************************* SYSTEM MENU *************************\n");
       Serial.print("GENERAL SYSTEM CONFIGURATION\n\n");
 
+
+      for (auto i = (*cliCommands).begin(); i != (*cliCommands).end() ; i++) {
+        printed = strlen((*i)->tokenShort) + strlen((*i)->tokenLong);
+
+/*
+      }
       for (i = 0; i < Cons::NUMBER_OF_COMMANDS; i++) {
-        printed = strlen(cliCommands[i]->tokenShort) + strlen(cliCommands[i]->tokenLong);
+        printed = strlen(cliCommands[i]->tokenShort) + strlen(cliCommands[i]->tokenLong);*/
         if (printed >= 18) {
           printed = 17;
         }
 
-        Serial.print(cliCommands[i]->tokenShort);
+        Serial.print((*i)->tokenShort);
         Serial.print(" or ");
-        Serial.print(cliCommands[i]->tokenLong);
+        Serial.print((*i)->tokenLong);
         for (; printed < 18; printed++) {
           Serial.print(" ");
         }
-        Serial.print(cliCommands[i]->help);
+        Serial.print((*i)->help);
         Serial.print("\n");
       }
-      /*
-        LOG_CONSOLE("   h or ? = help (displays this message)\n");
-        LOG_CONSOLE("   1 = display BMS status summary\n");
-        LOG_CONSOLE("   2 = print cell voltage graph\n");
-        LOG_CONSOLE("   3 = output BMS details in CSV format\n");
-        LOG_CONSOLE("   vX verbose (X=0:debug, X=1:info, X=2:warn, X=3:error, X=4:Cons)\n");*/
       Serial.print("\n");
       return 0;
     }
+  private:
+    std::list<CliCommand*> *cliCommands;
 };
 
 class ShowConfig : public CliCommand {
@@ -92,7 +80,46 @@ class ShowConfig : public CliCommand {
       settings->printSettings();
       return 0;
     }
-   private:
+  private:
+    Settings* settings;
+};
+
+class SetParam : public CliCommand {
+  public:
+    SetParam(Settings* sett) {
+      name = "Set Param";
+      tokenLong = "set";
+      tokenShort = "s";
+      help = " | set a config parameter to a specific value";
+      settings = sett;
+    }
+    int doCommand() {
+      char* paramName, *valStr;
+      Param* param;
+      paramName = strtok(0, 0);
+      if (paramName == 0) {
+        return -1;
+      } else {
+        paramName = strtok(paramName, " ");
+        param = settings->getParam(paramName);
+        if (param == 0) {
+          return -2;
+        } else {
+          valStr = strtok(0, 0);
+          if (valStr == 0) {
+            return -3;
+          } else {
+            if (param->setVal(valStr) == 0){
+              return 0;
+            } else {
+              return -4;
+            }
+          }
+        }
+      }
+      return 0;
+    }
+  private:
     Settings* settings;
 };
 
@@ -168,4 +195,28 @@ class SetVerbose : public CliCommand {
       Serial.print("missing logLevel eg.: BMS> v 3\n");
       return 1;
     }
+};
+
+class Cons {
+  public:
+    Cons(Controller* cont_inst_ptr);
+    void doConsole();
+    static const uint32_t NUMBER_OF_COMMANDS = 6;
+    static const uint32_t COMMAND_BUFFER_LENGTH = 64;  //length of serial buffer for incoming commands
+
+
+  private:
+    char  cmdLine[COMMAND_BUFFER_LENGTH + 1];  //Read commands into this buffer from Serial.  +1 in length for a termination char
+    CommandPrintMenu commandPrintMenu;
+    ShowConfig showConfig;
+    SetParam setParam;
+    ShowStatus showStatus;
+    ShowGraph showGraph;
+    ShowCSV showCSV;
+    SetVerbose setVerbose;
+    std::list<CliCommand*> cliCommands;
+    //CliCommand* cliCommands[NUMBER_OF_COMMANDS];
+    Controller* controller_inst_ptr;
+    const char *delimiters            = ", \n";
+    bool getCommandLineFromSerialPort(char * commandLine);
 };
