@@ -2,6 +2,7 @@
 
 #include <Arduino.h>
 //#include <EZPROM.h>
+#include <list>
 
 //enable testing mode that simply cycles through all states instead of triggers
 //#define STATECYCLING 1
@@ -53,56 +54,13 @@
 #define LOOP_PERIOD_ACTIVE_MS 200
 #define LOOP_PERIOD_STANDBY_MS 2500
 
-
-
 #define VERSION 1
-#define CANBUS_SPEED 250000
-#define CANBUS_ADDRESS 1
-#define OVER_V_SETPOINT 4.25f
-#define UNDER_V_SETPOINT 3.0f
-//stop charging
-#define MAX_CHARGE_V_SETPOINT 4.2f
-//cycle charger to force a charging cycle
-#define CHARGER_CYCLE_V_SETPOINT 4.17f
-//transition to trickle charging when highest cell reaches this value.
-#define TRICKLE_CHARGE_V_SETPOINT 4.19f
-//issue a warning on OLED and serial console if a cell is that close to a OV or UV fault.
-#define WARN_CELL_V_OFFSET 0.1f
-
-/*
-   cooling system setings
-*/
-#define FLOOR_DUTY_COOLANT_PUMP 0.25f // 0.0 - 1.0
-#define COOLING_LOWT_SETPOINT 25.0f  //threashold at wich coolant pump gradually increases duty up to max.
-#define COOLING_HIGHT_SETPOINT 35.0f //threshold at wich coolant pump is at maximum duty
-#define OVER_T_SETPOINT 45.0f       //Tesla seam to allow reaching 45C while supercharging; in discharge, 60C is ok.
-#define UNDER_T_SETPOINT -10.0f
-//issue a warning on OLED and serial console if T is that close to a OT or UT fault.
-#define WARN_T_OFFSET 5.0f
-//start precision balancing when highest cell reaches this setpoint (taken from tom debree)
-#define PRECISION_BALANCE_V_SETPOINT 4.0f
-//precision balance all cells above the lowest cell by this offset (taken from tom debree)
-#define PRECISION_BALANCE_CELL_V_OFFSET 0.005f
-//start rough balancing when highest cell reaches this setpoint
-#define ROUGH_BALANCE_V_SETPOINT 3.4f
-//rough balance all cells above the lowest cell by this offset
-#define ROUGH_BALANCE_CELL_V_OFFSET 0.10f
-//DC 2 DC 12V battery charging cycle trigger
-#define DC2DC_CYCLE_V_SETPOINT 12.5f
-//DC 2 DC 12V battery charging cycle time in seconds
-#define DC2DC_CYCLE_TIME_S 3600
-//12V battery OV setpoint
-#define BAT12V_OVER_V_SETPOINT 14.5f
-//12V battery UV setpoint
-#define BAT12V_UNDER_V_SETPOINT 10.0f
-//12V battery ADC devisor 0-1023 -> 0-15V
-#define BAT12V_SCALING_DIVISOR 61.78f
 
 class Param {
   public:
     virtual void prettyPrint();
-  protected:
     const char* paramName;
+  protected:
     bool editable = true;
     const char* description;
 };
@@ -118,7 +76,12 @@ template <class C> class ParamImpl : public Param {
       valueMax = vmax;
       description = desc;
     }
+
     void prettyPrint() ;
+
+    C getVal() {
+      return value;
+    }
   private:
     C value;
     C valueDefault;
@@ -126,51 +89,41 @@ template <class C> class ParamImpl : public Param {
     C valueMax;
 };
 
-
-
 //class Settings : public EZPROM::Serializable {
 class Settings {
   public:
     static const uint8_t number_of_params = 25;
-    void printSettings() {
-      for (uint32_t i = 0; i < number_of_params; i++) {
-        parameters[i]->prettyPrint();
-      }
-    }
-    Settings () {
-      //TODO check EEPROM for initialisation and version
-      //if no match push defaults to eeprom
-      //load config from eeprom
+    void printSettings();
+    Settings ();
+    Param * getParam(const char* name);
 
-      uint8_t i = 0;
-      //                                    name, editable, value, default, min, max
-      parameters[i++] = new ParamImpl<uint32_t>("magic_bytes", false, 0xdeadbeef, 0xdeadbeef, 0, 0, "Magic byte to identify eeprom was initialized");
-      parameters[i++] = new ParamImpl<uint32_t>("version", false, 1, 1, 0, 0, "eeprom version");
-      parameters[i++] = new ParamImpl<uint32_t>("canbus_speed", true, 250000, 250000, 0, 0, "Can bus speed");
-      parameters[i++] = new ParamImpl<uint32_t>("canbus_address", true, 1, 1, 0, 0, "Can bus address");
-      parameters[i++] = new ParamImpl<float>("over_v_setpoint", true, 4.25f, 4.25f, 3.8f, 4.25f, "Triggers Over V error");
-      parameters[i++] = new ParamImpl<float>("under_v_setpoint", true, 3.0f, 3.0f, 2.5f, 3.5f, "Triggers Under V error");
-      parameters[i++] = new ParamImpl<float>("max_charge_v_setpoint", true, 4.2f, 4.2f, 3.8f, 4.25f, "Stops charging");
-      parameters[i++] = new ParamImpl<float>("charger_cycle_v_setpoint", true, 4.17f, 4.17f, 2.5f, 4.25f, "cycle charger to force a charging cycle");
-      parameters[i++] = new ParamImpl<float>("trickle_charge_v_setpoint", true, 4.19f, 4.19f, 2.5f, 4.25f, "transition to trickle charging when highest cell reaches this value");
-      parameters[i++] = new ParamImpl<float>("warn_cell_v_offset", true, 0.1f, 0.1f, 0.00f, 3.0f, "TODO, issue a warning on OLED and serial console if a cell is that close to a OV or UV fault");
-      parameters[i++] = new ParamImpl<float>("floor_duty_coolant_pump", true, 0.25f, 0.25f, 0.00f, 1.0f, "Lowest pump duty cucle when in RUN or CHARGING");
-      parameters[i++] = new ParamImpl<float>("cooling_lowt_setpoint", true, 25.0f, 25.0f, -20.0f, 65.0f, "threashold at wich coolant pump gradually increases duty up to max");
-      parameters[i++] = new ParamImpl<float>("cooling_hight_setpoint", true, 35.0f, 35.0f, -20.0f, 65.0f, "threshold at wich coolant pump is at maximum duty");
-      parameters[i++] = new ParamImpl<float>("over_t_setpoint", true, 35.0f, 35.0f, 40.0f, 60.0f, "Triggers Over T error; Tesla seam to allow reaching 45C while supercharging; in discharge, 60C is ok");
-      parameters[i++] = new ParamImpl<float>("under_t_setpoint", true, -10.0f, -10.0f, -40.0f, 10.0f, "Triggers Under T error");
-      parameters[i++] = new ParamImpl<float>("warn_t_offset", true, 5.0f, 5.0f, 0.5f, 10.0f, "TODO, issue a warning on OLED and serial console if T is that close to a OT or UT fault");
-      parameters[i++] = new ParamImpl<float>("precision_balance_v_setpoint", true, 4.0f, 4.0f, 3.0f, 4.2f, "start precision balancing when highest cell reaches this setpoint (taken from tom debree)");
-      parameters[i++] = new ParamImpl<float>("precision_balance_cell_v_offset", true, 0.005f, 0.005f, 0.001f, 0.1f, "precision balance all cells above the lowest cell by this offset (taken from tom debree)");
-      parameters[i++] = new ParamImpl<float>("rough_balance_v_setpoint", true, 3.4f, 3.4f, 3.0f, 4.0f, "start rough balancing when highest cell reaches this setpoint");
-      parameters[i++] = new ParamImpl<float>("rough_balance_cell_v_offset", true, 0.1f, 0.1f, 0.05f, 0.5f, "rough balance all cells above the lowest cell by this offset");
-      parameters[i++] = new ParamImpl<float>("dc2dc_cycle_v_setpoint", true, 12.5f, 12.5f, 12.0f, 13.0f, "DC 2 DC 12V battery charging cycle trigger");
-      parameters[i++] = new ParamImpl<uint32_t>("dc2dc_cycle_time_s", true, 3600, 3600, 60, 14400, "DC 2 DC 12V battery charging cycle time in seconds");
-      parameters[i++] = new ParamImpl<float>("bat12v_over_v_setpoint", true, 14.5f, 14.5f, 13.0f, 15.0f, "Triggers 12V battery OV error");
-      parameters[i++] = new ParamImpl<float>("bat12v_under_v_setpoint", true, 10.0f, 10.0f, 9.0f, 12.5f, "Triggers 12V battery UV error");
-      parameters[i++] = new ParamImpl<float>("bat12v_scaling_divisor", true, 61.78f, 61.78f, 50.0f, 70.0f, "12V battery ADC devisor 0-1023 -> 0-15V");
-    }
+    ParamImpl<uint32_t> magic_bytes;
+    ParamImpl<uint32_t> eeprom_version;
+    ParamImpl<uint32_t> canbus_speed;
+    ParamImpl<uint32_t> canbus_address;
+    ParamImpl<float> over_v_setpoint;
+    ParamImpl<float> under_v_setpoint;
+    ParamImpl<float> max_charge_v_setpoint;
+    ParamImpl<float> charger_cycle_v_setpoint;
+    ParamImpl<float> trickle_charge_v_setpoint;
+    ParamImpl<float> warn_cell_v_offset;
+    ParamImpl<float> floor_duty_coolant_pump;
+    ParamImpl<float> cooling_lowt_setpoint;
+    ParamImpl<float> cooling_hight_setpoint;
+    ParamImpl<float> over_t_setpoint;
+    ParamImpl<float> under_t_setpoint;
+    ParamImpl<float> warn_t_offset;
+    ParamImpl<float> precision_balance_v_setpoint;
+    ParamImpl<float> precision_balance_cell_v_offset;
+    ParamImpl<float> rough_balance_v_setpoint;
+    ParamImpl<float> rough_balance_cell_v_offset;
+    ParamImpl<float> dc2dc_cycle_v_setpoint;
+    ParamImpl<uint32_t> dc2dc_cycle_time_s;
+    ParamImpl<float> bat12v_over_v_setpoint;
+    ParamImpl<float> bat12v_under_v_setpoint;
+    ParamImpl<float> bat12v_scaling_divisor;
+    
   private:
-    Param * parameters[number_of_params];
+    std::list<Param*> parameters;
 
 };

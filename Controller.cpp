@@ -3,7 +3,7 @@
 /////////////////////////////////////////////////
 /// \brief When instantiated, the controller is in the init state ensuring that all the signal pins are set properly.
 /////////////////////////////////////////////////
-Controller::Controller() {
+Controller::Controller() : bms(&settings){
   state = INIT;
 }
 
@@ -15,7 +15,7 @@ void Controller::doController() {
   static unsigned int bat12Vcyclestart = 0;
   static int standbyTicks = 1; //1 because ticks slow down
   const int stateticks = 4;
-  bat12vVoltage = (float)analogRead(INA_12V_BAT) / BAT12V_SCALING_DIVISOR ;
+  bat12vVoltage = (float)analogRead(INA_12V_BAT) / settings.bat12v_scaling_divisor.getVal() ;
 
   if (state != INIT) syncModuleDataObjects();
 
@@ -38,10 +38,10 @@ void Controller::doController() {
         LOG_INFO("Transition to PRE_CHARGE\n");
       }
 #else
-      if (dc2dcON_H == 0 && bat12vVoltage < DC2DC_CYCLE_V_SETPOINT) {
+      if (dc2dcON_H == 0 && bat12vVoltage < settings.dc2dc_cycle_v_setpoint.getVal()) {
         bat12Vcyclestart = (millis() / 1000);
         dc2dcON_H = 1;
-      } else if ( dc2dcON_H == 1 && ((millis() / 1000) > bat12Vcyclestart + DC2DC_CYCLE_TIME_S)) {
+      } else if ( dc2dcON_H == 1 && ((millis() / 1000) > bat12Vcyclestart + settings.dc2dc_cycle_time_s.getVal())) {
         // I am ignoring the time counter loop around as it will simply result in a short charge cycle
         // followed with a proper charging cycle.
         dc2dcON_H = 0;
@@ -55,7 +55,7 @@ void Controller::doController() {
         ticks = 0;
         state = CHARGING;
         LOG_INFO("Transition to CHARGING\n");
-      } else if (bms.getHighCellVolt() < CHARGER_CYCLE_V_SETPOINT && bms.getHighCellVolt() < MAX_CHARGE_V_SETPOINT && ticks >= standbyTicks) {
+      } else if (bms.getHighCellVolt() < settings.charger_cycle_v_setpoint.getVal() && bms.getHighCellVolt() < settings.max_charge_v_setpoint.getVal() && ticks >= standbyTicks) {
         ticks = 0;
         state = PRE_CHARGE;
         LOG_INFO("Transition to PRE_CHARGE\n");
@@ -105,12 +105,12 @@ void Controller::doController() {
       } else if (digitalRead(INL_EVSE_DISC) == LOW || digitalRead(INH_CHARGING) == LOW) {
         //debounce error by letting ticks go up to 5.
         //LOG_INFO("INL_EVSE_DISC == LOW || INH_CHARGING == LOW\n");
-        if (digitalRead(INL_EVSE_DISC) == LOW){
+        if (digitalRead(INL_EVSE_DISC) == LOW) {
           LOG_INFO("INL_EVSE_DISC == LOW\n");
         } else if ( digitalRead(INH_CHARGING) == LOW) {
           LOG_INFO("INH_CHARGING == LOW\n");
         }
-      } else if (bms.getHighCellVolt() > TRICKLE_CHARGE_V_SETPOINT) {
+      } else if (bms.getHighCellVolt() > settings.trickle_charge_v_setpoint.getVal()) {
         ticks = 0;
         state = TRICKLE_CHARGING;
         LOG_INFO("Transition to TRICKLE_CHARGING\n");
@@ -296,38 +296,38 @@ void Controller::syncModuleDataObjects() {
     deAssertFault(FWatSen2);
   }
 
-  if ( bms.getHighCellVolt() > OVER_V_SETPOINT) {
+  if ( bms.getHighCellVolt() > settings.over_v_setpoint.getVal()) {
     assertFault(FBMSOV);
   } else {
     deAssertFault(FBMSOV);
   }
 
-  if ( bms.getLowCellVolt() < UNDER_V_SETPOINT) {
+  if ( bms.getLowCellVolt() < settings.under_v_setpoint.getVal()) {
     assertFault(FBMSUV);
   } else {
     deAssertFault(FBMSUV);
   }
 
-  if ( bms.getHighTemperature() > OVER_T_SETPOINT) {
+  if ( bms.getHighTemperature() > settings.over_t_setpoint.getVal()) {
     assertFault(FBMSOT);
   } else {
     deAssertFault(FBMSOT);
   }
 
-  if ( bms.getLowTemperature() < UNDER_T_SETPOINT) {
+  if ( bms.getLowTemperature() < settings.under_t_setpoint.getVal()) {
     assertFault(FBMSUT);
   } else {
     deAssertFault(FBMSUT);
   }
 
-  bat12vVoltage = (float)analogRead(INA_12V_BAT) / BAT12V_SCALING_DIVISOR ;
-  if ( bat12vVoltage > BAT12V_OVER_V_SETPOINT) {
+  bat12vVoltage = (float)analogRead(INA_12V_BAT) / settings.bat12v_scaling_divisor.getVal() ;
+  if ( bat12vVoltage > settings.bat12v_over_v_setpoint.getVal()) {
     assertFault(F12VBatOV);
   } else {
     deAssertFault(F12VBatOV);
   }
 
-  if ( bat12vVoltage < BAT12V_UNDER_V_SETPOINT) {
+  if ( bat12vVoltage < settings.bat12v_under_v_setpoint.getVal()) {
     assertFault(F12VBatUV);
   } else {
     deAssertFault(F12VBatUV);
@@ -341,10 +341,10 @@ void Controller::syncModuleDataObjects() {
     if (faults[i].runFault) powerLimiter |= faults[i].fault;
     isFaulted |= faults[i].fault;
   }
-  chargerInhibit |= bms.getHighCellVolt() >= MAX_CHARGE_V_SETPOINT;
-  powerLimiter |= bms.getHighCellVolt() >= MAX_CHARGE_V_SETPOINT; //added in case charging in run mode.
+  chargerInhibit |= bms.getHighCellVolt() >= settings.max_charge_v_setpoint.getVal();
+  powerLimiter |= bms.getHighCellVolt() >= settings.max_charge_v_setpoint.getVal(); //added in case charging in run mode.
 
-  if (bms.getHighCellVolt() >= MAX_CHARGE_V_SETPOINT) LOG_INFO("bms.getHighCellVolt()[%.2f] >= MAX_CHARGE_V_SETPOINT", bms.getHighCellVolt());
+  if (bms.getHighCellVolt() >= settings.max_charge_v_setpoint.getVal()) LOG_INFO("bms.getHighCellVolt()[%.2f] >= settings.max_charge_v_setpoint.getVal()", bms.getHighCellVolt());
   if (chargerInhibit) LOG_INFO("chargerInhibit (fault) line asserted!\n");
   if (powerLimiter) LOG_INFO("powerLimiter (fault) line asserted!\n");
 
@@ -358,12 +358,12 @@ void Controller::syncModuleDataObjects() {
 /////////////////////////////////////////////////
 void Controller::balanceCells() {
   //balance for 1 second given that the controller wakes up every second.
-  if (bms.getHighCellVolt() > PRECISION_BALANCE_V_SETPOINT) {
+  if (bms.getHighCellVolt() > settings.precision_balance_v_setpoint.getVal()) {
     LOG_INFO("precision balance\n");
-    bms.balanceCells(5, PRECISION_BALANCE_CELL_V_OFFSET);
-  } else if (bms.getHighCellVolt() > ROUGH_BALANCE_V_SETPOINT) {
+    bms.balanceCells(5, settings.precision_balance_cell_v_offset.getVal());
+  } else if (bms.getHighCellVolt() > settings.rough_balance_v_setpoint.getVal()) {
     LOG_INFO("rough balance\n");
-    bms.balanceCells(5, ROUGH_BALANCE_CELL_V_OFFSET);
+    bms.balanceCells(5, settings.rough_balance_cell_v_offset.getVal());
   }
 }
 
@@ -375,15 +375,15 @@ void Controller::balanceCells() {
 /// @param the temparature in C
 /////////////////////////////////////////////////
 //pwd = a*temp + b
-#define COOLING_A (1.0 - FLOOR_DUTY_COOLANT_PUMP) / (COOLING_HIGHT_SETPOINT - COOLING_LOWT_SETPOINT)
-#define COOLING_B FLOOR_DUTY_COOLANT_PUMP - COOLING_A * COOLING_LOWT_SETPOINT
+#define COOLING_A (1.0 - settings.floor_duty_coolant_pump.getVal()) / (COOLING_HIGHT_SETPOINT - settings.cooling_lowt_setpoint.getVal())
+#define COOLING_B settings.floor_duty_coolant_pump.getVal() - COOLING_A * settings.cooling_lowt_setpoint.getVal()
 float Controller::getCoolingPumpDuty(float temp) {
   //LOG_INFO("Cooling Pump Set To Max duty\n");
   return 1.0; //always fully on.
   /*
-    if (temp < COOLING_LOWT_SETPOINT) {
-    return FLOOR_DUTY_COOLANT_PUMP;
-    } else if (temp > COOLING_HIGHT_SETPOINT) {
+    if (temp < settings.cooling_lowt_setpoint.getVal()) {
+    return settings.floor_duty_coolant_pump.getVal();
+    } else if (temp > settings.cooling_hight_setpoint.getVal()) {
     return 1.0;
     } else {
     return COOLING_A * temp + COOLING_B;

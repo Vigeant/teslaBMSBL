@@ -5,7 +5,7 @@
 /////////////////////////////////////////////////
 /// \brief constructor initialized to invalid address 0.
 /////////////////////////////////////////////////
-BMSModuleManager::BMSModuleManager()
+BMSModuleManager::BMSModuleManager(Settings* sett)
 {
   histLowestPackVolt = 1000.0f;
   histHighestPackVolt = 0.0f;
@@ -16,6 +16,7 @@ BMSModuleManager::BMSModuleManager()
   histHighestCellDiffVolt = 0.0f;
   lineFault = false;
   pstring = 1;
+  settings = sett;
 }
 
 /////////////////////////////////////////////////
@@ -521,8 +522,8 @@ void BMSModuleManager::printPackSummary()
   LOG_CONSOLE("INH_CHARGING: %d\n", digitalRead(INH_CHARGING));
   
   //testing scafolding
-  LOG_CONSOLE("getHighCellVolt() < CHARGER_CYCLE_V_SETPOINT    : %f < %f?\n" , getHighCellVolt(),CHARGER_CYCLE_V_SETPOINT);
-  LOG_CONSOLE("getHighCellVolt() < MAX_CHARGE_V_SETPOINT    : %f < %f?\n" , getHighCellVolt(),MAX_CHARGE_V_SETPOINT);
+  LOG_CONSOLE("getHighCellVolt() < settings->charger_cycle_v_setpoint.getVal()    : %f < %f?\n" , getHighCellVolt(),settings->charger_cycle_v_setpoint.getVal());
+  LOG_CONSOLE("getHighCellVolt() < settings->max_charge_v_setpoint.getVal()    : %f < %f?\n" , getHighCellVolt(),settings->max_charge_v_setpoint.getVal());
 }
 
 /////////////////////////////////////////////////
@@ -577,16 +578,16 @@ void BMSModuleManager::printPackGraph()
     rowV = deltaV*row/40 + lowCellVolt;
     LOG_CONSOLE("%.3fV |" , rowV);
 
-    if (getHighCellVolt() > PRECISION_BALANCE_V_SETPOINT){
-      if(rowV > getLowCellVolt() + PRECISION_BALANCE_CELL_V_OFFSET){
+    if (getHighCellVolt() > settings->precision_balance_v_setpoint.getVal()){
+      if(rowV > getLowCellVolt() + settings->precision_balance_cell_v_offset.getVal()){
         LOG_CONSOLE("B ");
         barchar = 'B';
       } else{
         LOG_CONSOLE("| ");
         barchar = 177;
       }
-    } else if (getHighCellVolt() > ROUGH_BALANCE_V_SETPOINT){
-      if(rowV > getLowCellVolt() + ROUGH_BALANCE_CELL_V_OFFSET){
+    } else if (getHighCellVolt() > settings->rough_balance_v_setpoint.getVal()){
+      if(rowV > getLowCellVolt() + settings->rough_balance_cell_v_offset.getVal()){
         LOG_CONSOLE("B ");
         barchar = 'B';
       } else{
