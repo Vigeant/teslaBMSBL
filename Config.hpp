@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Arduino.h>
-//#include <EZPROM.h>
+#include <EEPROM.h>
 #include <list>
 
 //enable testing mode that simply cycles through all states instead of triggers
@@ -54,13 +54,19 @@
 #define LOOP_PERIOD_ACTIVE_MS 200
 #define LOOP_PERIOD_STANDBY_MS 2500
 
-#define VERSION 1
+#define EEPROM_VERSION 1
 
 class Param {
   public:
     const char* paramName;
     virtual void prettyPrint();
     virtual int32_t setVal(const char * valStr);
+    virtual uint16_t getSize();
+    virtual uint8_t* getRawBytes();
+    virtual void setRawBytes(uint8_t*);
+    virtual void resetDefault();
+    virtual uint32_t saveToEEPROM(uint32_t address);
+    virtual uint32_t loadFromEEPROM(uint32_t address);
   protected:
     bool editable = true;
     const char* description;
@@ -84,6 +90,31 @@ template <class C> class ParamImpl : public Param {
     C getVal() {
       return value;
     }
+
+    uint8_t* getRawBytes() {
+      return (uint8_t*)&value;
+    }
+
+    void resetDefault(){
+      value = valueDefault;
+    }
+
+    void setRawBytes(uint8_t*);
+    uint16_t getSize();
+    bool valueMatchDefault(){
+      return (value == valueDefault);
+    }
+
+    uint32_t saveToEEPROM(uint32_t address){
+      EEPROM.put(address, value);
+      return sizeof(C);
+    }
+
+    uint32_t loadFromEEPROM(uint32_t address){
+      EEPROM.get(address, value);
+      return sizeof(C);
+    }
+    
   private:
     C value;
     C valueDefault;
@@ -91,13 +122,19 @@ template <class C> class ParamImpl : public Param {
     C valueMax;
 };
 
-//class Settings : public EZPROM::Serializable {
 class Settings {
+    //class Settings {
   public:
     static const uint8_t number_of_params = 25;
     void printSettings();
     Settings ();
     Param * getParam(const char* name);
+
+    uint16_t size();
+
+    void reloadDefaultSettings();
+    void saveAllSettingsToEEPROM(uint32_t address);
+    void loadAllSettingsFromEEPROM(uint32_t address);
 
     ParamImpl<uint32_t> magic_bytes;
     ParamImpl<uint32_t> eeprom_version;

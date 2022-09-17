@@ -45,6 +45,7 @@ void setup() {
   //console stuff
   pinMode(INL_SOFT_RST, INPUT_PULLUP);
   //cons_inst.printMenu();
+
   LOG_CONSOLE("BMS> ");
 }
 
@@ -92,7 +93,7 @@ void loop()
     phaseA = !phaseA;
 
     digital.pinMode(INL_SOFT_RST, INPUT_PULLUP, FALLING);//pin, mode, type
-    
+
     //get loop period from controller
     period = controller_inst.getPeriodMillis();
 

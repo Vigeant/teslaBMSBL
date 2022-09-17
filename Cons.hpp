@@ -43,10 +43,10 @@ class CommandPrintMenu : public CliCommand {
       for (auto i = (*cliCommands).begin(); i != (*cliCommands).end() ; i++) {
         printed = strlen((*i)->tokenShort) + strlen((*i)->tokenLong);
 
-/*
-      }
-      for (i = 0; i < Cons::NUMBER_OF_COMMANDS; i++) {
-        printed = strlen(cliCommands[i]->tokenShort) + strlen(cliCommands[i]->tokenLong);*/
+        /*
+              }
+              for (i = 0; i < Cons::NUMBER_OF_COMMANDS; i++) {
+                printed = strlen(cliCommands[i]->tokenShort) + strlen(cliCommands[i]->tokenLong);*/
         if (printed >= 18) {
           printed = 17;
         }
@@ -86,12 +86,13 @@ class ShowConfig : public CliCommand {
 
 class SetParam : public CliCommand {
   public:
-    SetParam(Settings* sett) {
+    SetParam(Controller* cont_inst_ptr) {
       name = "Set Param";
       tokenLong = "set";
       tokenShort = "s";
       help = " | set a config parameter to a specific value";
-      settings = sett;
+      controller_inst_ptr = cont_inst_ptr;
+      settings = cont_inst_ptr->getSettingsPtr();
     }
     int doCommand() {
       char* paramName, *valStr;
@@ -109,15 +110,19 @@ class SetParam : public CliCommand {
           if (valStr == 0) {
             return -3;
           } else {
-            if (param->setVal(valStr) == 0){
-              return 0;
+            if (param->setVal(valStr) == 0) {
+              if (controller_inst_ptr->saveSettings() == 0){
+                return 0;
+              } else {
+                return -5;
+              }
             } else {
               return -4;
             }
           }
         }
       }
-      return 0;
+      return -6;
     }
   private:
     Settings* settings;
@@ -170,6 +175,23 @@ class ShowCSV : public CliCommand {
     }
 };
 
+class ResetDefaultValues : public CliCommand {
+  public:
+    ResetDefaultValues(Settings* sett) {
+      name = "reset default values";
+      tokenLong = "resetDefaultValues";
+      tokenShort = "reset";
+      help = " | Reset al default configuration values";
+      settings = sett;
+    }
+    int doCommand() {
+      settings->reloadDefaultSettings();
+      return 0;
+    }
+  private:
+    Settings* settings;
+};
+
 class SetVerbose : public CliCommand {
   public:
     SetVerbose() {
@@ -214,6 +236,7 @@ class Cons {
     ShowGraph showGraph;
     ShowCSV showCSV;
     SetVerbose setVerbose;
+    ResetDefaultValues resetDefaultValues;
     std::list<CliCommand*> cliCommands;
     //CliCommand* cliCommands[NUMBER_OF_COMMANDS];
     Controller* controller_inst_ptr;

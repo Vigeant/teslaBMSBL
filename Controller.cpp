@@ -3,8 +3,31 @@
 /////////////////////////////////////////////////
 /// \brief When instantiated, the controller is in the init state ensuring that all the signal pins are set properly.
 /////////////////////////////////////////////////
-Controller::Controller() : bms(&settings){
+Controller::Controller()
+  : bms(&settings) {
   state = INIT;
+
+  //try to load object
+  settings.loadAllSettingsFromEEPROM(0);
+  if (!((settings.magic_bytes.valueMatchDefault()) && (settings.eeprom_version.valueMatchDefault()))) {
+    Serial.print("object does not match magicbytes and version\n");
+    (void)reloadDefaultSettings();
+    Serial.print("Default values reloaded\n");
+  } else {
+    Serial.printf("Loaded config from EEPROM|| magicbytes: 0x%X, version = %d\n", settings.magic_bytes.getVal(), settings.eeprom_version.getVal());
+    Serial.printf("over_v_setpoint: 0x%.3f\n", settings.over_v_setpoint.getVal());
+  }
+}
+
+
+int32_t Controller::saveSettings() {
+  settings.saveAllSettingsToEEPROM(0);
+  return 0;
+}
+
+int32_t Controller::reloadDefaultSettings() {
+  settings.reloadDefaultSettings();
+  return saveSettings();
 }
 
 /////////////////////////////////////////////////
@@ -13,9 +36,9 @@ Controller::Controller() : bms(&settings){
 void Controller::doController() {
   static int ticks = 0;
   static unsigned int bat12Vcyclestart = 0;
-  static int standbyTicks = 1; //1 because ticks slow down
+  static int standbyTicks = 1;  //1 because ticks slow down
   const int stateticks = 4;
-  bat12vVoltage = (float)analogRead(INA_12V_BAT) / settings.bat12v_scaling_divisor.getVal() ;
+  bat12vVoltage = (float)analogRead(INA_12V_BAT) / settings.bat12v_scaling_divisor.getVal();
 
   if (state != INIT) syncModuleDataObjects();
 
@@ -41,7 +64,7 @@ void Controller::doController() {
       if (dc2dcON_H == 0 && bat12vVoltage < settings.dc2dc_cycle_v_setpoint.getVal()) {
         bat12Vcyclestart = (millis() / 1000);
         dc2dcON_H = 1;
-      } else if ( dc2dcON_H == 1 && ((millis() / 1000) > bat12Vcyclestart + settings.dc2dc_cycle_time_s.getVal())) {
+      } else if (dc2dcON_H == 1 && ((millis() / 1000) > bat12Vcyclestart + settings.dc2dc_cycle_time_s.getVal())) {
         // I am ignoring the time counter loop around as it will simply result in a short charge cycle
         // followed with a proper charging cycle.
         dc2dcON_H = 0;
@@ -71,8 +94,8 @@ void Controller::doController() {
         LOG_INFO("Transition to CHARGING\n");
       }
 #else
-      if (ticks >= 50 && ticks <= 100) { //adjust to give time to the EVCC to properly boot (5 ticks == 1 seconds)
-        if ( (digitalRead(INL_EVSE_DISC) == LOW) || (digitalRead(INH_CHARGING) == LOW) ) {
+      if (ticks >= 50 && ticks <= 100) {  //adjust to give time to the EVCC to properly boot (5 ticks == 1 seconds)
+        if ((digitalRead(INL_EVSE_DISC) == LOW) || (digitalRead(INH_CHARGING) == LOW)) {
           ticks = 0;
           state = STANDBY;
           LOG_INFO("Transition to STANDBY\n");
@@ -107,7 +130,7 @@ void Controller::doController() {
         //LOG_INFO("INL_EVSE_DISC == LOW || INH_CHARGING == LOW\n");
         if (digitalRead(INL_EVSE_DISC) == LOW) {
           LOG_INFO("INL_EVSE_DISC == LOW\n");
-        } else if ( digitalRead(INH_CHARGING) == LOW) {
+        } else if (digitalRead(INH_CHARGING) == LOW) {
           LOG_INFO("INH_CHARGING == LOW\n");
         }
       } else if (bms.getHighCellVolt() > settings.trickle_charge_v_setpoint.getVal()) {
@@ -167,7 +190,7 @@ void Controller::doController() {
         LOG_INFO("Transition to INIT\n");
       }
 #else
-      if (digitalRead(INH_RUN ) == LOW) {
+      if (digitalRead(INH_RUN) == LOW) {
         ticks = 0;
         state = STANDBY;
         LOG_INFO("Transition to STANDBY\n");
@@ -296,38 +319,38 @@ void Controller::syncModuleDataObjects() {
     deAssertFault(FWatSen2);
   }
 
-  if ( bms.getHighCellVolt() > settings.over_v_setpoint.getVal()) {
+  if (bms.getHighCellVolt() > settings.over_v_setpoint.getVal()) {
     assertFault(FBMSOV);
   } else {
     deAssertFault(FBMSOV);
   }
 
-  if ( bms.getLowCellVolt() < settings.under_v_setpoint.getVal()) {
+  if (bms.getLowCellVolt() < settings.under_v_setpoint.getVal()) {
     assertFault(FBMSUV);
   } else {
     deAssertFault(FBMSUV);
   }
 
-  if ( bms.getHighTemperature() > settings.over_t_setpoint.getVal()) {
+  if (bms.getHighTemperature() > settings.over_t_setpoint.getVal()) {
     assertFault(FBMSOT);
   } else {
     deAssertFault(FBMSOT);
   }
 
-  if ( bms.getLowTemperature() < settings.under_t_setpoint.getVal()) {
+  if (bms.getLowTemperature() < settings.under_t_setpoint.getVal()) {
     assertFault(FBMSUT);
   } else {
     deAssertFault(FBMSUT);
   }
 
-  bat12vVoltage = (float)analogRead(INA_12V_BAT) / settings.bat12v_scaling_divisor.getVal() ;
-  if ( bat12vVoltage > settings.bat12v_over_v_setpoint.getVal()) {
+  bat12vVoltage = (float)analogRead(INA_12V_BAT) / settings.bat12v_scaling_divisor.getVal();
+  if (bat12vVoltage > settings.bat12v_over_v_setpoint.getVal()) {
     assertFault(F12VBatOV);
   } else {
     deAssertFault(F12VBatOV);
   }
 
-  if ( bat12vVoltage < settings.bat12v_under_v_setpoint.getVal()) {
+  if (bat12vVoltage < settings.bat12v_under_v_setpoint.getVal()) {
     assertFault(F12VBatUV);
   } else {
     deAssertFault(F12VBatUV);
@@ -336,13 +359,13 @@ void Controller::syncModuleDataObjects() {
   chargerInhibit = false;
   powerLimiter = false;
   isFaulted = false;
-  for (uint16_t i = 0; i < sizeof(faults) / sizeof(faults[0]) ; i++) {
+  for (uint16_t i = 0; i < sizeof(faults) / sizeof(faults[0]); i++) {
     if (faults[i].chargeFault) chargerInhibit |= faults[i].fault;
     if (faults[i].runFault) powerLimiter |= faults[i].fault;
     isFaulted |= faults[i].fault;
   }
   chargerInhibit |= bms.getHighCellVolt() >= settings.max_charge_v_setpoint.getVal();
-  powerLimiter |= bms.getHighCellVolt() >= settings.max_charge_v_setpoint.getVal(); //added in case charging in run mode.
+  powerLimiter |= bms.getHighCellVolt() >= settings.max_charge_v_setpoint.getVal();  //added in case charging in run mode.
 
   if (bms.getHighCellVolt() >= settings.max_charge_v_setpoint.getVal()) LOG_INFO("bms.getHighCellVolt()[%.2f] >= settings.max_charge_v_setpoint.getVal()", bms.getHighCellVolt());
   if (chargerInhibit) LOG_INFO("chargerInhibit (fault) line asserted!\n");
@@ -376,10 +399,10 @@ void Controller::balanceCells() {
 /////////////////////////////////////////////////
 //pwd = a*temp + b
 #define COOLING_A (1.0 - settings.floor_duty_coolant_pump.getVal()) / (COOLING_HIGHT_SETPOINT - settings.cooling_lowt_setpoint.getVal())
-#define COOLING_B settings.floor_duty_coolant_pump.getVal() - COOLING_A * settings.cooling_lowt_setpoint.getVal()
+#define COOLING_B settings.floor_duty_coolant_pump.getVal() - COOLING_A* settings.cooling_lowt_setpoint.getVal()
 float Controller::getCoolingPumpDuty(float temp) {
   //LOG_INFO("Cooling Pump Set To Max duty\n");
-  return 1.0; //always fully on.
+  return 1.0;  //always fully on.
   /*
     if (temp < settings.cooling_lowt_setpoint.getVal()) {
     return settings.floor_duty_coolant_pump.getVal();
@@ -396,7 +419,7 @@ float Controller::getCoolingPumpDuty(float temp) {
 /////////////////////////////////////////////////
 void Controller::init() {
   pinMode(OUTL_12V_BAT_CHRG, INPUT);
-  pinMode(OUTPWM_PUMP, OUTPUT); //PWM use analogWrite(OUTPWM_PUMP, 0-255);
+  pinMode(OUTPWM_PUMP, OUTPUT);  //PWM use analogWrite(OUTPWM_PUMP, 0-255);
   pinMode(INL_BAT_PACK_FAULT, INPUT_PULLUP);
   pinMode(INL_BAT_MON_FAULT, INPUT_PULLUP);
   pinMode(INL_EVSE_DISC, INPUT_PULLUP);
@@ -468,7 +491,7 @@ void Controller::charging() {
   outL_evcc_on_buffer = LOW;
   outH_fault_buffer = chargerInhibit;
   outL_12V_bat_chrg_buffer = LOW;
-  outpwm_pump_buffer = (uint8_t) (getCoolingPumpDuty(bms.getHighTemperature()) * 255 );
+  outpwm_pump_buffer = (uint8_t)(getCoolingPumpDuty(bms.getHighTemperature()) * 255);
 }
 
 /////////////////////////////////////////////////
@@ -481,8 +504,8 @@ void Controller::trickle_charging() {
   balanceCells();
   outL_evcc_on_buffer = LOW;
   outH_fault_buffer = chargerInhibit;
-  outL_12V_bat_chrg_buffer = HIGH; //stop DC2DC
-  outpwm_pump_buffer = (uint8_t) (getCoolingPumpDuty(bms.getHighTemperature()) * 255 );
+  outL_12V_bat_chrg_buffer = HIGH;  //stop DC2DC
+  outpwm_pump_buffer = (uint8_t)(getCoolingPumpDuty(bms.getHighTemperature()) * 255);
 }
 
 /////////////////////////////////////////////////
@@ -491,19 +514,19 @@ void Controller::trickle_charging() {
 /////////////////////////////////////////////////
 void Controller::post_charge() {
   balanceCells();
-  outL_evcc_on_buffer = HIGH;      // de-assert key switch ignition KSI to the EVCC
-  outH_fault_buffer = HIGH; //keep asserting the loop to the EVCC until it goes to sleep
-  outL_12V_bat_chrg_buffer = HIGH; //stop DC2DC
-  outpwm_pump_buffer = (uint8_t) (getCoolingPumpDuty(bms.getHighTemperature()) * 255 );
+  outL_evcc_on_buffer = HIGH;       // de-assert key switch ignition KSI to the EVCC
+  outH_fault_buffer = HIGH;         //keep asserting the loop to the EVCC until it goes to sleep
+  outL_12V_bat_chrg_buffer = HIGH;  //stop DC2DC
+  outpwm_pump_buffer = (uint8_t)(getCoolingPumpDuty(bms.getHighTemperature()) * 255);
 }
 /////////////////////////////////////////////////
 /// \brief run state is turned on and ready to operate.
 /////////////////////////////////////////////////
 void Controller::run() {
-  outL_evcc_on_buffer = LOW;      //required so that the EVSE_DISC is valid (will inhibit the motor controller if EVSE is connected)
+  outL_evcc_on_buffer = LOW;  //required so that the EVSE_DISC is valid (will inhibit the motor controller if EVSE is connected)
   outH_fault_buffer = powerLimiter;
   outL_12V_bat_chrg_buffer = LOW;
-  outpwm_pump_buffer = (uint8_t) (getCoolingPumpDuty(bms.getHighTemperature()) * 255 );
+  outpwm_pump_buffer = (uint8_t)(getCoolingPumpDuty(bms.getHighTemperature()) * 255);
 }
 
 /////////////////////////////////////////////////
@@ -570,7 +593,7 @@ void Controller::printControllerState() {
   LOG_CONSOLE("====================================================================================\n");
   LOG_CONSOLE("%-22s   last fault time\n", "Fault Name");
   LOG_CONSOLE("----------------------   -----------------------------------------------------------\n");
-  for (uint16_t i = 0; i < sizeof(faults) / sizeof(faults[0]) ; i++) {
+  for (uint16_t i = 0; i < sizeof(faults) / sizeof(faults[0]); i++) {
     if (faults[i].sFault) {
       LOG_CONSOLE("%-22s @ %-3d days, %02d:%02d:%02d\n", faults[i].name, faults[i].timeStamp / 86400, (faults[i].timeStamp % 86400) / 3600, (faults[i].timeStamp % 3600) / 60, (faults[i].timeStamp % 60));
     }

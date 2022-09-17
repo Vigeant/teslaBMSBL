@@ -80,10 +80,11 @@ void Cons::doConsole() {
 Cons::Cons(Controller * cont_inst_ptr):
   commandPrintMenu(&cliCommands),
   showConfig(cont_inst_ptr->getSettingsPtr()),
-  setParam(cont_inst_ptr->getSettingsPtr()),
+  setParam(cont_inst_ptr),
   showStatus(cont_inst_ptr),
   showGraph(cont_inst_ptr),
-  showCSV(cont_inst_ptr)
+  showCSV(cont_inst_ptr),
+  resetDefaultValues(cont_inst_ptr->getSettingsPtr())
 {
   // initialize serial communication at 115200 bits per second:
   SERIALCONSOLE.begin(115200);
@@ -91,6 +92,7 @@ Cons::Cons(Controller * cont_inst_ptr):
   controller_inst_ptr = cont_inst_ptr;
   cliCommands.push_back(&commandPrintMenu);
   cliCommands.push_back(&showConfig);
+  cliCommands.push_back(&resetDefaultValues);
   cliCommands.push_back(&setParam);
   cliCommands.push_back(&showStatus);
   cliCommands.push_back(&showGraph);

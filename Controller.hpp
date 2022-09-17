@@ -17,6 +17,8 @@ class Controller {
     Settings* getSettingsPtr();
     void printControllerState();
     uint32_t getPeriodMillis();
+    int32_t reloadDefaultSettings();
+    int32_t saveSettings();
 
     //faults overhaul
     enum faultNames { FModuleLoop, FBatMon, FBMSSerialComms, FBMSOV, FBMSUV, FBMSOT, FBMSUT, F12VBatOV, F12VBatUV, FWatSen1, FWatSen2};
