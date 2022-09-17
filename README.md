@@ -41,8 +41,8 @@ Speed: 115200
 - [X] set bat mon to 176V
 - [X] add post charge state to give time for the charger to properly shutoff.
 - [ ] make graph not show B when in run.
-- [ ] add full console
-- [ ] implement nvram config settings.
+- [X] add full console
+- [X] implement EEPROM config settings.
 - [ ] add error when less than 7 modules are seen.
 	
 ## particularities
