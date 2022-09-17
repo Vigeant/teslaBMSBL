@@ -7,7 +7,7 @@
 class BMSModuleManager
 {
   public:
-    BMSModuleManager();
+    BMSModuleManager(Settings* sett);
     int seriescells();
     void resetModuleRecordedValues();
     void StopBalancing();
@@ -67,6 +67,8 @@ class BMSModuleManager
     int batteryID;
     int numFoundModules;                    // The number of modules that seem to exist
     bool lineFault;     //true if we lose comms with modules.
+
+    Settings* settings;
 };
 
 #endif //ifndef BMSMODULEMANAGER_HPP_

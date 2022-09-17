@@ -1,9 +1,9 @@
 /**@file teslaBMSBL.ino */
 #include <Arduino.h>
+#include "Controller.hpp"
 #include "Cons.hpp"
 #include "Logger.hpp"
 #include "Oled.hpp"
-#include "Controller.hpp"
 #include <Snooze.h>
 
 #define CPU_RESTART_ADDR (uint32_t *)0xE000ED0C
@@ -24,6 +24,7 @@
 */
 
 //instantiate all objects
+//static Settings settings;
 static Controller controller_inst;        ///< The controller is responsible for orchestrating all major functions of the BMS.
 static Cons cons_inst(&controller_inst);  ///< The console is a 2 way user interface available on usb serial port at baud 115200.
 static Oled oled_inst(&controller_inst);  ///< The oled is a 1 way user interface displaying the most critical information.
@@ -44,6 +45,7 @@ void setup() {
   //console stuff
   pinMode(INL_SOFT_RST, INPUT_PULLUP);
   //cons_inst.printMenu();
+
   LOG_CONSOLE("BMS> ");
 }
 
@@ -79,9 +81,7 @@ void loop()
 {
   uint32_t starttime, endtime, delaytime, timespent, period;
   bool phaseA = true;
-  //int who;
 
-  //pinMode(INH_RUN, INPUT_PULLDOWN);
   for (;;) {
     starttime = millis();
 
@@ -93,7 +93,7 @@ void loop()
     phaseA = !phaseA;
 
     digital.pinMode(INL_SOFT_RST, INPUT_PULLUP, FALLING);//pin, mode, type
-    
+
     //get loop period from controller
     period = controller_inst.getPeriodMillis();
 

@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include "CONFIG.h"
+#include "Config.hpp"
 #include "BMSModuleManager.hpp"
 
 #ifndef CONTROLLER_HPP_
@@ -14,8 +14,11 @@ class Controller {
     Controller();
     ControllerState getState();
     BMSModuleManager* getBMSPtr();
+    Settings* getSettingsPtr();
     void printControllerState();
     uint32_t getPeriodMillis();
+    int32_t reloadDefaultSettings();
+    int32_t saveSettings();
 
     //faults overhaul
     enum faultNames { FModuleLoop, FBatMon, FBMSSerialComms, FBMSOV, FBMSUV, FBMSOT, FBMSUT, F12VBatOV, F12VBatUV, FWatSen1, FWatSen2};
@@ -57,7 +60,7 @@ class Controller {
     bool outH_fault_buffer;
 
   private:
-
+    Settings settings;
     BMSModuleManager bms;
 
     bool chargerInhibit;

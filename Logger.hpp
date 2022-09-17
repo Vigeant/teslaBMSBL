@@ -2,7 +2,7 @@
 #define LOGGER_HPP_
 
 #include <Arduino.h>
-#include "CONFIG.h"
+#include "Config.hpp"
 #include <string.h>
 
 
