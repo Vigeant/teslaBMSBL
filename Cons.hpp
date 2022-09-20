@@ -238,7 +238,6 @@ class Cons {
     SetVerbose setVerbose;
     ResetDefaultValues resetDefaultValues;
     std::list<CliCommand*> cliCommands;
-    //CliCommand* cliCommands[NUMBER_OF_COMMANDS];
     Controller* controller_inst_ptr;
     const char *delimiters            = ", \n";
     bool getCommandLineFromSerialPort(char * commandLine);

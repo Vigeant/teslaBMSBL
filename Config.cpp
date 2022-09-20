@@ -6,7 +6,7 @@ Settings::Settings()
   : magic_bytes("magic_bytes", false, 0, 0xdeadbeef, 0, 0, "Magic byte to identify eeprom was initialized"),
     eeprom_version("eeprom_version", false, 0, EEPROM_VERSION, 0, 0, "eeprom version"),
     canbus_speed("canbus_speed", true, 0, 250000, 62500, 1000000, "Can bus speed"),
-    canbus_address("canbus_address", true, 0, 1, 0, 0, "Can bus address"),
+    canbus_address("canbus_address", true, 0, 1, 1, 1000, "Can bus address"),
     over_v_setpoint("over_v_setpoint", true, 0.0f, 4.25f, 3.8f, 4.25f, "Triggers Over V error"),
     under_v_setpoint("under_v_setpoint", true, 0.0f, 3.0f, 2.5f, 3.5f, "Triggers Under V error"),
     max_charge_v_setpoint("max_charge_v_setpoint", true, 0.0f, 4.2f, 3.8f, 4.25f, "Stops charging"),
@@ -27,7 +27,8 @@ Settings::Settings()
     dc2dc_cycle_time_s("dc2dc_cycle_time_s", true, 0, 3600, 60, 14400, "DC 2 DC 12V battery charging cycle time in seconds"),
     bat12v_over_v_setpoint("bat12v_over_v_setpoint", true, 0.0f, 14.5f, 13.0f, 15.0f, "Triggers 12V battery OV error"),
     bat12v_under_v_setpoint("bat12v_under_v_setpoint", true, 0.0f, 10.0f, 9.0f, 12.5f, "Triggers 12V battery UV error"),
-    bat12v_scaling_divisor("bat12v_scaling_divisor", true, 0.0f, 61.78f, 50.0f, 70.0f, "12V battery ADC devisor 0-1023 -> 0-15V") {
+    bat12v_scaling_divisor("bat12v_scaling_divisor", true, 0.0f, 61.78f, 50.0f, 70.0f, "12V battery ADC devisor 0-1023 -> 0-15V"),
+    fault_debounce_count("fault_debounce_count", true, 0, 5, 1, 100, "Number of time a fault condition has to be counted before the fault is recorded/asserted") {
   //TODO check EEPROM for initialisation and version
   //if no match push defaults to eeprom
   //load config from eeprom
@@ -56,6 +57,7 @@ Settings::Settings()
   parameters.push_back(&bat12v_over_v_setpoint);
   parameters.push_back(&bat12v_under_v_setpoint);
   parameters.push_back(&bat12v_scaling_divisor);
+  parameters.push_back(&fault_debounce_count);
 }
 
 void Settings::printSettings() {
@@ -90,7 +92,7 @@ template<>
 int32_t ParamImpl<uint32_t>::setVal(const char* valStr) {
   char* endptr;
   uint32_t tempValue;
-  if (!editable){
+  if (!editable) {
     return -1;
   }
   errno = 0;  // To distinguish success/failure after call
@@ -158,21 +160,6 @@ int32_t ParamImpl<float>::setVal(const char* valStr) {
   return 0;
 }
 
-template<>
-void ParamImpl<uint32_t>::setRawBytes(uint8_t* bytes) {
-  value = *(uint32_t*)bytes;
-}
-
-template<>
-void ParamImpl<int32_t>::setRawBytes(uint8_t* bytes) {
-  value = *(int32_t*)bytes;
-}
-
-template<>
-void ParamImpl<float>::setRawBytes(uint8_t* bytes) {
-  value = *(float*)bytes;
-}
-
 Param* Settings::getParam(const char* name) {
   for (auto i = parameters.begin(); i != parameters.end(); i++) {
     if (strncmp((*i)->paramName, name, strlen((*i)->paramName)) == 0) {
@@ -182,13 +169,13 @@ Param* Settings::getParam(const char* name) {
   return 0;
 }
 
-void Settings::saveAllSettingsToEEPROM(uint32_t address){
+void Settings::saveAllSettingsToEEPROM(uint32_t address) {
   for (auto i = parameters.begin(); i != parameters.end(); i++) {
     address += (*i)->saveToEEPROM(address);
   }
 }
 
-void Settings::loadAllSettingsFromEEPROM(uint32_t address){
+void Settings::loadAllSettingsFromEEPROM(uint32_t address) {
   for (auto i = parameters.begin(); i != parameters.end(); i++) {
     address += (*i)->loadFromEEPROM(address);
   }

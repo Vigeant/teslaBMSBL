@@ -3,20 +3,57 @@
 /////////////////////////////////////////////////
 /// \brief When instantiated, the controller is in the init state ensuring that all the signal pins are set properly.
 /////////////////////////////////////////////////
+/*Fault faultModuleLoop;             // = { .name = "ModuleLoop", .code = "A", .fault = false, .sFault = false, .chargeFault = true, .runFault = true, .msgAsserted = "One or more BMS modules have asserted the fault loop!\n", .msgDeAsserted = "All modules have deasserted the fault loop\n" };
+  Fault faultBatMon;                 // = { .name = "BatMon", .code = "B", .fault = false, .sFault = false, .chargeFault = true, .runFault = true, .msgAsserted = "The battery monitor asserted a fault!\n", .msgDeAsserted = "The battery monitor deasserted a fault\n" };
+  Fault faultBMSSerialComms;         // = { .name = "BMSSerialComms", .code = "C", .fault = false, .sFault = false, .chargeFault = true, .runFault = true, .msgAsserted = "Serial communication with battery modules lost!\n", .msgDeAsserted = "Serial communication with battery modules re-established!\n" };
+  Fault faultBMSOV;                  // = { .name = "BMSOV", .code = "D", .fault = false, .sFault = false, .chargeFault = true, .runFault = true, .msgAsserted = "A cell reached a voltage higher than the OV threshold\n", .msgDeAsserted = "All cells are back under OV threshold\n" };
+  Fault faultBMSUV;                  // = { .name = "BMSUV", .code = "E", .fault = false, .sFault = false, .chargeFault = false, .runFault = true, .msgAsserted = "A cell reached a voltage lower than the UV threshold\n", .msgDeAsserted = "All cells are back over UV threshold\n" };
+  Fault faultBMSOT;                  // = { .name = "BMSOT", .code = "F", .fault = false, .sFault = false, .chargeFault = true, .runFault = true, .msgAsserted = "A module reached a temp higher than the OT threshold\n", .msgDeAsserted = "All modules are back under OT threshold\n" };
+  Fault faultBMSUT;                  // = { .name = "BMSUT", .code = "G", .fault = false, .sFault = false, .chargeFault = true, .runFault = true, .msgAsserted = "A module reached a temp lower than the UT threshold\n", .msgDeAsserted = "All modules are back over UT threshold\n" };
+  Fault fault12VBatOV;               // = { .name = "12VBatOV", .code = "H", .fault = false, .sFault = false, .chargeFault = false, .runFault = false, .msgAsserted = "12V battery reached a voltage higher than the OV threshold\n", .msgDeAsserted = "12V battery back under the OV threshold\n" };
+  Fault fault12VBatUV;               // = { .name = "12VBatUV", .code = "I", .fault = false, .sFault = false, .chargeFault = false, .runFault = true, .msgAsserted = "12V battery reached a voltage lower than the UV threshold\n", .msgDeAsserted = "12V battery back over the UV threshold\n" };
+  Fault faultWatSen1;                // = { .name = "WatSen1", .code = "J", .fault = false, .sFault = false, .chargeFault = true, .runFault = true, .msgAsserted = "The battery water sensor 1 is reporting water!\n", .msgDeAsserted = "The battery water sensor 1 is reporting dry.\n" };
+  Fault faultWatSen2;                // = { .name = "WatSen2", .code = "K", .fault = false, .sFault = false, .chargeFault = true, .runFault = true, .msgAsserted = "The battery water sensor 2 is reporting water!\n", .msgDeAsserted = "The battery water sensor 2 is reporting dry.\n" };
+  Fault faultBMSPartialSerialComms;  // = { .name = "BMSPartialSerialComms", .code = "L", .fault = false, .sFault = false, .chargeFault = true, .runFault = true, .msgAsserted = "Found fewer modules than configured!\n", .msgDeAsserted = "Found all modules as configured!\n" };
+*/
 Controller::Controller()
-  : bms(&settings) {
+  : faultModuleLoop(String("ModuleLoop"), String("A"), true, true, String("One or more BMS modules have asserted the fault loop!\n"), String("All modules have deasserted the fault loop\n")),
+    faultBatMon(String("BatMon"), String("B"), true, true, String("The battery monitor asserted a fault!\n"), String("The battery monitor deasserted a fault\n")),
+    faultBMSSerialComms(String("BMSSerialComms"), String("C"), true, true, String("Serial communication with battery modules lost!\n"), String("Serial communication with battery modules re-established!\n")),
+    faultBMSOV(String("BMSOV"), String("D"), true, true, String("A cell reached a voltage higher than the OV threshold\n"), String("All cells are back under OV threshold\n")),
+    faultBMSUV(String("BMSUV"), String("E"), false, true, String("A cell reached a voltage lower than the UV threshold\n"), String("All cells are back over UV threshold\n")),
+    faultBMSOT(String("BMSOT"), String("F"), true, true, String("A module reached a temp higher than the OT threshold\n"), String("All modules are back under OT threshold\n")),
+    faultBMSUT(String("BMSUT"), String("G"), true, true, String("A module reached a temp lower than the UT threshold\n"), String("All modules are back over UT threshold\n")),
+    fault12VBatOV(String("12VBatOV"), String("H"), false, false, String("12V battery reached a voltage higher than the OV threshold\n"), String("12V battery back under the OV threshold\n")),
+    fault12VBatUV(String("12VBatUV"), String("I"), false, true, String("12V battery reached a voltage lower than the UV threshold\n"), String("12V battery back over the UV threshold\n")),
+    faultWatSen1(String("WatSen1"), String("J"), true, true, String("The battery water sensor 1 is reporting water!\n"), String("The battery water sensor 1 is reporting dry.\n")),
+    faultWatSen2(String("WatSen2"), String("K"), true, true, String("The battery water sensor 2 is reporting water!\n"), String("The battery water sensor 2 is reporting dry.\n")),
+    faultBMSPartialSerialComms(String("BMSPartialSerialComms"), String("L"), true, true, String("Found fewer modules than configured!\n"), String("Found all modules as configured!\n")),
+    bms(&settings) {
   state = INIT;
 
   //try to load object
   settings.loadAllSettingsFromEEPROM(0);
   if (!((settings.magic_bytes.valueMatchDefault()) && (settings.eeprom_version.valueMatchDefault()))) {
-    Serial.print("object does not match magicbytes and version\n");
+    Serial.print("EEPROM does not match magicbytes and version\n");
     (void)reloadDefaultSettings();
     Serial.print("Default values reloaded\n");
   } else {
     Serial.printf("Loaded config from EEPROM|| magicbytes: 0x%X, version = %d\n", settings.magic_bytes.getVal(), settings.eeprom_version.getVal());
-    Serial.printf("over_v_setpoint: 0x%.3f\n", settings.over_v_setpoint.getVal());
   }
+
+  faults.push_back(&faultModuleLoop);
+  faults.push_back(&faultBatMon);
+  faults.push_back(&faultBMSSerialComms);
+  faults.push_back(&faultBMSOV);
+  faults.push_back(&faultBMSUV);
+  faults.push_back(&faultBMSOT);
+  faults.push_back(&faultBMSUT);
+  faults.push_back(&fault12VBatOV);
+  faults.push_back(&fault12VBatUV);
+  faults.push_back(&faultWatSen1);
+  faults.push_back(&faultWatSen2);
+  faults.push_back(&faultBMSPartialSerialComms);
 }
 
 
@@ -260,27 +297,6 @@ void Controller::doController() {
   analogWrite(OUTPWM_PUMP, outpwm_pump_buffer);
 }
 
-void Controller::assertFault(faultNames fautlName) {
-  faults[fautlName].debounceCounter += 1;
-  if (faults[fautlName].debounceCounter >= FAULT_DEBOUNCE_COUNT) {
-    if (!faults[fautlName].fault) {
-      LOG_ERR(faults[fautlName].msgAsserted);
-    }
-    faults[fautlName].fault = true;
-    faults[fautlName].sFault = true;
-    faults[fautlName].timeStamp = millis() / 1000;
-    faults[fautlName].debounceCounter = FAULT_DEBOUNCE_COUNT;
-  }
-}
-
-void Controller::deAssertFault(faultNames fautlName) {
-  if (faults[fautlName].fault) {
-    LOG_ERR(faults[fautlName].msgDeAsserted);
-  }
-  faults[fautlName].debounceCounter = 0;
-  faults[fautlName].fault = false;
-}
-
 /////////////////////////////////////////////////
 /// \brief gather all the data from the boards and check for any faults.
 /////////////////////////////////////////////////
@@ -290,80 +306,82 @@ void Controller::syncModuleDataObjects() {
   bms.getAllVoltTemp();
 
   if (bms.getLineFault()) {
-    assertFault(FBMSSerialComms);
+    faultBMSSerialComms.countFault(settings.fault_debounce_count.getVal());
   } else {
-    deAssertFault(FBMSSerialComms);
+    faultBMSSerialComms.resetFault();
   }
 
   if (digitalRead(INL_BAT_PACK_FAULT) == LOW) {
-    assertFault(FModuleLoop);
+    faultModuleLoop.countFault(settings.fault_debounce_count.getVal());
   } else {
-    deAssertFault(FModuleLoop);
+    faultModuleLoop.resetFault();
   }
 
   if (digitalRead(INL_BAT_MON_FAULT) == LOW) {
-    assertFault(FBatMon);
+    faultBatMon.countFault(settings.fault_debounce_count.getVal());
   } else {
-    deAssertFault(FBatMon);
+    faultBatMon.resetFault();
   }
 
   if (digitalRead(INL_WATER_SENS1) == LOW) {
-    assertFault(FWatSen1);
+    faultWatSen1.countFault(settings.fault_debounce_count.getVal());
   } else {
-    deAssertFault(FWatSen1);
+    faultWatSen1.resetFault();
   }
 
   if (digitalRead(INL_WATER_SENS2) == LOW) {
-    assertFault(FWatSen2);
+    faultWatSen2.countFault(settings.fault_debounce_count.getVal());
   } else {
-    deAssertFault(FWatSen2);
+    faultWatSen2.resetFault();
   }
 
   if (bms.getHighCellVolt() > settings.over_v_setpoint.getVal()) {
-    assertFault(FBMSOV);
+    faultBMSOV.countFault(settings.fault_debounce_count.getVal());
   } else {
-    deAssertFault(FBMSOV);
+    faultBMSOV.resetFault();
   }
 
   if (bms.getLowCellVolt() < settings.under_v_setpoint.getVal()) {
-    assertFault(FBMSUV);
+    faultBMSUV.countFault(settings.fault_debounce_count.getVal());
   } else {
-    deAssertFault(FBMSUV);
+    faultBMSUV.resetFault();
   }
 
   if (bms.getHighTemperature() > settings.over_t_setpoint.getVal()) {
-    assertFault(FBMSOT);
+    faultBMSOT.countFault(settings.fault_debounce_count.getVal());
   } else {
-    deAssertFault(FBMSOT);
+    faultBMSOT.resetFault();
   }
 
   if (bms.getLowTemperature() < settings.under_t_setpoint.getVal()) {
-    assertFault(FBMSUT);
+    faultBMSUT.countFault(settings.fault_debounce_count.getVal());
   } else {
-    deAssertFault(FBMSUT);
+    faultBMSUT.resetFault();
   }
 
   bat12vVoltage = (float)analogRead(INA_12V_BAT) / settings.bat12v_scaling_divisor.getVal();
   if (bat12vVoltage > settings.bat12v_over_v_setpoint.getVal()) {
-    assertFault(F12VBatOV);
+    fault12VBatOV.countFault(settings.fault_debounce_count.getVal());
   } else {
-    deAssertFault(F12VBatOV);
+    fault12VBatOV.resetFault();
   }
 
   if (bat12vVoltage < settings.bat12v_under_v_setpoint.getVal()) {
-    assertFault(F12VBatUV);
+    fault12VBatUV.countFault(settings.fault_debounce_count.getVal());
   } else {
-    deAssertFault(F12VBatUV);
+    fault12VBatUV.resetFault();
   }
 
   chargerInhibit = false;
   powerLimiter = false;
   isFaulted = false;
-  for (uint16_t i = 0; i < sizeof(faults) / sizeof(faults[0]); i++) {
-    if (faults[i].chargeFault) chargerInhibit |= faults[i].fault;
-    if (faults[i].runFault) powerLimiter |= faults[i].fault;
-    isFaulted |= faults[i].fault;
+
+  for (auto i = faults.begin(); i != faults.end(); i++) {
+    if ((*i)->getChargeFault()) chargerInhibit |= (*i)->getFault();
+    if ((*i)->getRunFault()) powerLimiter |= (*i)->getFault();
+    isFaulted |= (*i)->getFault();
   }
+
   chargerInhibit |= bms.getHighCellVolt() >= settings.max_charge_v_setpoint.getVal();
   powerLimiter |= bms.getHighCellVolt() >= settings.max_charge_v_setpoint.getVal();  //added in case charging in run mode.
 
@@ -593,9 +611,9 @@ void Controller::printControllerState() {
   LOG_CONSOLE("====================================================================================\n");
   LOG_CONSOLE("%-22s   last fault time\n", "Fault Name");
   LOG_CONSOLE("----------------------   -----------------------------------------------------------\n");
-  for (uint16_t i = 0; i < sizeof(faults) / sizeof(faults[0]); i++) {
-    if (faults[i].sFault) {
-      LOG_CONSOLE("%-22s @ %-3d days, %02d:%02d:%02d\n", faults[i].name, faults[i].timeStamp / 86400, (faults[i].timeStamp % 86400) / 3600, (faults[i].timeStamp % 3600) / 60, (faults[i].timeStamp % 60));
+  for (auto i = faults.begin(); i != faults.end(); i++) {
+    if ((*i)->getSFault()) {
+      LOG_CONSOLE("%-22s @ %-3d days, %02d:%02d:%02d\n", (*i)->getName().c_str(), (*i)->getTimeStamp() / 86400, ((*i)->getTimeStamp() % 86400) / 3600, ((*i)->getTimeStamp() % 3600) / 60, (*i)->getTimeStamp() % 60);
     }
   }
 }
