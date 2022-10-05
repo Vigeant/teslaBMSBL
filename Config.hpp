@@ -82,7 +82,8 @@ public:
     : Param(paramName, editable, description),
       value(value),
       valueDefault(valueDefault),
-      valueMin(valueMin) {
+      valueMin(valueMin),
+      valueMax(valueMax) {
     ;
   }
 

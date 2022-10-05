@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include "Config.hpp"
 #include <string.h>
+#include <TimeLib.h>
 
 
 class Logger {
@@ -21,6 +22,8 @@ public:
     LogLevel getLogLevel();
     uint32_t getLastLogTime();
     boolean isDebug();
+    void printTimeStamp(time_t t);
+    void printTimeStampLn(time_t t);
 private:
     LogLevel logLevel;
     uint32_t lastLogTime;
@@ -37,6 +40,8 @@ extern Logger log_inst;
 #define LOG_ERR log_inst.error
 #define LOG_ERROR log_inst.error("file: %s, function: %s, line: %d\n",strrchr(__FILE__,'\\'),__func__,__LINE__); log_inst.error
 #define LOG_CONSOLE log_inst.console
+#define LOG_TIMESTAMP log_inst.printTimeStamp
+#define LOG_TIMESTAMP_LN log_inst.printTimeStampLn
 //#define LOG_CONSOLE SERIALCONSOLE.print
 
 #endif /* LOG_HPP_ */

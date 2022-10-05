@@ -31,7 +31,7 @@ public:
       }
       fault = true;
       sFault = true;
-      timeStamp = millis() / 1000;
+      timeStamp = now();
       debounceCounter = fault_debounce_counter;
     }
   }
@@ -66,7 +66,7 @@ public:
   const String getMsgDeAsserted() {
     return msgDeAsserted;
   }
-  uint32_t getTimeStamp() {
+  time_t getTimeStamp() {
     return timeStamp;
   }
 
@@ -80,7 +80,7 @@ private:
   const String msgAsserted;
   const String msgDeAsserted;
   uint8_t debounceCounter;
-  uint32_t timeStamp;
+  time_t timeStamp;
 };
 
 class Controller {

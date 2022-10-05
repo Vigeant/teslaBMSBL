@@ -5,6 +5,7 @@
 #include "Logger.hpp"
 #include "Oled.hpp"
 #include <Snooze.h>
+#include <TimeLib.h>
 
 #define CPU_RESTART_ADDR (uint32_t *)0xE000ED0C
 #define CPU_RESTART_VAL 0x5FA0004
@@ -38,16 +39,28 @@ SnoozeUSBSerial usbSerial;
 // install drivers to a SnoozeBlock
 SnoozeBlock config(timer, digital, usbSerial);
 
+time_t getTeensy3Time() {
+  return Teensy3Clock.get();
+}
 /////////////////////////////////////////////////
 /// \brief The setup function runs once when you press reset or power the board.
 /////////////////////////////////////////////////
 void setup() {
-  //console stuff
+
   pinMode(INL_SOFT_RST, INPUT_PULLUP);
-  //cons_inst.printMenu();
+
+  // set the Time library to use Teensy 3.0's RTC to keep time
+  setSyncProvider(getTeensy3Time);
+  delay(100);
+  if (timeStatus() != timeSet) {
+    Serial.println("Unable to sync with the RTC");
+  } else {
+    Serial.println("RTC has set the system time");
+  }
 
   LOG_CONSOLE("BMS> ");
 }
+
 
 /////////////////////////////////////////////////
 /// Holds all the code that runs every period.
@@ -77,8 +90,7 @@ void phase1B() {
 /////////////////////////////////////////////////
 /// Once setup is complete, loop is called for ever.
 /////////////////////////////////////////////////
-void loop()
-{
+void loop() {
   uint32_t starttime, endtime, delaytime, timespent, period;
   bool phaseA = true;
 
@@ -92,7 +104,7 @@ void loop()
       phase1B();
     phaseA = !phaseA;
 
-    digital.pinMode(INL_SOFT_RST, INPUT_PULLUP, FALLING);//pin, mode, type
+    digital.pinMode(INL_SOFT_RST, INPUT_PULLUP, FALLING);  //pin, mode, type
 
     //get loop period from controller
     period = controller_inst.getPeriodMillis();
@@ -112,9 +124,9 @@ void loop()
 
     //sleep board instead of delay, if not in active state
     if (delaytime > LOOP_PERIOD_ACTIVE_MS) {
-      timer.setTimer(delaytime);// milliseconds
+      timer.setTimer(delaytime);  // milliseconds
       //who = Snooze.deepSleep( config );
-      (void)Snooze.deepSleep( config );
+      (void)Snooze.deepSleep(config);
     } else {
       delay(delaytime);
     }

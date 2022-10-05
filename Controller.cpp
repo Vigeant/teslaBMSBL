@@ -3,19 +3,6 @@
 /////////////////////////////////////////////////
 /// \brief When instantiated, the controller is in the init state ensuring that all the signal pins are set properly.
 /////////////////////////////////////////////////
-/*Fault faultModuleLoop;             // = { .name = "ModuleLoop", .code = "A", .fault = false, .sFault = false, .chargeFault = true, .runFault = true, .msgAsserted = "One or more BMS modules have asserted the fault loop!\n", .msgDeAsserted = "All modules have deasserted the fault loop\n" };
-  Fault faultBatMon;                 // = { .name = "BatMon", .code = "B", .fault = false, .sFault = false, .chargeFault = true, .runFault = true, .msgAsserted = "The battery monitor asserted a fault!\n", .msgDeAsserted = "The battery monitor deasserted a fault\n" };
-  Fault faultBMSSerialComms;         // = { .name = "BMSSerialComms", .code = "C", .fault = false, .sFault = false, .chargeFault = true, .runFault = true, .msgAsserted = "Serial communication with battery modules lost!\n", .msgDeAsserted = "Serial communication with battery modules re-established!\n" };
-  Fault faultBMSOV;                  // = { .name = "BMSOV", .code = "D", .fault = false, .sFault = false, .chargeFault = true, .runFault = true, .msgAsserted = "A cell reached a voltage higher than the OV threshold\n", .msgDeAsserted = "All cells are back under OV threshold\n" };
-  Fault faultBMSUV;                  // = { .name = "BMSUV", .code = "E", .fault = false, .sFault = false, .chargeFault = false, .runFault = true, .msgAsserted = "A cell reached a voltage lower than the UV threshold\n", .msgDeAsserted = "All cells are back over UV threshold\n" };
-  Fault faultBMSOT;                  // = { .name = "BMSOT", .code = "F", .fault = false, .sFault = false, .chargeFault = true, .runFault = true, .msgAsserted = "A module reached a temp higher than the OT threshold\n", .msgDeAsserted = "All modules are back under OT threshold\n" };
-  Fault faultBMSUT;                  // = { .name = "BMSUT", .code = "G", .fault = false, .sFault = false, .chargeFault = true, .runFault = true, .msgAsserted = "A module reached a temp lower than the UT threshold\n", .msgDeAsserted = "All modules are back over UT threshold\n" };
-  Fault fault12VBatOV;               // = { .name = "12VBatOV", .code = "H", .fault = false, .sFault = false, .chargeFault = false, .runFault = false, .msgAsserted = "12V battery reached a voltage higher than the OV threshold\n", .msgDeAsserted = "12V battery back under the OV threshold\n" };
-  Fault fault12VBatUV;               // = { .name = "12VBatUV", .code = "I", .fault = false, .sFault = false, .chargeFault = false, .runFault = true, .msgAsserted = "12V battery reached a voltage lower than the UV threshold\n", .msgDeAsserted = "12V battery back over the UV threshold\n" };
-  Fault faultWatSen1;                // = { .name = "WatSen1", .code = "J", .fault = false, .sFault = false, .chargeFault = true, .runFault = true, .msgAsserted = "The battery water sensor 1 is reporting water!\n", .msgDeAsserted = "The battery water sensor 1 is reporting dry.\n" };
-  Fault faultWatSen2;                // = { .name = "WatSen2", .code = "K", .fault = false, .sFault = false, .chargeFault = true, .runFault = true, .msgAsserted = "The battery water sensor 2 is reporting water!\n", .msgDeAsserted = "The battery water sensor 2 is reporting dry.\n" };
-  Fault faultBMSPartialSerialComms;  // = { .name = "BMSPartialSerialComms", .code = "L", .fault = false, .sFault = false, .chargeFault = true, .runFault = true, .msgAsserted = "Found fewer modules than configured!\n", .msgDeAsserted = "Found all modules as configured!\n" };
-*/
 Controller::Controller()
   : faultModuleLoop(String("ModuleLoop"), String("A"), true, true, String("One or more BMS modules have asserted the fault loop!\n"), String("All modules have deasserted the fault loop\n")),
     faultBatMon(String("BatMon"), String("B"), true, true, String("The battery monitor asserted a fault!\n"), String("The battery monitor deasserted a fault\n")),
@@ -303,7 +290,7 @@ void Controller::doController() {
 void Controller::syncModuleDataObjects() {
   float bat12vVoltage;
   bms.wakeBoards();
-  
+
   if (bms.getAllVoltTemp() < settings.module_count.getVal()) {
     faultBMSPartialSerialComms.countFault(settings.fault_debounce_count.getVal());
   } else {
@@ -613,12 +600,16 @@ void Controller::printControllerState() {
   }
   LOG_CONSOLE("=  Time since last reset:%-3d days, %02d:%02d:%02d                                        =\n",
               seconds / 86400, (seconds % 86400) / 3600, (seconds % 3600) / 60, (seconds % 60));
+  LOG_CONSOLE("=  Time: ");
+  LOG_TIMESTAMP(now());
+  LOG_CONSOLE("                                                       =\n");
   LOG_CONSOLE("====================================================================================\n");
   LOG_CONSOLE("%-22s   last fault time\n", "Fault Name");
   LOG_CONSOLE("----------------------   -----------------------------------------------------------\n");
   for (auto i = faults.begin(); i != faults.end(); i++) {
     if ((*i)->getSFault()) {
-      LOG_CONSOLE("%-22s @ %-3d days, %02d:%02d:%02d\n", (*i)->getName().c_str(), (*i)->getTimeStamp() / 86400, ((*i)->getTimeStamp() % 86400) / 3600, ((*i)->getTimeStamp() % 3600) / 60, (*i)->getTimeStamp() % 60);
+      LOG_CONSOLE("%-22s @ ", (*i)->getName().c_str());
+      LOG_TIMESTAMP_LN((*i)->getTimeStamp());
     }
   }
 }
