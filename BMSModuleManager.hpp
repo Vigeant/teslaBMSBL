@@ -16,7 +16,7 @@ class BMSModuleManager
     void clearFaults();
     void sleepBoards();
     void wakeBoards();
-    void getAllVoltTemp();
+    uint16_t getAllVoltTemp();
     void readSetpoints();
     void setBatteryID(int id);
     void setPstrings(int Pstrings);

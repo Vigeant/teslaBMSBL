@@ -155,6 +155,7 @@ public:
   ParamImpl<float> bat12v_under_v_setpoint;
   ParamImpl<float> bat12v_scaling_divisor;
   ParamImpl<uint32_t> fault_debounce_count;
+  ParamImpl<uint32_t> module_count;
 
 private:
   std::list<Param*> parameters;

@@ -5,8 +5,7 @@
 /////////////////////////////////////////////////
 /// \brief constructor initialized to invalid address 0.
 /////////////////////////////////////////////////
-BMSModuleManager::BMSModuleManager(Settings* sett)
-{
+BMSModuleManager::BMSModuleManager(Settings* sett) {
   histLowestPackVolt = 1000.0f;
   histHighestPackVolt = 0.0f;
   histLowestPackTemp = 200.0f;
@@ -22,10 +21,8 @@ BMSModuleManager::BMSModuleManager(Settings* sett)
 /////////////////////////////////////////////////
 /// \brief resets all the modules atributes to their initial value.
 /////////////////////////////////////////////////
-void BMSModuleManager::resetModuleRecordedValues()
-{
-  for (int y = 0; y < MAX_MODULE_ADDR; y++)
-  {
+void BMSModuleManager::resetModuleRecordedValues() {
+  for (int y = 0; y < MAX_MODULE_ADDR; y++) {
     modules[y].resetRecordedValues();
   }
 }
@@ -35,25 +32,19 @@ void BMSModuleManager::resetModuleRecordedValues()
 ///
 /// @param duration the number of seconds to enable balancing for.
 /////////////////////////////////////////////////
-void BMSModuleManager::balanceCells(uint8_t duration, float cell_v_offset)
-{
-  uint8_t balance = 0;//bit 0 - 5 are to activate cell balancing 1-6
+void BMSModuleManager::balanceCells(uint8_t duration, float cell_v_offset) {
+  uint8_t balance = 0;  //bit 0 - 5 are to activate cell balancing 1-6
 
-  for (int y = 0; y < MAX_MODULE_ADDR; y++)
-  {
-    if (modules[y].getAddress() > 0)
-    {
+  for (int y = 0; y < MAX_MODULE_ADDR; y++) {
+    if (modules[y].getAddress() > 0) {
       balance = 0;
-      for (int i = 0; i < 6; i++)
-      {
-        if (modules[y].getCellVoltage(i) > getLowCellVolt() + cell_v_offset)
-        {
+      for (int i = 0; i < 6; i++) {
+        if (modules[y].getCellVoltage(i) > getLowCellVolt() + cell_v_offset) {
           balance = balance | (1 << i);
-
         }
       }
       LOG_DEBUG("balancing module %d - 0x%x\n", modules[y].getAddress(), balance);
-      (void) modules[y].balanceCells(balance, duration);
+      (void)modules[y].balanceCells(balance, duration);
     } else {
       //no more modules
       break;
@@ -67,8 +58,7 @@ void BMSModuleManager::balanceCells(uint8_t duration, float cell_v_offset)
 /// Force all modules to reset back to address 0 then set them all up in order so that the first module
 /// in line from the master board is 1, the second one 2, and so on.
 /////////////////////////////////////////////////
-void BMSModuleManager::renumberBoardIDs()
-{
+void BMSModuleManager::renumberBoardIDs() {
   int16_t err;
   uint8_t buff[30];
 
@@ -98,13 +88,12 @@ void BMSModuleManager::renumberBoardIDs()
         y--;
         continue;
       }
-
     }
     LOG_INFO("Got a response to address 0\n");
 
     //write address register
     LOG_INFO("Assigning it address 0x%x\n", y + 1);
-    if ((err = BMSDW(0, REG_ADDR_CTRL, (y + 1) | 0x80)) < 0 ) {
+    if ((err = BMSDW(0, REG_ADDR_CTRL, (y + 1) | 0x80)) < 0) {
       BMSD_LOG_ERR(y + 1, err, "write address register");
     }
     modules[y].setAddress(y + 1);
@@ -120,8 +109,7 @@ void BMSModuleManager::renumberBoardIDs()
 /// After a RESET boards have their faults written due to the hard restart
 /// or first time power up, this clears their faults
 /////////////////////////////////////////////////
-void BMSModuleManager::clearFaults()
-{
+void BMSModuleManager::clearFaults() {
   int16_t err;
   //reset alerts status
   if ((err = BMSDW(BROADCAST_ADDR, REG_ALERT_STATUS, 0xFF)) < 0) {
@@ -162,8 +150,7 @@ void BMSModuleManager::sleepBoards() {
 ///
 /// Wakes all the boards up and clears their SLEEP state bit in the Alert Status Registery
 /////////////////////////////////////////////////
-void BMSModuleManager::wakeBoards()
-{
+void BMSModuleManager::wakeBoards() {
   int16_t err;
   //wake boards up
   if ((err = BMSDW(BROADCAST_ADDR, REG_IO_CTRL, 0x00)) < 0) {
@@ -186,14 +173,15 @@ void BMSModuleManager::wakeBoards()
 ///
 /// Most important function called every tick
 /////////////////////////////////////////////////
-void BMSModuleManager::getAllVoltTemp() {
+uint16_t BMSModuleManager::getAllVoltTemp() {
   int16_t err;
   float tempPackVolt = 0.0f;
+  uint16_t numOfBoards = 0;
   if (lineFault || modules[0].getAddress() == 0) renumberBoardIDs();
 
   //stop balancing
   if ((err = BMSDW(BROADCAST_ADDR, REG_BAL_CTRL, 0x00)) < 0) {
-  //if ((err = BMSDW(BROADCAST_ADDR, REG_BAL_CTRL, 0x3f)) < 0) {
+    //if ((err = BMSDW(BROADCAST_ADDR, REG_BAL_CTRL, 0x3f)) < 0) {
     BMSD_LOG_ERR(BROADCAST_ADDR, err, "getAllVoltTemp, stop balancing");
     lineFault = true;
   } else {
@@ -201,10 +189,9 @@ void BMSModuleManager::getAllVoltTemp() {
   }
 
   //update state of each module and gather voltages and temperatures
-  for (int y = 0; y < MAX_MODULE_ADDR; y++)
-  {
-    if (modules[y].getAddress() > 0) {
-      modules[y].updateInstanceWithModuleValues();
+  for (int y = 0; y < MAX_MODULE_ADDR; y++) {
+    numOfBoards = y;
+    if (modules[y].getAddress() > 0 && modules[y].updateInstanceWithModuleValues()) {
       tempPackVolt += modules[y].getModuleVoltage();
       if (modules[y].getLowTemp() < histLowestPackTemp) histLowestPackTemp = modules[y].getLowTemp();
       if (modules[y].getHighTemp() > histHighestPackTemp) histHighestPackTemp = modules[y].getHighTemp();
@@ -219,33 +206,32 @@ void BMSModuleManager::getAllVoltTemp() {
   if (tempPackVolt < histLowestPackVolt) histLowestPackVolt = tempPackVolt;
 
   float tempHighCellVolt = 0.0;
-  for (int y = 0; y < MAX_MODULE_ADDR; y++)
-  {
+  for (int y = 0; y < MAX_MODULE_ADDR; y++) {
     if (modules[y].getAddress() > 0) {
-      if (modules[y].getHighCellV() >  tempHighCellVolt)  tempHighCellVolt = modules[y].getHighCellV();
+      if (modules[y].getHighCellV() > tempHighCellVolt) tempHighCellVolt = modules[y].getHighCellV();
     }
   }
   float tempLowCellVolt = 5.0;
   if (TESTING_MODE == 1) tempLowCellVolt = 3.8;
-  
-  for (int y = 0; y < MAX_MODULE_ADDR; y++)
-  {
+
+  for (int y = 0; y < MAX_MODULE_ADDR; y++) {
     if (modules[y].getAddress() > 0) {
-      if (modules[y].getLowCellV() <  tempLowCellVolt)  tempLowCellVolt = modules[y].getLowCellV();
+      if (modules[y].getLowCellV() < tempLowCellVolt) tempLowCellVolt = modules[y].getLowCellV();
     }
   }
 
   //update cell V watermarks
-  if ( tempLowCellVolt < histLowestCellVolt ) histLowestCellVolt =  tempLowCellVolt;
-  if ( tempHighCellVolt > histHighestCellVolt ) histHighestCellVolt = tempHighCellVolt;
+  if (tempLowCellVolt < histLowestCellVolt) histLowestCellVolt = tempLowCellVolt;
+  if (tempHighCellVolt > histHighestCellVolt) histHighestCellVolt = tempHighCellVolt;
 
   float tempHCDV = tempHighCellVolt - tempLowCellVolt;
-  if ( histHighestCellDiffVolt < tempHCDV ) histHighestCellDiffVolt = tempHCDV;
+  if (histHighestCellDiffVolt < tempHCDV) histHighestCellDiffVolt = tempHCDV;
 
   //save values to objects
   lowCellVolt = tempLowCellVolt;
   highCellVolt = tempHighCellVolt;
   packVolt = tempPackVolt;
+  return numOfBoards;
 }
 
 /////////////////////////////////////////////////
@@ -314,30 +300,26 @@ float BMSModuleManager::getHistHighestPackVolt() {
 /////////////////////////////////////////////////
 /// \brief not used
 //////////////////////////////////////////////////
-void BMSModuleManager::setBatteryID(int id)
-{
+void BMSModuleManager::setBatteryID(int id) {
   batteryID = id;
 }
 
 /////////////////////////////////////////////////
 /// \brief not used
 //////////////////////////////////////////////////
-void BMSModuleManager::setPstrings(int pstrings)
-{
+void BMSModuleManager::setPstrings(int pstrings) {
   pstring = pstrings;
 }
 
 /////////////////////////////////////////////////
 /// \brief returns the average temperature of the pack.
 //////////////////////////////////////////////////
-float BMSModuleManager::getAvgTemperature()
-{
+float BMSModuleManager::getAvgTemperature() {
   float avg = 0.0f;
   highTemp = -100;
   lowTemp = 999;
-  int y = 0; //counter for modules above -70 (sensors connected)
-  for (int x = 0; x < MAX_MODULE_ADDR; x++)
-  {
+  int y = 0;  //counter for modules above -70 (sensors connected)
+  for (int x = 0; x < MAX_MODULE_ADDR; x++) {
     if (modules[x].getAddress() > 0) {
       if (modules[x].getAvgTemp() > -70) {
         avg += modules[x].getAvgTemp();
@@ -357,8 +339,7 @@ float BMSModuleManager::getAvgTemperature()
 /////////////////////////////////////////////////
 /// \brief returns the current highest temperature of the pack.
 //////////////////////////////////////////////////
-float BMSModuleManager::getHighTemperature()
-{
+float BMSModuleManager::getHighTemperature() {
   highTemp = -100;
   for (int x = 0; x < MAX_MODULE_ADDR; x++) {
     if (modules[x].getAddress() > 0) {
@@ -377,8 +358,7 @@ float BMSModuleManager::getHighTemperature()
 /////////////////////////////////////////////////
 /// \brief returns the current lowest temperature of the pack.
 //////////////////////////////////////////////////
-float BMSModuleManager::getLowTemperature()
-{
+float BMSModuleManager::getLowTemperature() {
   lowTemp = 999;
   for (int x = 0; x < MAX_MODULE_ADDR; x++) {
     if (modules[x].getAddress() > 0) {
@@ -397,11 +377,9 @@ float BMSModuleManager::getLowTemperature()
 /////////////////////////////////////////////////
 /// \brief returns the current average cell voltage for the whole pack.
 //////////////////////////////////////////////////
-float BMSModuleManager::getAvgCellVolt()
-{
+float BMSModuleManager::getAvgCellVolt() {
   float avg = 0.0f;
-  for (int x = 0; x < MAX_MODULE_ADDR; x++)
-  {
+  for (int x = 0; x < MAX_MODULE_ADDR; x++) {
     if (modules[x].getAddress() > 0) avg += modules[x].getAverageV();
   }
   avg = avg / (float)numFoundModules;
@@ -419,23 +397,20 @@ bool BMSModuleManager::getLineFault() {
 /////////////////////////////////////////////////
 /// \brief prints the pack summary to the console.
 //////////////////////////////////////////////////
-void BMSModuleManager::printPackSummary()
-{
+void BMSModuleManager::printPackSummary() {
   uint8_t faults;
   uint8_t alerts;
   uint8_t COV;
   uint8_t CUV;
 
-  for (int y = 0; y < MAX_MODULE_ADDR; y++)
-  {
-    if (modules[y].getAddress() > 0)
-    {
+  for (int y = 0; y < MAX_MODULE_ADDR; y++) {
+    if (modules[y].getAddress() > 0) {
       faults = modules[y].getFaults();
       alerts = modules[y].getAlerts();
       COV = modules[y].getCOVCells();
       CUV = modules[y].getCUVCells();
       LOG_CONSOLE("\n=====================================================================\n");
-      LOG_CONSOLE("=                                Module #%2i                         =\n", y+1);
+      LOG_CONSOLE("=                                Module #%2i                         =\n", y + 1);
       LOG_CONSOLE("=====================================================================\n");
       //LOG_CONSOLE("\t============================== Cell details =====================\n");
 
@@ -520,50 +495,49 @@ void BMSModuleManager::printPackSummary()
   LOG_CONSOLE("INL_EVSE_DISC: %d\n", digitalRead(INL_EVSE_DISC));
   LOG_CONSOLE("INH_RUN: %d\n", digitalRead(INH_RUN));
   LOG_CONSOLE("INH_CHARGING: %d\n", digitalRead(INH_CHARGING));
-  
+
   //testing scafolding
-  LOG_CONSOLE("getHighCellVolt() < settings->charger_cycle_v_setpoint.getVal()    : %f < %f?\n" , getHighCellVolt(),settings->charger_cycle_v_setpoint.getVal());
-  LOG_CONSOLE("getHighCellVolt() < settings->max_charge_v_setpoint.getVal()    : %f < %f?\n" , getHighCellVolt(),settings->max_charge_v_setpoint.getVal());
+  LOG_CONSOLE("getHighCellVolt() < settings->charger_cycle_v_setpoint.getVal()    : %f < %f?\n", getHighCellVolt(), settings->charger_cycle_v_setpoint.getVal());
+  LOG_CONSOLE("getHighCellVolt() < settings->max_charge_v_setpoint.getVal()    : %f < %f?\n", getHighCellVolt(), settings->max_charge_v_setpoint.getVal());
 }
 
 /////////////////////////////////////////////////
 /// \brief prints the pack details to the console.
 //////////////////////////////////////////////////
-void BMSModuleManager::printPackGraph()
-{
+void BMSModuleManager::printPackGraph() {
   char graphLine[200];
   int cellX, coli;
-  float deltaV =  highCellVolt - lowCellVolt;
+  float deltaV = highCellVolt - lowCellVolt;
   float rowV;
   char barchar = 'Z';
-  unsigned int seconds = millis()/1000;   
-  
+  unsigned int seconds = millis() / 1000;
+
   memset(graphLine, 0, 86);
   LOG_CONSOLE("\n====================================================================================\n");
-  
+
   LOG_CONSOLE("=  %3d days, %02d:%02d:%02d            cell voltage Graph (V)                            =\n",
-  seconds/86400, (seconds % 86400)/3600, (seconds % 3600)/60, (seconds % 60));
+              seconds / 86400, (seconds % 86400) / 3600, (seconds % 3600) / 60, (seconds % 60));
   LOG_CONSOLE("====================================================================================\n");
 
 
   //print graph header
   LOG_CONSOLE("          ");
-  for (int mod = 0; mod < numFoundModules; mod ++){
-    LOG_CONSOLE(" | M%-2d|" , mod + 1);
+  for (int mod = 0; mod < numFoundModules; mod++) {
+    LOG_CONSOLE(" | M%-2d|", mod + 1);
   }
   LOG_CONSOLE("\n");
 
   LOG_CONSOLE("          ");
-  for (cellX = 0; cellX < numFoundModules * 6; cellX++){
-    if (cellX % 6 == 0){
+  for (cellX = 0; cellX < numFoundModules * 6; cellX++) {
+    if (cellX % 6 == 0) {
       LOG_CONSOLE(" ");
     }
-    LOG_CONSOLE("%d", cellX%6 + 1);
+    LOG_CONSOLE("%d", cellX % 6 + 1);
   }
   LOG_CONSOLE("\n");
-  
+
   LOG_CONSOLE("          ");
-  for (cellX = 0; cellX < numFoundModules * 7; cellX++){
+  for (cellX = 0; cellX < numFoundModules * 7; cellX++) {
     graphLine[cellX] = '=';
   }
   graphLine[cellX] = '\n';
@@ -572,37 +546,37 @@ void BMSModuleManager::printPackGraph()
   /*for (int row = 128; row <= 256 ; row++){
     LOG_CONSOLE("%i : %c ", row, row);
   }*/
-  
-  for (int row = 40; row >= 0 ; row--){
-    memset(graphLine, 0, 86);
-    rowV = deltaV*row/40 + lowCellVolt;
-    LOG_CONSOLE("%.3fV |" , rowV);
 
-    if (getHighCellVolt() > settings->precision_balance_v_setpoint.getVal()){
-      if(rowV > getLowCellVolt() + settings->precision_balance_cell_v_offset.getVal()){
+  for (int row = 40; row >= 0; row--) {
+    memset(graphLine, 0, 86);
+    rowV = deltaV * row / 40 + lowCellVolt;
+    LOG_CONSOLE("%.3fV |", rowV);
+
+    if (getHighCellVolt() > settings->precision_balance_v_setpoint.getVal()) {
+      if (rowV > getLowCellVolt() + settings->precision_balance_cell_v_offset.getVal()) {
         LOG_CONSOLE("B ");
         barchar = 'B';
-      } else{
+      } else {
         LOG_CONSOLE("| ");
         barchar = 177;
       }
-    } else if (getHighCellVolt() > settings->rough_balance_v_setpoint.getVal()){
-      if(rowV > getLowCellVolt() + settings->rough_balance_cell_v_offset.getVal()){
+    } else if (getHighCellVolt() > settings->rough_balance_v_setpoint.getVal()) {
+      if (rowV > getLowCellVolt() + settings->rough_balance_cell_v_offset.getVal()) {
         LOG_CONSOLE("B ");
         barchar = 'B';
-      } else{
+      } else {
         LOG_CONSOLE("| ");
         barchar = 177;
       }
     } else {
       LOG_CONSOLE("| ");
     }
-    for (cellX = 0, coli = 0; cellX < numFoundModules * 6; cellX++,coli++){
-      if (cellX % 6 == 0){
+    for (cellX = 0, coli = 0; cellX < numFoundModules * 6; cellX++, coli++) {
+      if (cellX % 6 == 0) {
         graphLine[coli] = '|';
-        coli ++;
+        coli++;
       }
-      if (modules[cellX/6].getCellVoltage(cellX%6) < rowV){
+      if (modules[cellX / 6].getCellVoltage(cellX % 6) < rowV) {
         graphLine[coli] = ' ';
       } else {
         graphLine[coli] = barchar;
@@ -614,21 +588,21 @@ void BMSModuleManager::printPackGraph()
   }
 
   LOG_CONSOLE("          ");
-  for (cellX = 0; cellX < numFoundModules * 7; cellX++){
+  for (cellX = 0; cellX < numFoundModules * 7; cellX++) {
     graphLine[cellX] = '=';
   }
   graphLine[cellX] = '\n';
   LOG_CONSOLE(graphLine);
   LOG_CONSOLE("          ");
-  for (cellX = 0; cellX < numFoundModules * 6; cellX++){
-    if (cellX % 6 == 0){
+  for (cellX = 0; cellX < numFoundModules * 6; cellX++) {
+    if (cellX % 6 == 0) {
       LOG_CONSOLE(" ");
     }
-    LOG_CONSOLE("%d", cellX%6 + 1);
+    LOG_CONSOLE("%d", cellX % 6 + 1);
   }
   LOG_CONSOLE("\n          ");
-  for (int mod = 0; mod < numFoundModules; mod ++){
-    LOG_CONSOLE(" | M%-2d|" , mod + 1);
+  for (int mod = 0; mod < numFoundModules; mod++) {
+    LOG_CONSOLE(" | M%-2d|", mod + 1);
   }
   LOG_CONSOLE("\n");
 }
@@ -636,19 +610,15 @@ void BMSModuleManager::printPackGraph()
 /////////////////////////////////////////////////
 /// \brief prints the pack details in CSV format to the console.
 //////////////////////////////////////////////////
-void BMSModuleManager::printAllCSV()
-{
+void BMSModuleManager::printAllCSV() {
   LOG_CONSOLE("Module#,time (ms),cell1,cell2,cell3,cell4,cell5,cell6,temp1,temp2\n");
-  for (int y = 0; y < MAX_MODULE_ADDR; y++)
-  {
-    if (modules[y].getAddress() > 0)
-    {
+  for (int y = 0; y < MAX_MODULE_ADDR; y++) {
+    if (modules[y].getAddress() > 0) {
       LOG_CONSOLE("%d", modules[y].getAddress());
       LOG_CONSOLE(",");
       LOG_CONSOLE("%d", millis());
       LOG_CONSOLE(",");
-      for (int i = 0; i < 6; i++)
-      {
+      for (int i = 0; i < 6; i++) {
         LOG_CONSOLE("%.3f,", modules[y].getCellVoltage(i));
       }
       LOG_CONSOLE("%.2f,", modules[y].getTemperature(0));

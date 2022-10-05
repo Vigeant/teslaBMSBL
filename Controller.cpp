@@ -303,7 +303,12 @@ void Controller::doController() {
 void Controller::syncModuleDataObjects() {
   float bat12vVoltage;
   bms.wakeBoards();
-  bms.getAllVoltTemp();
+  
+  if (bms.getAllVoltTemp() < settings.module_count.getVal()) {
+    faultBMSPartialSerialComms.countFault(settings.fault_debounce_count.getVal());
+  } else {
+    faultBMSPartialSerialComms.resetFault();
+  }
 
   if (bms.getLineFault()) {
     faultBMSSerialComms.countFault(settings.fault_debounce_count.getVal());
