@@ -52,9 +52,9 @@
 */
 // Loop periods for the state machine of the controller
 #define LOOP_PERIOD_ACTIVE_MS 200
-#define LOOP_PERIOD_STANDBY_MS 2500
+#define LOOP_PERIOD_STANDBY_MS 2000
 
-#define EEPROM_VERSION 2
+#define EEPROM_VERSION 3
 
 class Param {
 public:
@@ -157,6 +157,7 @@ public:
   ParamImpl<float> bat12v_scaling_divisor;
   ParamImpl<uint32_t> fault_debounce_count;
   ParamImpl<uint32_t> module_count;
+  ParamImpl<uint32_t> oled_cycle_time;
 
 private:
   std::list<Param*> parameters;

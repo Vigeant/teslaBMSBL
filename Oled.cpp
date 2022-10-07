@@ -194,61 +194,63 @@ void Oled::printFaults() {
   oled.display();
 }
 
+bool Oled::changeState() {
+  static uint32_t ts = 0;
+  uint32_t ts2 = millis();
+  if (ts2 - ts > controller_inst_ptr->getSettingsPtr()->oled_cycle_time.getVal()) {
+    ts = ts2;
+    return true;
+  } else {
+    return false;
+  }
+}
+
 /////////////////////////////////////////////////
 /// \brief doOled is the function that executes a tick of the Oled state machine.
 ///
 /// The Oled cycles through formats after a predefined number of ticks. At each tick, it updates what is currently displayed in the current format.
 /////////////////////////////////////////////////
 void Oled::doOled() {
-  const int stateticks = 6;
-  static int ticks = 0;
   switch (state) {
     case FMT1:
-      Oled::printFormat1();
-      if (ticks >= stateticks) {
-        ticks = 0;
+      printFormat1();
+      if (changeState()) {
         state = FMT2;
       }
       break;
     case FMT2:
-      Oled::printFormat2();
-      if (ticks >= stateticks) {
-        ticks = 0;
+      printFormat2();
+      if (changeState()) {
         state = FMT3;
       }
       break;
     case FMT3:
-      Oled::printFormat3();
-      if (ticks >= stateticks) {
-        ticks = 0;
+      printFormat3();
+      if (changeState()) {
         state = FMT4;
       }
       break;
     case FMT4:
-      Oled::printFormat4();
-      if (ticks >= stateticks) {
-        ticks = 0;
+      printFormat4();
+      if (changeState()) {
         state = FMT5;
       }
       break;
     case FMT5:
-      Oled::printFormat5();
-      if (ticks >= stateticks) {
-        ticks = 0;
+      printFormat5();
+      if (changeState()) {
         state = FMT6;
       }
       break;
     case FMT6:
-      Oled::printTeslaBMSRT();
-      if (ticks >= stateticks) {
-        ticks = 0;
+      printTeslaBMSRT();
+      if (changeState()) {
         state = FMT7;
       }
       break;
     case FMT7:
-      Oled::printESidewinder();
-      if (ticks >= stateticks) {
-        ticks = 0;
+      printESidewinder();
+      if (changeState()) {
         if (controller_inst_ptr->isFaulted) {
           state = FMT8;
         } else if (controller_inst_ptr->stickyFaulted) {
@@ -259,23 +261,20 @@ void Oled::doOled() {
       }
       break;
     case FMT8:
-      Oled::printFaults();
-      if (ticks >= stateticks) {
-        ticks = 0;
+      printFaults();
+      if (changeState()) {
         state = FMT9;
       }
       break;
     case FMT9:
-      Oled::printStickyFaults();
-      if (ticks >= stateticks) {
-        ticks = 0;
+      printStickyFaults();
+      if (changeState()) {
         state = FMT1;
       }
       break;
     default:
       break;
   }
-  ticks++;
 }
 
 // Center and print a small values string

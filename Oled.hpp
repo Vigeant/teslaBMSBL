@@ -26,6 +26,6 @@ private:
   void printESidewinder();
   void printFaults();
   void printStickyFaults();
-  
+  bool changeState();
   void printCentre(const char*  , int);
 };

@@ -29,7 +29,8 @@ Settings::Settings()
     bat12v_under_v_setpoint("bat12v_under_v_setpoint", true, 0.0f, 10.0f, 9.0f, 12.5f, "Triggers 12V battery UV error"),
     bat12v_scaling_divisor("bat12v_scaling_divisor", true, 0.0f, 61.78f, 50.0f, 70.0f, "12V battery ADC devisor 0-1023 -> 0-15V"),
     fault_debounce_count("fault_debounce_count", true, 0, 5, 1, 100, "Number of time a fault condition has to be counted before the fault is recorded/asserted"),
-    module_count("module_count", true, 0, 7, 1, 64, "triggers an error if we see less than this number of modules.") {
+    module_count("module_count", true, 0, 7, 1, 64, "triggers an error if we see less than this number of modules."),
+    oled_cycle_time("oled_cycle_time", true, 0, 4000, 1000, 50000, "miliseconds per oled screen cycle.") {
   //TODO check EEPROM for initialisation and version
   //if no match push defaults to eeprom
   //load config from eeprom
@@ -60,6 +61,7 @@ Settings::Settings()
   parameters.push_back(&bat12v_scaling_divisor);
   parameters.push_back(&fault_debounce_count);
   parameters.push_back(&module_count);
+  parameters.push_back(&oled_cycle_time);
 }
 
 void Settings::printSettings() {
