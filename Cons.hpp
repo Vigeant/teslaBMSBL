@@ -124,6 +124,37 @@ private:
   Settings* settings;
 };
 
+class SetDateTime : public CliCommand {
+public:
+  SetDateTime() {
+    name = "Set Date Time";
+    tokenLong = "time";
+    tokenShort = "t";
+    help = " | set date and time using following format: yyyy-mm-ddThh:mm:ss (eg.: time 2022-10-07T09:14:24)";
+  }
+  int doCommand() {
+    char *yStr, *mStr, *dStr, *hStr, *minStr, *sStr;
+    int ret = 0;
+    yStr = strtok(0, "-T:");
+    mStr = strtok(0, "-T:");
+    dStr = strtok(0, "-T:");
+    hStr = strtok(0, "-T:");
+    minStr = strtok(0, "-T:");
+    sStr = strtok(0, "-T:");
+    if (yStr == 0 ) {
+      ret = 0;
+    } else if (yStr == 0 || mStr == 0 || dStr == 0 || hStr == 0 || minStr == 0 || sStr == 0) {
+      ret = -1;
+    } else {
+      setTime(atoi(hStr), atoi(minStr), atoi(sStr), atoi(dStr), atoi(mStr), atoi(yStr));
+      ret = 0;
+    }
+    LOG_CONSOLE("Current Time: ");
+    LOG_TIMESTAMP_LN(now());
+    return ret;
+  }
+};
+
 class ShowStatus : public CliCommand {
 public:
   ShowStatus(Controller* cont_inst_ptr) {
@@ -147,7 +178,7 @@ public:
     name = "Show Graph";
     tokenLong = "graph";
     tokenShort = "2";
-    help = " | shortcut to show cell volatage graph";
+    help = " | show cell volatage graph";
     controller_inst_ptr = cont_inst_ptr;
   }
   int doCommand() {
@@ -162,7 +193,7 @@ public:
     name = "Show CSV";
     tokenLong = "CSV";
     tokenShort = "3";
-    help = " | shortcut to show BMS details in CSV format";
+    help = " | show BMS details in CSV format";
     controller_inst_ptr = cont_inst_ptr;
   }
   int doCommand() {
@@ -175,9 +206,9 @@ class ResetDefaultValues : public CliCommand {
 public:
   ResetDefaultValues(Settings* sett) {
     name = "reset default values";
-    tokenLong = "resetDefaultValues";
-    tokenShort = "reset";
-    help = " | Reset al default configuration values";
+    tokenLong = "reset";
+    tokenShort = "re";
+    help = " | Reset all default configuration values";
     settings = sett;
   }
   int doCommand() {
@@ -228,6 +259,7 @@ private:
   CommandPrintMenu commandPrintMenu;
   ShowConfig showConfig;
   SetParam setParam;
+  SetDateTime setDateTime;
   ShowStatus showStatus;
   ShowGraph showGraph;
   ShowCSV showCSV;

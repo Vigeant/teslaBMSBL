@@ -81,6 +81,7 @@ Cons::Cons(Controller * cont_inst_ptr):
   commandPrintMenu(&cliCommands),
   showConfig(cont_inst_ptr->getSettingsPtr()),
   setParam(cont_inst_ptr),
+  setDateTime(),
   showStatus(cont_inst_ptr),
   showGraph(cont_inst_ptr),
   showCSV(cont_inst_ptr),
@@ -94,6 +95,7 @@ Cons::Cons(Controller * cont_inst_ptr):
   cliCommands.push_back(&showConfig);
   cliCommands.push_back(&resetDefaultValues);
   cliCommands.push_back(&setParam);
+  cliCommands.push_back(&setDateTime);
   cliCommands.push_back(&showStatus);
   cliCommands.push_back(&showGraph);
   cliCommands.push_back(&showCSV);
