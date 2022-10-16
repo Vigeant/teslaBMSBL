@@ -23,6 +23,7 @@
 | I | BMS 12V Battery Under Voltage Fault |
 | J | BMS Water Sensor 1 Fault |
 | K | BMS Water Sensor 2 Fault |
+| L | Incorrect modules count |
 
 ## Connection to USB serial console
 
@@ -35,7 +36,7 @@ Speed: 115200
 - [X] Change state machine to match actual charger controller behavior. 
 - [X] sleep modes for the teensy
 	- [X] full speed when a console is connected and in all but STANDBY mode, 5s sleep in STANDBY when no console is connected.
-	- [ ] adjust oled time when in sleep
+	- [X] adjust oled time when in sleep
 - [X] state transitions en V1
 - [X] display all IO in console
 - [X] set bat mon to 176V
@@ -43,7 +44,7 @@ Speed: 115200
 - [ ] make graph not show B when in run.
 - [X] add full console
 - [X] implement EEPROM config settings.
-- [ ] add error when less than 7 modules are seen.
+- [X] add error when less than 7 modules are seen.
 	
 ## particularities
 Due to the 5s deepsleep mode in standby, it is hard to connect the serial console. To make it easier, either connect within 1 minute of a reset or place the bms in run mode and connect.
