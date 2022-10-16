@@ -8,8 +8,6 @@
 //#define STATECYCLING 1
 #define TESTING_MODE 0
 
-#define FAULT_DEBOUNCE_COUNT 3
-
 ///////////////////////////////////
 // Teensy pin configuration      //
 ///////////////////////////////////
@@ -54,7 +52,7 @@
 #define LOOP_PERIOD_ACTIVE_MS 200
 #define LOOP_PERIOD_STANDBY_MS 2000
 
-#define EEPROM_VERSION 3
+#define EEPROM_VERSION 4
 
 class Param {
 public:
@@ -158,6 +156,7 @@ public:
   ParamImpl<uint32_t> fault_debounce_count;
   ParamImpl<uint32_t> module_count;
   ParamImpl<uint32_t> oled_cycle_time;
+  ParamImpl<uint32_t> time_before_first_sleep;
 
 private:
   std::list<Param*> parameters;

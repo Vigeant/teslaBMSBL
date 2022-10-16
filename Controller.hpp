@@ -115,7 +115,7 @@ public:
   Fault fault12VBatUV;
   Fault faultWatSen1;
   Fault faultWatSen2;
-  Fault faultBMSPartialSerialComms;
+  Fault faultIncorectModuleCount;
 
   bool isFaulted;
   bool stickyFaulted;

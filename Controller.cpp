@@ -15,7 +15,7 @@ Controller::Controller()
     fault12VBatUV(String("12VBatUV"), String("I"), false, true, String("12V battery reached a voltage lower than the UV threshold\n"), String("12V battery back over the UV threshold\n")),
     faultWatSen1(String("WatSen1"), String("J"), true, true, String("The battery water sensor 1 is reporting water!\n"), String("The battery water sensor 1 is reporting dry.\n")),
     faultWatSen2(String("WatSen2"), String("K"), true, true, String("The battery water sensor 2 is reporting water!\n"), String("The battery water sensor 2 is reporting dry.\n")),
-    faultBMSPartialSerialComms(String("BMSPartialSerialComms"), String("L"), true, true, String("Found fewer modules than configured!\n"), String("Found all modules as configured!\n")),
+    faultIncorectModuleCount(String("IncorectModuleCount"), String("L"), true, true, String("Found a different ammount of modules than configured!\n"), String("Found all modules as configured!\n")),
     bms(&settings) {
   state = INIT;
 
@@ -40,7 +40,7 @@ Controller::Controller()
   faults.push_back(&fault12VBatUV);
   faults.push_back(&faultWatSen1);
   faults.push_back(&faultWatSen2);
-  faults.push_back(&faultBMSPartialSerialComms);
+  faults.push_back(&faultIncorectModuleCount);
 }
 
 
@@ -237,8 +237,7 @@ void Controller::doController() {
     case STANDBY:
       //prevents sleeping if the console is connected or if within 10 minutes of a hard reset.
       //The teensy wont let reprogram if it slept once so this allows reprograming within 10 minutes.
-      if (SERIALCONSOLE || millis() < 600000) {
-
+      if (SERIALCONSOLE || millis() < settings.time_before_first_sleep.getVal()) {
         period = LOOP_PERIOD_ACTIVE_MS;
         standbyTicks = 10;
       } else {
@@ -293,9 +292,9 @@ void Controller::syncModuleDataObjects() {
   bms.wakeBoards();
 
   if (bms.getAllVoltTemp() < settings.module_count.getVal()) {
-    faultBMSPartialSerialComms.countFault(settings.fault_debounce_count.getVal());
+    faultIncorectModuleCount.countFault(settings.fault_debounce_count.getVal());
   } else {
-    faultBMSPartialSerialComms.resetFault();
+    faultIncorectModuleCount.resetFault();
   }
 
   if (bms.getLineFault()) {
