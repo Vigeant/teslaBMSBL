@@ -5,7 +5,7 @@
 /////////////////////////////////////////////////
 Controller::Controller()
   : faultModuleLoop(String("ModuleLoop"), String("A"), true, true, String("One or more BMS modules have asserted the fault loop!\n"), String("All modules have deasserted the fault loop\n")),
-    faultBatMon(String("BatMon"), String("B"), true, true, String("The battery monitor asserted a fault!\n"), String("The battery monitor deasserted a fault\n")),
+    faultBatMon(String("BatMon"), String("B"), false, true, String("The battery monitor asserted a fault!\n"), String("The battery monitor deasserted a fault\n")),
     faultBMSSerialComms(String("BMSSerialComms"), String("C"), true, true, String("Serial communication with battery modules lost!\n"), String("Serial communication with battery modules re-established!\n")),
     faultBMSOV(String("BMSOV"), String("D"), true, true, String("A cell reached a voltage higher than the OV threshold\n"), String("All cells are back under OV threshold\n")),
     faultBMSUV(String("BMSUV"), String("E"), false, true, String("A cell reached a voltage lower than the UV threshold\n"), String("All cells are back over UV threshold\n")),
