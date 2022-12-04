@@ -3,9 +3,7 @@
 #include "Controller.hpp"
 #include <string.h>
 #include <list>
-//#include <vector>
-
-
+#include <TimeLib.h>
 
 class CliCommand {
 public:
@@ -37,8 +35,7 @@ public:
     Serial.print("    ||       \\||||||||/   /|||||||||   |||||||||/   ||      ||\n\n");
     Serial.print("              Battery Management System by GuilT\n");
     Serial.print("\n************************* SYSTEM MENU *************************\n");
-    Serial.print("GENERAL SYSTEM CONFIGURATION\n\n");
-
+    
 
     for (auto i = (*cliCommands).begin(); i != (*cliCommands).end(); i++) {
       printed = strlen((*i)->tokenShort) + strlen((*i)->tokenLong);
@@ -73,6 +70,7 @@ public:
     settings = sett;
   }
   int doCommand() {
+    Serial.print("GENERAL SYSTEM CONFIGURATION\n\n");
     settings->printSettings();
     return 0;
   }
@@ -147,6 +145,7 @@ public:
       ret = -1;
     } else {
       setTime(atoi(hStr), atoi(minStr), atoi(sStr), atoi(dStr), atoi(mStr), atoi(yStr));
+      Teensy3Clock.set(now());
       ret = 0;
     }
     LOG_CONSOLE("Current Time: ");
