@@ -1,3 +1,4 @@
+#include "FlexCAN.h"
 #include "Controller.hpp"
 
 /////////////////////////////////////////////////
@@ -18,6 +19,21 @@ Controller::Controller()
     faultIncorectModuleCount(String("IncorectModuleCount"), String("L"), true, true, String("Found a different ammount of modules than configured!\n"), String("Found all modules as configured!\n")),
     bms(&settings) {
   state = INIT;
+
+  msg.ext = 1;
+  msg.id = BMS_EVCC_STATUS_IND;
+  msg.len = 5;
+  msg.buf[0] = 0;
+  msg.buf[1] = 0;
+  msg.buf[2] = 0;
+  msg.buf[3] = 0;
+  msg.buf[4] = 0;
+
+  msgStatusIns.bBMSStatusFlags = 0;
+  msgStatusIns.bBmsId = 0;
+  msgStatusIns.bBMSFault = 0;
+  msgStatusIns.bReserved2 = 0;
+  msgStatusIns.bReserved3 = 0;
 
   //try to load object
   settings.loadAllSettingsFromEEPROM(0);
@@ -62,6 +78,20 @@ void Controller::doController() {
   static unsigned int bat12Vcyclestart = 0;
   static int standbyTicks = 1;  //1 because ticks slow down
   const int stateticks = 4;
+
+  msgStatusIns.bBMSStatusFlags = 0;
+  msgStatusIns.bBMSFault = 0;
+
+  if (canOn == false && settings.canbus_to_EVCC.getVal() == 1){
+    Can0.begin(settings.canbus_speed.getVal());
+    canOn = true;
+  }
+
+  if (canOn == true && settings.canbus_to_EVCC.getVal() == 0) {
+    Can0.end();
+    canOn = false;
+  }
+
   bat12vVoltage = (float)analogRead(INA_12V_BAT) / settings.bat12v_scaling_divisor.getVal();
 
   if (state != INIT) syncModuleDataObjects();
@@ -160,6 +190,7 @@ void Controller::doController() {
       } else if (bms.getHighCellVolt() > settings.trickle_charge_v_setpoint.getVal()) {
         ticks = 0;
         state = TRICKLE_CHARGING;
+        msgStatusIns.bBMSStatusFlags |= BMS_STATUS_CELL_BVC_FLAG;
         LOG_INFO("Transition to TRICKLE_CHARGING\n");
       } else {
         ticks = 0;
@@ -374,14 +405,33 @@ void Controller::syncModuleDataObjects() {
     isFaulted |= (*i)->getFault();
   }
 
-  chargerInhibit |= bms.getHighCellVolt() >= settings.max_charge_v_setpoint.getVal();
+  if (faultBMSUV.getFault()) {
+    msgStatusIns.bBMSStatusFlags |= BMS_STATUS_CELL_LVC_FLAG;
+  }
+
+  if (faultBMSOT.getFault()) {
+    msgStatusIns.bBMSFault |= BMS_FAULT_OVERTEMP_FLAG;
+  }
+
   powerLimiter |= bms.getHighCellVolt() >= settings.max_charge_v_setpoint.getVal();  //added in case charging in run mode.
 
-  if (bms.getHighCellVolt() >= settings.max_charge_v_setpoint.getVal()) LOG_INFO("bms.getHighCellVolt()[%.2f] >= settings.max_charge_v_setpoint.getVal()", bms.getHighCellVolt());
+  if (bms.getHighCellVolt() >= settings.max_charge_v_setpoint.getVal()) {
+    chargerInhibit |= bms.getHighCellVolt() >= settings.max_charge_v_setpoint.getVal();
+    LOG_INFO("bms.getHighCellVolt()[%.2f] >= settings.max_charge_v_setpoint.getVal()", bms.getHighCellVolt());
+    msgStatusIns.bBMSStatusFlags |= BMS_STATUS_CELL_HVC_FLAG;
+  }
+
   if (chargerInhibit) LOG_INFO("chargerInhibit (fault) line asserted!\n");
   if (powerLimiter) LOG_INFO("powerLimiter (fault) line asserted!\n");
 
   stickyFaulted |= isFaulted;
+
+  msg.buf[0] = msgStatusIns.bBMSStatusFlags;
+  msg.buf[2] = msgStatusIns.bBMSFault;
+  if (settings.canbus_to_EVCC.getVal() == 1) {
+    Can0.write(msg);
+  }
+
   bms.clearFaults();
   //bms.sleepBoards();
 }

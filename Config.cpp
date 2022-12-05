@@ -5,8 +5,8 @@
 Settings::Settings()
   : magic_bytes("magic_bytes", false, 0, 0xdeadbeef, 0, 0, "Magic byte to identify eeprom was initialized"),
     eeprom_version("eeprom_version", false, 0, EEPROM_VERSION, 0, 0, "eeprom version"),
-    canbus_speed("canbus_speed", true, 0, 250000, 62500, 1000000, "Can bus speed"),
-    canbus_address("canbus_address", true, 0, 1, 1, 1000, "Can bus address"),
+    canbus_speed("canbus_speed", true, 0, 250000, 62500, 1000000, "Can bus speed. Needs a reboot after changing this."),
+    canbus_to_EVCC("canbus_to_EVCC", true, 0, 1, 0, 1, "0:disabled, 1:enabled, required to set balancing mode"),
     over_v_setpoint("over_v_setpoint", true, 0.0f, 4.25f, 3.8f, 4.25f, "Triggers Over V error"),
     under_v_setpoint("under_v_setpoint", true, 0.0f, 3.0f, 2.5f, 3.5f, "Triggers Under V error"),
     max_charge_v_setpoint("max_charge_v_setpoint", true, 0.0f, 4.2f, 3.8f, 4.25f, "Stops charging"),
@@ -38,7 +38,7 @@ Settings::Settings()
   parameters.push_back(&magic_bytes);
   parameters.push_back(&eeprom_version);
   parameters.push_back(&canbus_speed);
-  parameters.push_back(&canbus_address);
+  parameters.push_back(&canbus_to_EVCC);
   parameters.push_back(&over_v_setpoint);
   parameters.push_back(&under_v_setpoint);
   parameters.push_back(&max_charge_v_setpoint);
@@ -68,6 +68,7 @@ Settings::Settings()
 
 void Settings::printSettings() {
   Serial.printf("%35s | %-10s | %-10s | [%10s , %-10s] | %s\n", "param name", "value", "default", "min", "max", "description");
+  Serial.println("------------------------------------------------------------------------------------------------------------");
   for (auto i = parameters.begin(); i != parameters.end(); i++) {
     (*i)->prettyPrint();
   }

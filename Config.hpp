@@ -52,7 +52,11 @@
 #define LOOP_PERIOD_ACTIVE_MS 200
 #define LOOP_PERIOD_STANDBY_MS 2000
 
-#define EEPROM_VERSION 4
+#define EEPROM_VERSION 5
+
+#define CPU_RESTART_ADDR (uint32_t *)0xE000ED0C
+#define CPU_RESTART_VAL 0x5FA0004
+#define CPU_RESTART (*CPU_RESTART_ADDR = CPU_RESTART_VAL);
 
 class Param {
 public:
@@ -131,7 +135,7 @@ public:
   ParamImpl<uint32_t> magic_bytes;
   ParamImpl<uint32_t> eeprom_version;
   ParamImpl<uint32_t> canbus_speed;
-  ParamImpl<uint32_t> canbus_address;
+  ParamImpl<uint32_t> canbus_to_EVCC;
   ParamImpl<float> over_v_setpoint;
   ParamImpl<float> under_v_setpoint;
   ParamImpl<float> max_charge_v_setpoint;

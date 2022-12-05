@@ -1,3 +1,6 @@
+#include <FlexCAN.h>
+//#include <kinetis_flexcan.h>
+
 #include <Arduino.h>
 #include "Config.hpp"
 #include "BMSModuleManager.hpp"
@@ -35,6 +38,7 @@ public:
       debounceCounter = fault_debounce_counter;
     }
   }
+
   void resetFault() {
     if (fault) {
       LOG_ERR(msgDeAsserted.c_str());
@@ -42,30 +46,39 @@ public:
     fault = false;
     debounceCounter = 0;
   }
+
   bool getFault() {
     return fault;
   }
+
   bool getSFault() {
     return sFault;
   }
+
   const String getName() {
     return name;
   }
+
   const String getCode() {
     return code;
   }
+
   bool getChargeFault() {
     return chargeFault;
   }
+
   bool getRunFault() {
     return runFault;
   }
+
   const String getMsgAsserted() {
     return msgAsserted;
   }
+
   const String getMsgDeAsserted() {
     return msgDeAsserted;
   }
+
   time_t getTimeStamp() {
     return timeStamp;
   }
@@ -83,6 +96,31 @@ private:
   time_t timeStamp;
 };
 
+
+/*
+* The EVCC supports 250kbps CAN data rate and 29 bit identifiers
+*/
+/*
+* BMS->EVCC message Identifier
+*/
+#define BMS_EVCC_STATUS_IND 0x01dd0001
+/* bBMSStatusFlag bits */
+#define BMS_STATUS_CELL_HVC_FLAG 0x01 /* set if a cell is > HVC */
+#define BMS_STATUS_CELL_LVC_FLAG 0x02 /* set if a cell is < LVC */
+#define BMS_STATUS_CELL_BVC_FLAG 0x04 /* set if a cell is > BVC */
+/* bBMSFault bits */
+#define BMS_FAULT_OVERTEMP_FLAG 0x04 /* set for thermistor overtemp */
+/*
+* BMS->EVCC message body
+*/
+typedef struct tBMS_EVCC_StatusInd {
+  uint8_t bBMSStatusFlags; /* see bit definitions above */
+  uint8_t bBmsId;          /* reserved, set to 0 */
+  uint8_t bBMSFault;
+  uint8_t bReserved2; /* reserved, set to 0 */
+  uint8_t bReserved3; /* reserved, set to 0 */
+} tBMS_EVCC_StatusInd;
+
 class Controller {
 public:
   enum ControllerState {
@@ -94,6 +132,7 @@ public:
     POST_CHARGE,
     RUN
   };
+  
   void doController();
   Controller();
   ControllerState getState();
@@ -135,6 +174,7 @@ private:
   bool dc2dcON_H;
   uint32_t period;
   ControllerState state;
+  bool canOn = false;
 
   //run-time functions
   void syncModuleDataObjects();  //gathers all the data from the boards and populates the BMSModel object instances
@@ -150,6 +190,10 @@ private:
   void trickle_charging();
   void post_charge();
   void run();
+
+  CAN_message_t msg;
+  tBMS_EVCC_StatusInd msgStatusIns;
+  
 };
 
 #endif /* CONTROLLER_H_ */

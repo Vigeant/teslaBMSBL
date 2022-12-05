@@ -87,7 +87,8 @@ Cons::Cons(Controller* cont_inst_ptr)
     showStatus(cont_inst_ptr),
     showGraph(cont_inst_ptr),
     showCSV(cont_inst_ptr),
-    resetDefaultValues(cont_inst_ptr->getSettingsPtr()) {
+    resetDefaultValues(cont_inst_ptr->getSettingsPtr()),
+    reboot() {
   // initialize serial communication at 115200 bits per second:
   SERIALCONSOLE.begin(115200);
   SERIALCONSOLE.setTimeout(15);
@@ -100,4 +101,5 @@ Cons::Cons(Controller* cont_inst_ptr)
   cliCommands.push_back(&showStatus);
   cliCommands.push_back(&showGraph);
   cliCommands.push_back(&showCSV);
+  cliCommands.push_back(&reboot);
 }

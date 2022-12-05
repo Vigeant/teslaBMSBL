@@ -245,6 +245,20 @@ public:
   }
 };
 
+class Reboot : public CliCommand {
+public:
+  Reboot(void) {
+    name = "reboot BMS";
+    tokenLong = "reboot";
+    tokenShort = "reboot";
+    help = " | performs a soft reboot.";
+  }
+  int doCommand() {
+    CPU_RESTART;
+    return 0;
+  }
+};
+
 class Cons {
 public:
   Cons(Controller* cont_inst_ptr);
@@ -264,6 +278,8 @@ private:
   ShowCSV showCSV;
   SetVerbose setVerbose;
   ResetDefaultValues resetDefaultValues;
+  Reboot reboot;
+  
   std::list<CliCommand*> cliCommands;
   Controller* controller_inst_ptr;
   const char* delimiters = ", \n";
