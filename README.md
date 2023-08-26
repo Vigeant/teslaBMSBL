@@ -1,6 +1,7 @@
 # teslaBMSBL
 
 ![Tesla BMS BL](misc/20190319_221311.jpg)
+![Tesla BMS BL board](misc/20230725_143916.jpg)
 
 ## Hardware
 see eagle files to build the board hosting the teensy 3.2.
