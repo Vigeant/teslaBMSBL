@@ -34,10 +34,15 @@ class BMSModuleManager
     float getLowCellVolt();
     float getHighCellVolt();
     float getHistLowestPackVolt();
+    time_t getHistLowestPackVoltTimeStamp();
     float getHistHighestPackVolt();
+    time_t getHistHighestPackVoltTimeStamp();
     float getHistLowestCellVolt();
     float getHistHighestCellVolt();
+    float getHistLowestPackTemp();
+    time_t getHistLowestPackTempTimeStamp();
     float getHistHighestPackTemp();
+    time_t getHistHighestPackTempTimeStamp();
     float getHistHighestCellDiffVolt();
     bool getIsFaulted();
     bool getLineFault();
@@ -54,13 +59,13 @@ class BMSModuleManager
     int pstring;
     float lowCellVolt;
     float highCellVolt;
-    float histLowestPackVolt;
-    float histHighestPackVolt;
+    float histLowestPackVolt; time_t histLowestPackVoltTimeStamp;
+    float histHighestPackVolt; time_t histHighestPackVoltTimeStamp;
     float histLowestCellVolt;
     float histHighestCellVolt;
     float histHighestCellDiffVolt;
-    float histLowestPackTemp;
-    float histHighestPackTemp;
+    float histLowestPackTemp; time_t histLowestPackTempTimeStamp;
+    float histHighestPackTemp; time_t histHighestPackTempTimeStamp;
     float highTemp;
     float lowTemp;
     BMSModule modules[MAX_MODULE_ADDR + 1]; // store data for as many modules as we've configured for.

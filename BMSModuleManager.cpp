@@ -193,8 +193,14 @@ uint16_t BMSModuleManager::getAllVoltTemp() {
     numOfBoards = y;
     if (modules[y].getAddress() > 0 && modules[y].updateInstanceWithModuleValues()) {
       tempPackVolt += modules[y].getModuleVoltage();
-      if (modules[y].getLowTemp() < histLowestPackTemp) histLowestPackTemp = modules[y].getLowTemp();
-      if (modules[y].getHighTemp() > histHighestPackTemp) histHighestPackTemp = modules[y].getHighTemp();
+      if (modules[y].getLowTemp() < histLowestPackTemp){
+        histLowestPackTemp = modules[y].getLowTemp();
+        histLowestPackTempTimeStamp = now();
+      }
+      if (modules[y].getHighTemp() > histHighestPackTemp){
+        histHighestPackTemp = modules[y].getHighTemp();
+        histHighestPackTempTimeStamp = now();
+      }
     } else {
       break;
     }
@@ -202,8 +208,14 @@ uint16_t BMSModuleManager::getAllVoltTemp() {
 
   //update high and low watermark values for voltages
   tempPackVolt = tempPackVolt / pstring;
-  if (tempPackVolt > histHighestPackVolt) histHighestPackVolt = tempPackVolt;
-  if (tempPackVolt < histLowestPackVolt) histLowestPackVolt = tempPackVolt;
+  if (tempPackVolt > histHighestPackVolt){
+    histHighestPackVolt = tempPackVolt;
+    histHighestPackVoltTimeStamp = now();
+  } 
+  if (tempPackVolt < histLowestPackVolt){
+    histLowestPackVolt = tempPackVolt;
+    histLowestPackVoltTimeStamp = now();
+  } 
 
   float tempHighCellVolt = 0.0;
   for (int y = 0; y < MAX_MODULE_ADDR; y++) {
@@ -235,10 +247,31 @@ uint16_t BMSModuleManager::getAllVoltTemp() {
 }
 
 /////////////////////////////////////////////////
+/// \brief returns the lowest temperature reached by the pack since last reset of the attributes.
+//////////////////////////////////////////////////
+float BMSModuleManager::getHistLowestPackTemp() {
+  return histHighestPackTemp;
+}
+
+/////////////////////////////////////////////////
+/// \brief returns the lowest temperature timestamp reached by the pack since last reset of the attributes.
+//////////////////////////////////////////////////
+time_t BMSModuleManager::getHistLowestPackTempTimeStamp() {
+  return histHighestPackTempTimeStamp;
+}
+
+/////////////////////////////////////////////////
 /// \brief returns the highest temperature reached by the pack since last reset of the attributes.
 //////////////////////////////////////////////////
 float BMSModuleManager::getHistHighestPackTemp() {
   return histHighestPackTemp;
+}
+
+/////////////////////////////////////////////////
+/// \brief returns the highest temperature timestamp reached by the pack since last reset of the attributes.
+//////////////////////////////////////////////////
+time_t BMSModuleManager::getHistHighestPackTempTimeStamp() {
+  return histHighestPackTempTimeStamp;
 }
 
 /////////////////////////////////////////////////
@@ -291,10 +324,24 @@ float BMSModuleManager::getHistLowestPackVolt() {
 }
 
 /////////////////////////////////////////////////
+/// \brief returns the lowest pack voltage timestamp reached since last reset of the atributes.
+//////////////////////////////////////////////////
+time_t BMSModuleManager::getHistLowestPackVoltTimeStamp() {
+  return histLowestPackVoltTimeStamp;
+}
+
+/////////////////////////////////////////////////
 /// \brief returns the highest pack voltage reached since last reset of the atributes.
 //////////////////////////////////////////////////
 float BMSModuleManager::getHistHighestPackVolt() {
   return histHighestPackVolt;
+}
+
+/////////////////////////////////////////////////
+/// \brief returns the highest pack voltage timestamp reached since last reset of the atributes.
+//////////////////////////////////////////////////
+time_t BMSModuleManager::getHistHighestPackVoltTimeStamp() {
+  return histHighestPackVoltTimeStamp;
 }
 
 /////////////////////////////////////////////////
@@ -490,8 +537,18 @@ void BMSModuleManager::printPackSummary() {
     }
   }
   LOG_CONSOLE("\n=====================================================================\n");
-  LOG_CONSOLE("\nModules: %i    Voltage: %.2fV   Avg Cell Voltage: %.2fV     Avg Temp: %.2fC\n", numFoundModules,
-              getPackVoltage(), getAvgCellVolt(), getAvgTemperature());
+  LOG_CONSOLE("\nModules: %i    Voltage: %.2fV   Avg Cell Voltage: %.2fV     Avg Temp: %.2fC\n",
+                  numFoundModules, getPackVoltage(), getAvgCellVolt(), getAvgTemperature());
+
+  LOG_CONSOLE("Lowest pack voltage %.2fV was reached at ", getHistLowestPackVolt());
+  LOG_TIMESTAMP_LN(getHistLowestPackVoltTimeStamp());
+  LOG_CONSOLE("Highest pack voltage %.2fV was reached at ", getHistHighestPackVolt());
+  LOG_TIMESTAMP_LN(getHistHighestPackVoltTimeStamp());
+  LOG_CONSOLE("Lowest pack temp %.2fV was reached at ", getHistLowestPackTemp());
+  LOG_TIMESTAMP_LN(getHistLowestPackTempTimeStamp());
+  LOG_CONSOLE("Highest pack temp %.2fV was reached at ", getHistHighestPackTemp());
+  LOG_TIMESTAMP_LN(getHistHighestPackTempTimeStamp());
+
   LOG_CONSOLE("INL_EVSE_DISC: %d\n", digitalRead(INL_EVSE_DISC));
   LOG_CONSOLE("INH_RUN: %d\n", digitalRead(INH_RUN));
   LOG_CONSOLE("INH_CHARGING: %d\n", digitalRead(INH_CHARGING));

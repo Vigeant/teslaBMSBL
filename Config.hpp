@@ -140,7 +140,7 @@ public:
   ParamImpl<float> under_v_setpoint;
   ParamImpl<float> max_charge_v_setpoint;
   ParamImpl<float> charger_cycle_v_setpoint;
-  ParamImpl<float> trickle_charge_v_setpoint;
+  ParamImpl<float> top_balance_v_setpoint;
   ParamImpl<float> warn_cell_v_offset;
   ParamImpl<float> floor_duty_coolant_pump;
   ParamImpl<float> cooling_lowt_setpoint;

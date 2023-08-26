@@ -11,7 +11,7 @@ Settings::Settings()
     under_v_setpoint("under_v_setpoint", true, 0.0f, 3.0f, 2.5f, 3.5f, "Triggers Under V error"),
     max_charge_v_setpoint("max_charge_v_setpoint", true, 0.0f, 4.2f, 3.8f, 4.25f, "Stops charging"),
     charger_cycle_v_setpoint("charger_cycle_v_setpoint", true, 0.0f, 4.17f, 2.5f, 4.25f, "Voltage treshold to force a charging cycle"),
-    trickle_charge_v_setpoint("trickle_charge_v_setpoint", true, 0.0f, 4.19f, 2.5f, 4.25f, "Transition to trickle charging when highest cell reaches this value"),
+    top_balance_v_setpoint("top_balance_v_setpoint", true, 0.0f, 4.19f, 2.5f, 4.25f, "Transition to top balancing when highest cell reaches this value"),
     warn_cell_v_offset("warn_cell_v_offset", true, 0.0f, 0.1f, 0.00f, 3.0f, "TODO, issue a warning on OLED and serial console if a cell is that close to a OV or UV fault"),
     floor_duty_coolant_pump("floor_duty_coolant_pump", true, 0.0f, 0.25f, 0.00f, 1.0f, "Lowest pump duty cucle when in RUN or CHARGING"),
     cooling_lowt_setpoint("cooling_lowt_setpoint", true, 0.0f, 25.0f, -20.0f, 65.0f, "Threshold at which coolant pump gradually increases duty up to max"),
@@ -43,7 +43,7 @@ Settings::Settings()
   parameters.push_back(&under_v_setpoint);
   parameters.push_back(&max_charge_v_setpoint);
   parameters.push_back(&charger_cycle_v_setpoint);
-  parameters.push_back(&trickle_charge_v_setpoint);
+  parameters.push_back(&top_balance_v_setpoint);
   parameters.push_back(&warn_cell_v_offset);
   parameters.push_back(&floor_duty_coolant_pump);
   parameters.push_back(&cooling_lowt_setpoint);

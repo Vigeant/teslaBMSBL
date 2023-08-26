@@ -128,7 +128,7 @@ public:
     STANDBY,
     PRE_CHARGE,
     CHARGING,
-    TRICKLE_CHARGING,
+    TOP_BALANCING,
     POST_CHARGE,
     RUN
   };
@@ -175,6 +175,7 @@ private:
   uint32_t period;
   ControllerState state;
   bool canOn = false;
+  time_t lastResetTimeStamp;
 
   //run-time functions
   void syncModuleDataObjects();  //gathers all the data from the boards and populates the BMSModel object instances
@@ -187,7 +188,7 @@ private:
   void standby();
   void pre_charge();
   void charging();
-  void trickle_charging();
+  void top_balancing();
   void post_charge();
   void run();
 

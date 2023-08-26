@@ -109,6 +109,7 @@ void Controller::doController() {
       if (ticks >= stateticks) {
         ticks = 0;
         state = STANDBY;
+        lastResetTimeStamp = now();
         LOG_INFO("Transition to STANDBY\n");
       }
       break;
@@ -177,8 +178,8 @@ void Controller::doController() {
 #ifdef STATECYCLING
       if (ticks >= stateticks) {
         ticks = 0;
-        state = TRICKLE_CHARGING;
-        LOG_INFO("Transition to TRICKLE_CHARGING\n");
+        state = TOP_BALANCING;
+        LOG_INFO("Transition to TOP_BALANCING\n");
       }
 #else
       if (ticks >= 5 && (digitalRead(INL_EVSE_DISC) == LOW || digitalRead(INH_CHARGING) == LOW)) {
@@ -193,17 +194,17 @@ void Controller::doController() {
         } else if (digitalRead(INH_CHARGING) == LOW) {
           LOG_INFO("INH_CHARGING == LOW\n");
         }
-      } else if (bms.getHighCellVolt() >= settings.trickle_charge_v_setpoint.getVal()) {
+      } else if (bms.getHighCellVolt() >= settings.top_balance_v_setpoint.getVal()) {
         ticks = 0;
-        state = TRICKLE_CHARGING;
-        LOG_INFO("Transition to TRICKLE_CHARGING\n");
+        state = TOP_BALANCING;
+        LOG_INFO("Transition to TOP_BALANCING\n");
       } else {
         ticks = 0;
       }
 #endif
       break;
     /**************** ****************/
-    case TRICKLE_CHARGING:
+    case TOP_BALANCING:
 #ifdef STATECYCLING
       if (ticks >= stateticks) {
         ticks = 0;
@@ -217,10 +218,10 @@ void Controller::doController() {
         LOG_INFO("Transition to POST_CHARGE\n");
       } else if (digitalRead(INL_EVSE_DISC) == LOW || digitalRead(INH_CHARGING) == LOW) {
         //debounce error by letting ticks go up to 5.
-		    msgStatusIns.bBMSStatusFlags |= BMS_STATUS_CELL_BVC_FLAG;
+		    //msgStatusIns.bBMSStatusFlags |= BMS_STATUS_CELL_BVC_FLAG;
         LOG_INFO("INL_EVSE_DISC == LOW || INH_CHARGING == LOW\n");
       } else {
-		    msgStatusIns.bBMSStatusFlags |= BMS_STATUS_CELL_BVC_FLAG;
+		    //msgStatusIns.bBMSStatusFlags |= BMS_STATUS_CELL_BVC_FLAG;
         ticks = 0;
       }
 #endif
@@ -295,9 +296,9 @@ void Controller::doController() {
       charging();
       break;
 
-    case TRICKLE_CHARGING:
+    case TOP_BALANCING:
       period = LOOP_PERIOD_ACTIVE_MS;
-      trickle_charging();
+      top_balancing();
       break;
 
     case POST_CHARGE:
@@ -419,9 +420,9 @@ void Controller::syncModuleDataObjects() {
     isFaulted |= (*i)->getFault();
   }
 
-  if (faultBMSUV.getFault()) {
-    msgStatusIns.bBMSStatusFlags |= BMS_STATUS_CELL_LVC_FLAG;
-  }
+  //if (faultBMSUV.getFault()) {
+  //  msgStatusIns.bBMSStatusFlags |= BMS_STATUS_CELL_LVC_FLAG;
+  //}
 
   if (faultBMSOT.getFault()) {
     msgStatusIns.bBMSFault |= BMS_FAULT_OVERTEMP_FLAG;
@@ -432,7 +433,7 @@ void Controller::syncModuleDataObjects() {
   if (bms.getHighCellVolt() >= settings.max_charge_v_setpoint.getVal()) {
     chargerInhibit |= bms.getHighCellVolt() >= settings.max_charge_v_setpoint.getVal();
     LOG_INFO("bms.getHighCellVolt()[%.2f] >= settings.max_charge_v_setpoint.getVal()", bms.getHighCellVolt());
-    msgStatusIns.bBMSStatusFlags |= BMS_STATUS_CELL_HVC_FLAG;
+    msgStatusIns.bBMSStatusFlags = BMS_STATUS_CELL_HVC_FLAG;
   }
 
   if (chargerInhibit) LOG_INFO("chargerInhibit (fault) line asserted!\n");
@@ -548,6 +549,7 @@ void Controller::pre_charge() {
   outH_fault_buffer = chargerInhibit;
   outL_12V_bat_chrg_buffer = !dc2dcON_H;
   outpwm_pump_buffer = 0;
+  msgStatusIns.bBMSStatusFlags = 0;
 }
 
 /////////////////////////////////////////////////
@@ -560,21 +562,23 @@ void Controller::charging() {
   outH_fault_buffer = chargerInhibit;
   outL_12V_bat_chrg_buffer = LOW;
   outpwm_pump_buffer = (uint8_t)(getCoolingPumpDuty(bms.getHighTemperature()) * 255);
+  msgStatusIns.bBMSStatusFlags = 0;
 }
 
 /////////////////////////////////////////////////
-/// \brief trickle_charging state is when the boat *is connected*
+/// \brief top_balancing state is when the boat *is connected*
 /// to a EVSE and is finishing up charging until EVCC shuts itself down.
 /// During this phase, we turn off the DC2DC so as not to confuse the EVCC
 /// as it tries to measure a current drop in the charging.
 /////////////////////////////////////////////////
-void Controller::trickle_charging() {
+void Controller::top_balancing() {
   balanceCells();
   msgStatusIns.bBMSStatusFlags |= BMS_STATUS_CELL_BVC_FLAG;
   outL_evcc_on_buffer = LOW;
   outH_fault_buffer = chargerInhibit;
   outL_12V_bat_chrg_buffer = HIGH;  //stop DC2DC
   outpwm_pump_buffer = (uint8_t)(getCoolingPumpDuty(bms.getHighTemperature()) * 255);
+  msgStatusIns.bBMSStatusFlags = BMS_STATUS_CELL_BVC_FLAG;
 }
 
 /////////////////////////////////////////////////
@@ -587,6 +591,7 @@ void Controller::post_charge() {
   outH_fault_buffer = HIGH;         //keep asserting the loop to the EVCC until it goes to sleep
   outL_12V_bat_chrg_buffer = HIGH;  //stop DC2DC
   outpwm_pump_buffer = (uint8_t)(getCoolingPumpDuty(bms.getHighTemperature()) * 255);
+  msgStatusIns.bBMSStatusFlags = BMS_STATUS_CELL_HVC_FLAG;
 }
 /////////////////////////////////////////////////
 /// \brief run state is turned on and ready to operate.
@@ -647,8 +652,8 @@ void Controller::printControllerState() {
     case CHARGING:
       LOG_CONSOLE("=  state: CHARGING                                                                 =\n");
       break;
-    case TRICKLE_CHARGING:
-      LOG_CONSOLE("=  state: TRICKLE_CHARGING                                                         =\n");
+    case TOP_BALANCING:
+      LOG_CONSOLE("=  state: TOP_BALANCING                                                         =\n");
       break;
     case POST_CHARGE:
       LOG_CONSOLE("=  state: POST_CHARGE                                                              =\n");
@@ -659,6 +664,9 @@ void Controller::printControllerState() {
   }
   LOG_CONSOLE("=  Time since last reset:%-3d days, %02d:%02d:%02d                                        =\n",
               seconds / 86400, (seconds % 86400) / 3600, (seconds % 3600) / 60, (seconds % 60));
+  LOG_CONSOLE("=  Time of last reset: ");
+  LOG_TIMESTAMP(lastResetTimeStamp);
+  LOG_CONSOLE("                                       ="); 
   LOG_CONSOLE("=  Time: ");
   LOG_TIMESTAMP(now());
   LOG_CONSOLE("                                                       =\n");
