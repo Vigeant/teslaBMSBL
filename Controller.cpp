@@ -155,8 +155,8 @@ void Controller::doController() {
         LOG_INFO("Transition to CHARGING\n");
       }
 #else
-      if (ticks >= 50 && ticks <= 100) {  //adjust to give time to the EVCC to properly boot (5 ticks == 1 seconds)
-        if ((digitalRead(INL_EVSE_DISC) == LOW) || (digitalRead(INH_CHARGING) == LOW)) {
+      if (ticks >= 10 && ticks <= 100) {  //adjust to give time to the EVCC to properly boot (5 ticks == 1 seconds)
+        if ((digitalRead(INL_EVSE_DISC) == LOW)) {
           ticks = 0;
           state = STANDBY;
           LOG_INFO("Transition to STANDBY\n");
@@ -420,15 +420,15 @@ void Controller::syncModuleDataObjects() {
     isFaulted |= (*i)->getFault();
   }
 
-  //if (faultBMSUV.getFault()) {
-  //  msgStatusIns.bBMSStatusFlags |= BMS_STATUS_CELL_LVC_FLAG;
-  //}
+  if (faultBMSUV.getFault()) {
+    msgStatusIns.bBMSStatusFlags |= BMS_STATUS_CELL_LVC_FLAG;
+  }
 
   if (faultBMSOT.getFault()) {
     msgStatusIns.bBMSFault |= BMS_FAULT_OVERTEMP_FLAG;
   }
 
-  powerLimiter |= bms.getHighCellVolt() >= settings.max_charge_v_setpoint.getVal();  //added in case charging in run mode.
+  powerLimiter |= bms.getHighCellVolt() >= settings.max_charge_v_setpoint.getVal();  //added in case charging in run mode like my dad likes to do.
 
   if (bms.getHighCellVolt() >= settings.max_charge_v_setpoint.getVal()) {
     chargerInhibit |= bms.getHighCellVolt() >= settings.max_charge_v_setpoint.getVal();
