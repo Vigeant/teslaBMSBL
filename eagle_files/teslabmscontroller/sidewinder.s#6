@@ -7888,8 +7888,8 @@ naming: grid - package width</description>
 <symbols>
 <symbol name="MCP2561FD">
 <pin name="TXD" x="-15.24" y="7.62" length="middle" direction="in"/>
-<pin name="VSS" x="-15.24" y="5.08" length="middle" direction="pwr"/>
-<pin name="VDD" x="-15.24" y="2.54" length="middle" direction="pwr"/>
+<pin name="VSS" x="-15.24" y="5.08" length="middle" direction="in"/>
+<pin name="VDD" x="-15.24" y="2.54" length="middle" direction="in"/>
 <pin name="RXD" x="-15.24" y="0" length="middle" direction="out"/>
 <pin name="VIO" x="12.7" y="0" length="middle" direction="nc" rot="R180"/>
 <pin name="CANL" x="12.7" y="2.54" length="middle" rot="R180"/>
@@ -9108,7 +9108,9 @@ naming: grid - package width</description>
 <approved hash="208,1,38.1,142.24,+5V,out,,,,"/>
 <approved hash="208,1,88.9,142.24,+5V,sup,,,,"/>
 <approved hash="208,1,-17.78,53.34,+5V,sup,,,,"/>
+<approved hash="208,1,66.04,-35.56,+5V,sup,,,,"/>
 <approved hash="208,1,213.36,170.18,+5V,sup,,,,"/>
+<approved hash="208,1,101.6,-33.02,+5V,sup,,,,"/>
 </errors>
 </schematic>
 </drawing>

@@ -7,7 +7,7 @@
 class Oled {
 public:
 
-  Oled(Controller*);
+  Oled(Controller*, TeensyView*);
   void doOled();
   //static void init();
 
@@ -17,6 +17,7 @@ private:
   };
   formatState state;
   Controller* controller_inst_ptr;
+  TeensyView* oled_ptr;
   void printFormat1();
   void printFormat2();
   void printFormat3();

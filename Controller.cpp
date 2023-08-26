@@ -57,6 +57,7 @@ Controller::Controller()
   faults.push_back(&faultWatSen1);
   faults.push_back(&faultWatSen2);
   faults.push_back(&faultIncorectModuleCount);
+  //Serial.print("Controller faults created\n");
 }
 
 
@@ -74,6 +75,7 @@ int32_t Controller::reloadDefaultSettings() {
 /// \brief Orchestrates the activities within the BMS via a state machine.
 /////////////////////////////////////////////////
 void Controller::doController() {
+  //Serial.print("doController\n");
   static int ticks = 0;
   static unsigned int bat12Vcyclestart = 0;
   static int standbyTicks = 1;  //1 because ticks slow down
@@ -92,9 +94,13 @@ void Controller::doController() {
     canOn = false;
   }
 
+  //Serial.print("doController can done\n");
+
   bat12vVoltage = (float)analogRead(INA_12V_BAT) / settings.bat12v_scaling_divisor.getVal();
 
   if (state != INIT) syncModuleDataObjects();
+
+  //Serial.print("doController syncModuleDataObjects\n");
 
   //figure out state transition
   switch (state) {
@@ -187,10 +193,9 @@ void Controller::doController() {
         } else if (digitalRead(INH_CHARGING) == LOW) {
           LOG_INFO("INH_CHARGING == LOW\n");
         }
-      } else if (bms.getHighCellVolt() > settings.trickle_charge_v_setpoint.getVal()) {
+      } else if (bms.getHighCellVolt() >= settings.trickle_charge_v_setpoint.getVal()) {
         ticks = 0;
         state = TRICKLE_CHARGING;
-        msgStatusIns.bBMSStatusFlags |= BMS_STATUS_CELL_BVC_FLAG;
         LOG_INFO("Transition to TRICKLE_CHARGING\n");
       } else {
         ticks = 0;
@@ -212,8 +217,10 @@ void Controller::doController() {
         LOG_INFO("Transition to POST_CHARGE\n");
       } else if (digitalRead(INL_EVSE_DISC) == LOW || digitalRead(INH_CHARGING) == LOW) {
         //debounce error by letting ticks go up to 5.
+		    msgStatusIns.bBMSStatusFlags |= BMS_STATUS_CELL_BVC_FLAG;
         LOG_INFO("INL_EVSE_DISC == LOW || INH_CHARGING == LOW\n");
       } else {
+		    msgStatusIns.bBMSStatusFlags |= BMS_STATUS_CELL_BVC_FLAG;
         ticks = 0;
       }
 #endif
@@ -313,6 +320,13 @@ void Controller::doController() {
   setOutput(OUTH_FAULT, outH_fault_buffer);
   setOutput(OUTL_12V_BAT_CHRG, outL_12V_bat_chrg_buffer);
   analogWrite(OUTPWM_PUMP, outpwm_pump_buffer);
+
+  //can bus message to evcc
+  msg.buf[0] = msgStatusIns.bBMSStatusFlags;
+  msg.buf[2] = msgStatusIns.bBMSFault;
+  if (settings.canbus_to_EVCC.getVal() == 1) {
+    Can0.write(msg);
+  }
 }
 
 /////////////////////////////////////////////////
@@ -425,12 +439,6 @@ void Controller::syncModuleDataObjects() {
   if (powerLimiter) LOG_INFO("powerLimiter (fault) line asserted!\n");
 
   stickyFaulted |= isFaulted;
-
-  msg.buf[0] = msgStatusIns.bBMSStatusFlags;
-  msg.buf[2] = msgStatusIns.bBMSFault;
-  if (settings.canbus_to_EVCC.getVal() == 1) {
-    Can0.write(msg);
-  }
 
   bms.clearFaults();
   //bms.sleepBoards();
@@ -562,6 +570,7 @@ void Controller::charging() {
 /////////////////////////////////////////////////
 void Controller::trickle_charging() {
   balanceCells();
+  msgStatusIns.bBMSStatusFlags |= BMS_STATUS_CELL_BVC_FLAG;
   outL_evcc_on_buffer = LOW;
   outH_fault_buffer = chargerInhibit;
   outL_12V_bat_chrg_buffer = HIGH;  //stop DC2DC

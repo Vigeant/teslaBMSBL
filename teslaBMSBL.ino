@@ -7,6 +7,8 @@
 #include <Snooze.h>
 #include <TimeLib.h>
 
+#include <TeensyView.h>
+
 /*! \mainpage teslaBMSBL
 
    \section intro_sec Introduction
@@ -21,10 +23,11 @@
 */
 
 //instantiate all objects
+TeensyView teensyView_inst(OLED_PIN_RESET, OLED_PIN_DC, OLED_PIN_CS, OLED_PIN_SCK, OLED_PIN_MOSI);
 //static Settings settings;
 static Controller controller_inst;        ///< The controller is responsible for orchestrating all major functions of the BMS.
 static Cons cons_inst(&controller_inst);  ///< The console is a 2 way user interface available on usb serial port at baud 115200.
-static Oled oled_inst(&controller_inst);  ///< The oled is a 1 way user interface displaying the most critical information.
+static Oled oled_inst(&controller_inst, &teensyView_inst);  ///< The oled is a 1 way user interface displaying the most critical information.
 
 // Load drivers
 //SnoozeTouch touch;
@@ -43,17 +46,19 @@ time_t getTeensy3Time() {
 /////////////////////////////////////////////////
 void setup() {
 
+  Serial.println("setup");
   pinMode(INL_SOFT_RST, INPUT_PULLUP);
-
+  Serial.println("setup pinmode");
   // set the Time library to use Teensy 3.0's RTC to keep time
   setSyncProvider(getTeensy3Time);
+  Serial.println("setup setSyncProvider");
   delay(100);
   if (timeStatus() != timeSet) {
     Serial.println("Unable to sync with the RTC");
   } else {
     Serial.println("RTC has set the system time");
   }
-
+  Serial.println("setup");
   LOG_CONSOLE("BMS> ");
 }
 

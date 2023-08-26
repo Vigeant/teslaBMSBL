@@ -102,4 +102,5 @@ Cons::Cons(Controller* cont_inst_ptr)
   cliCommands.push_back(&showGraph);
   cliCommands.push_back(&showCSV);
   cliCommands.push_back(&reboot);
+  //Serial.print("Console instantiated\n");
 }

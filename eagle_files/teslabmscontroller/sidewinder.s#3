@@ -8145,7 +8145,7 @@ Spark Fun Electronics SKU : COM-00107</description>
 <part name="P+4" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="+5V" device=""/>
 <part name="U$1" library="MCP2561FD" deviceset="MCP2561FD" device="DIP8" package3d_urn="urn:adsk.eagle:package:36700320/1"/>
 <part name="P+7" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="+5V" device=""/>
-<part name="U4" library="SparkFun-IC-Power" library_urn="urn:adsk.eagle:library:526" deviceset="V_REG_78XX" device="-TO-220" package3d_urn="urn:adsk.eagle:package:39066/1" value="mEZD72401A-g"/>
+<part name="U7" library="SparkFun-IC-Power" library_urn="urn:adsk.eagle:library:526" deviceset="V_REG_78XX" device="SINK" package3d_urn="urn:adsk.eagle:package:39063/1" value="mEZD72401A-G"/>
 </parts>
 <sheets>
 <sheet>
@@ -8403,7 +8403,7 @@ Spark Fun Electronics SKU : COM-00107</description>
 <instance part="P+7" gate="1" x="101.6" y="-30.48" smashed="yes">
 <attribute name="VALUE" x="99.06" y="-35.56" size="1.778" layer="96" rot="R90"/>
 </instance>
-<instance part="U4" gate="G$1" x="30.48" y="142.24" smashed="yes">
+<instance part="U7" gate="G$1" x="30.48" y="142.24" smashed="yes">
 <attribute name="NAME" x="33.02" y="134.62" size="1.778" layer="95"/>
 <attribute name="VALUE" x="22.86" y="147.32" size="1.778" layer="96"/>
 </instance>
@@ -8437,7 +8437,7 @@ Spark Fun Electronics SKU : COM-00107</description>
 <pinref part="P+12" gate="1" pin="+5V"/>
 <pinref part="C6" gate="G$1" pin="1"/>
 <pinref part="C1" gate="G$1" pin="+"/>
-<pinref part="U4" gate="G$1" pin="OUT"/>
+<pinref part="U7" gate="G$1" pin="OUT"/>
 </segment>
 <segment>
 <pinref part="B1" gate="G$1" pin="VIN"/>
@@ -8606,8 +8606,8 @@ Spark Fun Electronics SKU : COM-00107</description>
 </segment>
 <segment>
 <wire x1="30.48" y1="119.38" x2="30.48" y2="134.62" width="0.1524" layer="91"/>
-<pinref part="U4" gate="G$1" pin="GND"/>
 <pinref part="GND14" gate="1" pin="GND"/>
+<pinref part="U7" gate="G$1" pin="GND"/>
 </segment>
 </net>
 <net name="SERIAL_TX3" class="0">
@@ -8806,7 +8806,7 @@ Spark Fun Electronics SKU : COM-00107</description>
 <junction x="12.7" y="142.24"/>
 <pinref part="P+2" gate="1" pin="+12V"/>
 <pinref part="C2" gate="G$1" pin="1"/>
-<pinref part="U4" gate="G$1" pin="IN"/>
+<pinref part="U7" gate="G$1" pin="IN"/>
 </segment>
 <segment>
 <pinref part="U6" gate="G$1" pin="V+"/>

@@ -1,7 +1,7 @@
 #include "Oled.hpp"
 #include "Logger.hpp"
 
-static TeensyView oled(OLED_PIN_RESET, OLED_PIN_DC, OLED_PIN_CS, OLED_PIN_SCK, OLED_PIN_MOSI);
+//TeensyView oled(OLED_PIN_RESET, OLED_PIN_DC, OLED_PIN_CS, OLED_PIN_SCK, OLED_PIN_MOSI);
 
 static uint8_t sidewinder[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0xc0, 0xe0, 0xe0, 0xf0, 0xf0, 0xf8, 0xf8, 0x78, 0x7c, 0x3c, 0x3c, 0x3c, 0x3c, 0x3c, 0x3c, 0x3c, 0x3c, 0x3c, 0xf8, 0xf8, 0x60, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf8, 0xfe, 0xdf, 0x8f, 0x07, 0x03, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x10, 0x10, 0x18, 0x18, 0x18, 0x1c, 0x9c, 0x0e, 0x0e, 0x07, 0x03, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x40, 0xe0, 0xc0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -15,11 +15,12 @@ static uint8_t teslalogo[] = { 0x00, 0x00, 0x00, 0x00, 0x10, 0x10, 0x50, 0xd8, 0
 /////////////////////////////////////////////////
 /// \brief Constructor for the Oled teensyView display
 /////////////////////////////////////////////////
-Oled::Oled(Controller* cont_inst_ptr) {
-  oled.begin();      // Initialize the OLED
-  oled.clear(ALL);   // Clear the display's internal memory
-  oled.display();    // Display what's in the buffer (splashscreen)
-  oled.clear(PAGE);  // Clear the buffer.
+Oled::Oled(Controller* cont_inst_ptr, TeensyView* teensyView_inst_ptr){
+  oled_ptr = teensyView_inst_ptr;
+  oled_ptr->begin();      // Initialize the OLED
+  oled_ptr->clear(ALL);   // Clear the display's internal memory
+  oled_ptr->display();    // Display what's in the buffer (splashscreen)
+  oled_ptr->clear(PAGE);  // Clear the buffer.
   state = FMT6;
   controller_inst_ptr = cont_inst_ptr;
 }
@@ -30,21 +31,21 @@ Oled::Oled(Controller* cont_inst_ptr) {
 */
 void Oled::printFormat1() {
   const int col0 = 0;
-  const int col1 = oled.getLCDWidth() / 2;
+  const int col1 = oled_ptr->getLCDWidth() / 2;
 
-  oled.clear(PAGE);         // Clear the display
-  oled.setCursor(col0, 0);  // Set cursor to top-left
-  oled.setFontType(1);      // Smallest font
-  oled.print("Vbat");
-  oled.setCursor(col1, 0);
-  oled.print("Tbat");
+  oled_ptr->clear(PAGE);         // Clear the display
+  oled_ptr->setCursor(col0, 0);  // Set cursor to top-left
+  oled_ptr->setFontType(1);      // Smallest font
+  oled_ptr->print("Vbat");
+  oled_ptr->setCursor(col1, 0);
+  oled_ptr->print("Tbat");
 
-  oled.setFontType(2);  // 7-segment font
-  oled.setCursor(col0, oled.getLCDHeight() / 2);
-  oled.print(controller_inst_ptr->getBMSPtr()->getPackVoltage(), 1);
-  oled.setCursor(col1, oled.getLCDHeight() / 2);
-  oled.print(controller_inst_ptr->getBMSPtr()->getAvgTemperature());
-  oled.display();
+  oled_ptr->setFontType(2);  // 7-segment font
+  oled_ptr->setCursor(col0, oled_ptr->getLCDHeight() / 2);
+  oled_ptr->print(controller_inst_ptr->getBMSPtr()->getPackVoltage(), 1);
+  oled_ptr->setCursor(col1, oled_ptr->getLCDHeight() / 2);
+  oled_ptr->print(controller_inst_ptr->getBMSPtr()->getAvgTemperature());
+  oled_ptr->display();
 }
 
 /*
@@ -53,21 +54,21 @@ void Oled::printFormat1() {
 */
 void Oled::printFormat2() {
   const int col0 = 0;
-  const int col1 = oled.getLCDWidth() / 2;
+  const int col1 = oled_ptr->getLCDWidth() / 2;
 
-  oled.clear(PAGE);         // Clear the display
-  oled.setCursor(col0, 0);  // Set cursor to top-left
-  oled.setFontType(1);      // Smallest font
-  oled.print("VClo");       // Print "A0"
-  oled.setCursor(col1, 0);
-  oled.print("VChi");
+  oled_ptr->clear(PAGE);         // Clear the display
+  oled_ptr->setCursor(col0, 0);  // Set cursor to top-left
+  oled_ptr->setFontType(1);      // Smallest font
+  oled_ptr->print("VClo");       // Print "A0"
+  oled_ptr->setCursor(col1, 0);
+  oled_ptr->print("VChi");
 
-  oled.setFontType(2);  // 7-segment font
-  oled.setCursor(col0, oled.getLCDHeight() / 2);
-  oled.print(controller_inst_ptr->getBMSPtr()->getLowCellVolt());  // Print a0 reading
-  oled.setCursor(col1, oled.getLCDHeight() / 2);
-  oled.print(controller_inst_ptr->getBMSPtr()->getHighCellVolt());
-  oled.display();
+  oled_ptr->setFontType(2);  // 7-segment font
+  oled_ptr->setCursor(col0, oled_ptr->getLCDHeight() / 2);
+  oled_ptr->print(controller_inst_ptr->getBMSPtr()->getLowCellVolt());  // Print a0 reading
+  oled_ptr->setCursor(col1, oled_ptr->getLCDHeight() / 2);
+  oled_ptr->print(controller_inst_ptr->getBMSPtr()->getHighCellVolt());
+  oled_ptr->display();
 }
 
 /*
@@ -77,21 +78,21 @@ void Oled::printFormat2() {
 */
 void Oled::printFormat3() {
   const int col0 = 0;
-  const int col1 = oled.getLCDWidth() / 2;
+  const int col1 = oled_ptr->getLCDWidth() / 2;
 
-  oled.clear(PAGE);         // Clear the display
-  oled.setCursor(col0, 0);  // Set cursor to top-left
-  oled.setFontType(1);      // Smallest font
-  oled.print("VCmin");
-  oled.setCursor(col1, 0);
-  oled.print("VCmax");
+  oled_ptr->clear(PAGE);         // Clear the display
+  oled_ptr->setCursor(col0, 0);  // Set cursor to top-left
+  oled_ptr->setFontType(1);      // Smallest font
+  oled_ptr->print("VCmin");
+  oled_ptr->setCursor(col1, 0);
+  oled_ptr->print("VCmax");
 
-  oled.setFontType(2);  // 7-segment font
-  oled.setCursor(col0, oled.getLCDHeight() / 2);
-  oled.print(controller_inst_ptr->getBMSPtr()->getHistLowestCellVolt());
-  oled.setCursor(col1, oled.getLCDHeight() / 2);
-  oled.print(controller_inst_ptr->getBMSPtr()->getHistHighestCellVolt());
-  oled.display();
+  oled_ptr->setFontType(2);  // 7-segment font
+  oled_ptr->setCursor(col0, oled_ptr->getLCDHeight() / 2);
+  oled_ptr->print(controller_inst_ptr->getBMSPtr()->getHistLowestCellVolt());
+  oled_ptr->setCursor(col1, oled_ptr->getLCDHeight() / 2);
+  oled_ptr->print(controller_inst_ptr->getBMSPtr()->getHistHighestCellVolt());
+  oled_ptr->display();
 }
 
 /*
@@ -100,25 +101,25 @@ void Oled::printFormat3() {
 */
 void Oled::printFormat4() {
   const int col0 = 0;
-  const int col1 = oled.getLCDWidth() / 2;
+  const int col1 = oled_ptr->getLCDWidth() / 2;
 
-  oled.clear(PAGE);         // Clear the display
-  oled.setCursor(col0, 0);  // Set cursor to top-left
-  oled.setFontType(1);      // Smallest font
-  //oled.print("VCdmax");
-  oled.print("VCdiff");
-  oled.setCursor(col1, 0);
-  oled.print("Tmax");
+  oled_ptr->clear(PAGE);         // Clear the display
+  oled_ptr->setCursor(col0, 0);  // Set cursor to top-left
+  oled_ptr->setFontType(1);      // Smallest font
+  //oled_ptr->print("VCdmax");
+  oled_ptr->print("VCdiff");
+  oled_ptr->setCursor(col1, 0);
+  oled_ptr->print("Tmax");
 
-  oled.setFontType(2);  // 7-segment font
-  oled.setCursor(col0, oled.getLCDHeight() / 2);
-  //oled.print(controller_inst_ptr->getBMSPtr()->getHistHighestCellDiffVolt());
-  oled.print(controller_inst_ptr->getBMSPtr()->getHighCellVolt() - controller_inst_ptr->getBMSPtr()->getLowCellVolt());
+  oled_ptr->setFontType(2);  // 7-segment font
+  oled_ptr->setCursor(col0, oled_ptr->getLCDHeight() / 2);
+  //oled_ptr->print(controller_inst_ptr->getBMSPtr()->getHistHighestCellDiffVolt());
+  oled_ptr->print(controller_inst_ptr->getBMSPtr()->getHighCellVolt() - controller_inst_ptr->getBMSPtr()->getLowCellVolt());
 
-  oled.setCursor(col1, oled.getLCDHeight() / 2);
-  //oled.setFontType(1);
-  oled.print(controller_inst_ptr->getBMSPtr()->getHistHighestPackTemp());
-  oled.display();
+  oled_ptr->setCursor(col1, oled_ptr->getLCDHeight() / 2);
+  //oled_ptr->setFontType(1);
+  oled_ptr->print(controller_inst_ptr->getBMSPtr()->getHistHighestPackTemp());
+  oled_ptr->display();
 }
 
 void Oled::printFormat5() {
@@ -151,47 +152,47 @@ void Oled::printFormat5() {
 }
 
 void Oled::printTeslaBMSRT() {
-  oled.drawBitmap(teslalogo);
-  oled.display();
+  oled_ptr->drawBitmap(teslalogo);
+  oled_ptr->display();
 }
 
 void Oled::printESidewinder() {
-  oled.drawBitmap(sidewinder);
-  oled.display();
+  oled_ptr->drawBitmap(sidewinder);
+  oled_ptr->display();
 }
 
 void Oled::printStickyFaults() {
   const int col0 = 0;
 
-  oled.clear(PAGE);         // Clear the display
-  oled.setCursor(col0, 0);  // Set cursor to top-left
-  oled.setFontType(1);      // Smallest font
-  oled.print("sFault Codes");
-  oled.setCursor(col0, oled.getLCDHeight() / 2);
+  oled_ptr->clear(PAGE);         // Clear the display
+  oled_ptr->setCursor(col0, 0);  // Set cursor to top-left
+  oled_ptr->setFontType(1);      // Smallest font
+  oled_ptr->print("sFault Codes");
+  oled_ptr->setCursor(col0, oled_ptr->getLCDHeight() / 2);
 
   for (auto i = controller_inst_ptr->faults.begin(); i != controller_inst_ptr->faults.end(); i++) {
     if ((*i)->getSFault()) {
-      oled.print((*i)->getCode());
+      oled_ptr->print((*i)->getCode());
     }
   }
-  oled.display();
+  oled_ptr->display();
 }
 
 void Oled::printFaults() {
   const int col0 = 0;
 
-  oled.clear(PAGE);         // Clear the display
-  oled.setCursor(col0, 0);  // Set cursor to top-left
-  oled.setFontType(1);      // Smallest font
-  oled.print("Fault Codes");
-  oled.setCursor(col0, oled.getLCDHeight() / 2);
+  oled_ptr->clear(PAGE);         // Clear the display
+  oled_ptr->setCursor(col0, 0);  // Set cursor to top-left
+  oled_ptr->setFontType(1);      // Smallest font
+  oled_ptr->print("Fault Codes");
+  oled_ptr->setCursor(col0, oled_ptr->getLCDHeight() / 2);
 
   for (auto i = controller_inst_ptr->faults.begin(); i != controller_inst_ptr->faults.end(); i++) {
     if ((*i)->getFault()) {
-      oled.print((*i)->getCode());
+      oled_ptr->print((*i)->getCode());
     }
   }
-  oled.display();
+  oled_ptr->display();
 }
 
 bool Oled::changeState() {
@@ -281,15 +282,15 @@ void Oled::doOled() {
 // This function is quick and dirty. Only works for titles one
 // line long.
 void Oled::printCentre(const char* value, int font) {
-  int middleX = oled.getLCDWidth() / 2;
-  int middleY = oled.getLCDHeight() / 2;
+  int middleX = oled_ptr->getLCDWidth() / 2;
+  int middleY = oled_ptr->getLCDHeight() / 2;
 
-  oled.clear(PAGE);
-  oled.setFontType(font);
+  oled_ptr->clear(PAGE);
+  oled_ptr->setFontType(font);
   // Try to set the cursor in the middle of the screen
-  oled.setCursor(middleX - (oled.getFontWidth() * (strlen(value) / 2)) - 4,
-                 middleY - (oled.getFontHeight() / 2) + 3);
+  oled_ptr->setCursor(middleX - (oled_ptr->getFontWidth() * (strlen(value) / 2)) - 4,
+                 middleY - (oled_ptr->getFontHeight() / 2) + 3);
   // Print the title:
-  oled.print(value);
-  oled.display();
+  oled_ptr->print(value);
+  oled_ptr->display();
 }

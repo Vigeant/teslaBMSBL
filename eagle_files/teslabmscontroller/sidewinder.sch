@@ -9149,11 +9149,6 @@ Spark Fun Electronics SKU : COM-00107</description>
 <label x="231.14" y="109.22" size="1.778" layer="95"/>
 </segment>
 <segment>
-<pinref part="U5" gate="G$1" pin="IN12"/>
-<wire x1="208.28" y1="154.94" x2="223.52" y2="154.94" width="0.1524" layer="91"/>
-<label x="223.52" y="154.94" size="1.778" layer="95"/>
-</segment>
-<segment>
 <pinref part="U6" gate="G$1" pin="IN6"/>
 <wire x1="116.84" y1="-88.9" x2="104.14" y2="-88.9" width="0.1524" layer="91"/>
 <label x="93.98" y="-88.9" size="1.778" layer="95"/>
