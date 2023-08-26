@@ -1,3 +1,4 @@
+#include "TimeLib.h"
 /*
    Logger.cpp
 
@@ -155,7 +156,8 @@ bool Logger::isDebug() {
 void Logger::printTimeStamp(time_t t) {
   tmElements_t tm;
   breakTime(t, tm);
-  console("%04d-%02d-%02dT%02d:%02d:%02d", tm.Year + 1970, tm.Month, tm.Day, tm.Hour, tm.Minute, tm.Second);
+  //console("%04d-%02d-%02dT%02d:%02d:%02d", tm.Year + 1970, tm.Month, tm.Day, tm.Hour, tm.Minute, tm.Second);
+  console("%s %02d, %02d %02d:%02d:%02d", monthShortStr(tm.Month), tm.Day, tm.Year + 1970, tm.Hour, tm.Minute, tm.Second);
 }
 
 /////////////////////////////////////////////////
