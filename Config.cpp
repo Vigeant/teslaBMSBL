@@ -13,7 +13,7 @@ Settings::Settings()
     charger_cycle_v_setpoint("charger_cycle_v_setpoint", true, 0.0f, 4.17f, 2.5f, 4.25f, "Voltage treshold to force a charging cycle"),
     top_balance_v_setpoint("top_balance_v_setpoint", true, 0.0f, 4.19f, 2.5f, 4.25f, "Transition to top balancing when highest cell reaches this value"),
     warn_cell_v_offset("warn_cell_v_offset", true, 0.0f, 0.1f, 0.00f, 3.0f, "TODO, issue a warning on OLED and serial console if a cell is that close to a OV or UV fault"),
-    floor_duty_coolant_pump("floor_duty_coolant_pump", true, 0.0f, 0.25f, 0.00f, 1.0f, "Lowest pump duty cucle when in RUN or CHARGING"),
+    floor_duty_coolant_pump("floor_duty_coolant_pump", true, 0.0f, 0.25f, 0.00f, 1.0f, "Lowest pump duty cycle when in RUN or CHARGING"),
     cooling_lowt_setpoint("cooling_lowt_setpoint", true, 0.0f, 25.0f, -20.0f, 65.0f, "Threshold at which coolant pump gradually increases duty up to max"),
     cooling_hight_setpoint("cooling_hight_setpoint", true, 0.0f, 35.0f, -20.0f, 65.0f, "Threshold at which coolant pump is at maximum duty"),
     over_t_setpoint("over_t_setpoint", true, 0.0f, 35.0f, 30.0f, 60.0f, "Triggers Over temperature error; Tesla allows reaching 45C while supercharging; in discharge, 60C is ok"),

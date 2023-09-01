@@ -84,7 +84,7 @@ void Controller::doController() {
   msgStatusIns.bBMSStatusFlags = 0;
   msgStatusIns.bBMSFault = 0;
 
-  if (canOn == false && settings.canbus_to_EVCC.getVal() == 1){
+  if (canOn == false && settings.canbus_to_EVCC.getVal() == 1) {
     Can0.begin(settings.canbus_speed.getVal());
     canOn = true;
   }
@@ -218,10 +218,10 @@ void Controller::doController() {
         LOG_INFO("Transition to POST_CHARGE\n");
       } else if (digitalRead(INL_EVSE_DISC) == LOW || digitalRead(INH_CHARGING) == LOW) {
         //debounce error by letting ticks go up to 5.
-		    //msgStatusIns.bBMSStatusFlags |= BMS_STATUS_CELL_BVC_FLAG;
+        //msgStatusIns.bBMSStatusFlags |= BMS_STATUS_CELL_BVC_FLAG;
         LOG_INFO("INL_EVSE_DISC == LOW || INH_CHARGING == LOW\n");
       } else {
-		    //msgStatusIns.bBMSStatusFlags |= BMS_STATUS_CELL_BVC_FLAG;
+        //msgStatusIns.bBMSStatusFlags |= BMS_STATUS_CELL_BVC_FLAG;
         ticks = 0;
       }
 #endif
@@ -467,20 +467,19 @@ void Controller::balanceCells() {
 /// @param the temparature in C
 /////////////////////////////////////////////////
 //pwd = a*temp + b
-#define COOLING_A (1.0 - settings.floor_duty_coolant_pump.getVal()) / (COOLING_HIGHT_SETPOINT - settings.cooling_lowt_setpoint.getVal())
+#define COOLING_A (1.0 - settings.floor_duty_coolant_pump.getVal()) / (settings.cooling_hight_setpoint.getVal() - settings.cooling_lowt_setpoint.getVal())
 #define COOLING_B settings.floor_duty_coolant_pump.getVal() - COOLING_A* settings.cooling_lowt_setpoint.getVal()
 float Controller::getCoolingPumpDuty(float temp) {
   //LOG_INFO("Cooling Pump Set To Max duty\n");
-  return 1.0;  //always fully on.
-  /*
-    if (temp < settings.cooling_lowt_setpoint.getVal()) {
+  //return 1.0;  //always fully on.
+
+  if (temp < settings.cooling_lowt_setpoint.getVal()) {
     return settings.floor_duty_coolant_pump.getVal();
-    } else if (temp > settings.cooling_hight_setpoint.getVal()) {
+  } else if (temp > settings.cooling_hight_setpoint.getVal()) {
     return 1.0;
-    } else {
+  } else {
     return COOLING_A * temp + COOLING_B;
-    }
-  */
+  }
 }
 
 /////////////////////////////////////////////////
@@ -666,7 +665,7 @@ void Controller::printControllerState() {
               seconds / 86400, (seconds % 86400) / 3600, (seconds % 3600) / 60, (seconds % 60));
   LOG_CONSOLE("=  Time of last reset: ");
   LOG_TIMESTAMP(lastResetTimeStamp);
-  LOG_CONSOLE("                                       ="); 
+  LOG_CONSOLE("                                       =");
   LOG_CONSOLE("=  Time: ");
   LOG_TIMESTAMP(now());
   LOG_CONSOLE("                                                       =\n");
