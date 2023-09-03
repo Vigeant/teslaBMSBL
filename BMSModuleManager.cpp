@@ -544,9 +544,9 @@ void BMSModuleManager::printPackSummary() {
   LOG_TIMESTAMP_LN(getHistLowestPackVoltTimeStamp());
   LOG_CONSOLE("Highest pack voltage %.2fV was reached at ", getHistHighestPackVolt());
   LOG_TIMESTAMP_LN(getHistHighestPackVoltTimeStamp());
-  LOG_CONSOLE("Lowest pack temp %.2fV was reached at ", getHistLowestPackTemp());
+  LOG_CONSOLE("Lowest pack temp %.2fC was reached at ", getHistLowestPackTemp());
   LOG_TIMESTAMP_LN(getHistLowestPackTempTimeStamp());
-  LOG_CONSOLE("Highest pack temp %.2fV was reached at ", getHistHighestPackTemp());
+  LOG_CONSOLE("Highest pack temp %.2fC was reached at ", getHistHighestPackTemp());
   LOG_TIMESTAMP_LN(getHistHighestPackTempTimeStamp());
 
   LOG_CONSOLE("INL_EVSE_DISC: %d\n", digitalRead(INL_EVSE_DISC));

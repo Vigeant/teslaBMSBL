@@ -665,7 +665,7 @@ void Controller::printControllerState() {
               seconds / 86400, (seconds % 86400) / 3600, (seconds % 3600) / 60, (seconds % 60));
   LOG_CONSOLE("=  Time of last reset: ");
   LOG_TIMESTAMP(lastResetTimeStamp);
-  LOG_CONSOLE("                                       =");
+  LOG_CONSOLE("                                       =\n");
   LOG_CONSOLE("=  Time: ");
   LOG_TIMESTAMP(now());
   LOG_CONSOLE("                                                       =\n");
