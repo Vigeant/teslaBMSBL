@@ -50,7 +50,6 @@
 */
 // Loop periods for the state machine of the controller
 #define LOOP_PERIOD_ACTIVE_MS 200
-#define LOOP_PERIOD_STANDBY_MS 2000
 
 #define EEPROM_VERSION 6
 

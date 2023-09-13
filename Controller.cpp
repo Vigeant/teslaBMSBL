@@ -274,15 +274,9 @@ void Controller::doController() {
       break;
 
     case STANDBY:
-      //prevents sleeping if the console is connected or if within 10 minutes of a hard reset.
-      //The teensy wont let reprogram if it slept once so this allows reprograming within 10 minutes.
-      if (SERIALCONSOLE || millis() < settings.time_before_first_sleep.getVal()) {
-        period = LOOP_PERIOD_ACTIVE_MS;
-        standbyTicks = 10;
-      } else {
-        period = LOOP_PERIOD_STANDBY_MS;
-        standbyTicks = 1;
-      }
+
+      period = LOOP_PERIOD_ACTIVE_MS;
+      standbyTicks = 10;
       standby();
       break;
 
