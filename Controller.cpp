@@ -636,8 +636,7 @@ void Controller::printControllerState() {
   LOG_CONSOLE("OUTH_FAULT: %d\n", outH_fault_buffer);
   LOG_CONSOLE("OUTL_12V_BAT_CHRG: %d\n", outL_12V_bat_chrg_buffer);
   LOG_CONSOLE("OUTPWM_PUMP: %d\n", outpwm_pump_buffer);
-  LOG_CONSOLE("====================================================================================\n");
-  LOG_CONSOLE("=                     BMS Controller registered faults                             =\n");
+  
   switch (state) {
     case INIT:
       LOG_CONSOLE("=  state: INIT                                                                     =\n");
@@ -661,6 +660,25 @@ void Controller::printControllerState() {
       LOG_CONSOLE("=  state: RUN                                                                      =\n");
       break;
   }
+  LOG_CONSOLE("====================================================================================\n");
+  LOG_CONSOLE("=                     BMS Controller las reset                                     =\n");
+  LOG_CONSOLE("RCM_SRS0: %02X, RCM_SRS1: %02X\n", RCM_SRS0, RCM_SRS1);
+   // Check RCM_SRS0 flags using built-in Kinetis core constants
+  if (RCM_SRS0 & RCM_SRS0_POR)     LOG_CONSOLE(" - [POR] Power-on Reset\n");
+  if (RCM_SRS0 & RCM_SRS0_PIN)     LOG_CONSOLE(" - [PIN] External Pin Reset\n");
+  if (RCM_SRS0 & RCM_SRS0_WDOG)    LOG_CONSOLE(" - [WDOG] Watchdog (COP) Reset\n");
+  if (RCM_SRS0 & RCM_SRS0_LOC)     LOG_CONSOLE(" - [LOC] Loss of External Clock\n");
+  if (RCM_SRS0 & RCM_SRS0_LOL)     LOG_CONSOLE(" - [LOL] Loss of Lock in PLL\n");
+  if (RCM_SRS0 & RCM_SRS0_LVD)     LOG_CONSOLE(" - [LVD] Low-voltage Detect\n");
+  if (RCM_SRS0 & RCM_SRS0_WAKEUP)  LOG_CONSOLE(" - [WAKEUP] Low-Leakage Wakeup Reset\n");
+
+  // Check RCM_SRS1 flags using built-in Kinetis core constants
+  if (RCM_SRS1 & RCM_SRS1_LOCKUP)  LOG_CONSOLE(" - [LOCKUP] Core Lockup Event Reset\n");
+  if (RCM_SRS1 & RCM_SRS1_SW)      LOG_CONSOLE(" - [SW] Software Reset\n");
+  if (RCM_SRS1 & RCM_SRS1_MDM_AP)  LOG_CONSOLE(" - [MDM_AP] MDM-AP Reset Request\n");
+  if (RCM_SRS1 & RCM_SRS1_SACKERR) LOG_CONSOLE(" - [SACKERR] Stop Mode Acknowledge Error\n");
+  LOG_CONSOLE("====================================================================================\n");
+  LOG_CONSOLE("=                     BMS Controller registered faults                             =\n");
   LOG_CONSOLE("=  Time since last reset:%-3d days, %02d:%02d:%02d                                        =\n",
               seconds / 86400, (seconds % 86400) / 3600, (seconds % 3600) / 60, (seconds % 60));
   LOG_CONSOLE("=  Time of last reset: ");
