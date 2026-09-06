@@ -125,9 +125,10 @@ void loop() {
 
     //sleep board instead of delay, if not in active state
     if (delaytime > LOOP_PERIOD_ACTIVE_MS) {
-      timer.setTimer(delaytime);  // milliseconds
+      //timer.setTimer(delaytime);  // milliseconds
       //who = Snooze.deepSleep( config );
-      (void)Snooze.deepSleep(config);
+      //(void)Snooze.deepSleep(config);
+      delay(delaytime);
     } else {
       delay(delaytime);
     }
