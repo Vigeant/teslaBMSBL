@@ -661,7 +661,7 @@ void Controller::printControllerState() {
       break;
   }
   LOG_CONSOLE("====================================================================================\n");
-  LOG_CONSOLE("=                     BMS Controller las reset                                     =\n");
+  LOG_CONSOLE("=                     BMS Controller last reset                                     =\n");
   LOG_CONSOLE("RCM_SRS0: %02X, RCM_SRS1: %02X\n", RCM_SRS0, RCM_SRS1);
    // Check RCM_SRS0 flags using built-in Kinetis core constants
   if (RCM_SRS0 & RCM_SRS0_POR)     LOG_CONSOLE(" - [POR] Power-on Reset\n");
