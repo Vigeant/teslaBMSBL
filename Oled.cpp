@@ -195,6 +195,32 @@ void Oled::printFaults() {
   oled_ptr->display();
 }
 
+void Oled::printLastReboot() {
+  const int col0 = 0;
+
+  oled_ptr->clear(PAGE);         // Clear the display
+  oled_ptr->setCursor(col0, 0);  // Set cursor to top-left
+  oled_ptr->setFontType(1);      // Smallest font
+  oled_ptr->printf("Lstrst %02x %02x",RCM_SRS0,RCM_SRS1 );
+  oled_ptr->setCursor(col0, oled_ptr->getLCDHeight() / 2);
+// Check RCM_SRS0 flags
+  if (RCM_SRS0 & RCM_SRS0_POR)     oled_ptr->println("Power-on Reset (POR)");
+  if (RCM_SRS0 & RCM_SRS0_PIN)     oled_ptr->println("External Reset Pin");
+  if (RCM_SRS0 & RCM_SRS0_WDOG)    oled_ptr->println("Watchdog (WDOG) Reset");
+  if (RCM_SRS0 & RCM_SRS0_LVD)     oled_ptr->println("Low-Voltage Detect (LVD)");
+  if (RCM_SRS0 & RCM_SRS0_LOC)     oled_ptr->println("Loss of Clock Reset");
+  if (RCM_SRS0 & RCM_SRS0_LOL)     oled_ptr->println("Loss of Lock Reset");
+  if (RCM_SRS0 & RCM_SRS0_WAKEUP)  oled_ptr->println("Low-Leakage Wakeup");
+
+  // Check RCM_SRS1 flags
+  if (RCM_SRS1 & RCM_SRS1_SW)      oled_ptr->println("Software Reset (SCB_AIRCR)");
+  if (RCM_SRS1 & RCM_SRS1_LOCKUP)  oled_ptr->println("Core Lockup Event");
+  if (RCM_SRS1 & RCM_SRS1_JTAG)    oled_ptr->println("JTAG Reset");
+  if (RCM_SRS1 & RCM_SRS1_MDM_AP)  oled_ptr->println("MDM-AP Reset");
+
+  oled_ptr->display();
+}
+
 bool Oled::changeState() {
   static uint32_t ts = 0;
   uint32_t ts2 = millis();
@@ -257,7 +283,7 @@ void Oled::doOled() {
         } else if (controller_inst_ptr->stickyFaulted) {
           state = FMT9;
         } else {
-          state = FMT1;
+          state = FMT10;
         }
       }
       break;
@@ -270,9 +296,14 @@ void Oled::doOled() {
     case FMT9:
       printStickyFaults();
       if (changeState()) {
-        state = FMT1;
+        state = FMT10;
       }
       break;
+    case FMT10:
+      printLastReboot();
+      if (changeState()) {
+        state = FMT1;
+      }
     default:
       break;
   }
